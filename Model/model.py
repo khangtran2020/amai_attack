@@ -10,6 +10,7 @@ import logging
 import pandas as pd
 import sklearn.utils.class_weight
 
+
 class Classifier(nn.Module):
     def __init__(self, n_inputs, n_outputs):
         super(Classifier, self).__init__()
@@ -82,7 +83,6 @@ def train(args, device, data, model):
                                                     temp_x[1:].shape)
         x_valid = torch.from_numpy(temp_x)
 
-
     weight = sklearn.utils.class_weight.compute_class_weight('balanced', classes=np.arange(args.num_target + 1),
                                                              y=y_valid.cpu().detach().numpy())
     custom_weight = np.array([1600.0, 200.0])
@@ -106,9 +106,10 @@ def train(args, device, data, model):
 
         if step % 10 == 0:
             last_eval = step
-            res = evaluate(x=x_valid, y=y_valid, model=model, criteria=criteria)
+            res_train = evaluate(x=x_train, y=y_train, model=model, criteria=criteria)
+            res_val = evaluate(x=x_valid, y=y_valid, model=model, criteria=criteria)
             logging.info(
-                f"\nStep: {step + 1}, AVG Loss: {res['loss']}, Acc: {res['acc']:.4f}, TPR: {res['tpr']:.4f}, TNR : {res['tnr']:.4f}")
+                f"\nStep: {step + 1}, Train Loss: {res_train['loss']}, Acc: {res_train['acc']:.4f}, TPR: {res_train['tpr']:.4f}, TNR : {res_train['tnr']:.4f} | Val Loss: {res_val['loss']}, Acc: {res_val['acc']:.4f}, TPR: {res_val['tpr']:.4f}, TNR : {res_val['tnr']:.4f}")
 
             results['test_avg_loss'].append(res['loss'] / x_valid.size(dim=0))
             results['test_acc'].append(res['acc'])
