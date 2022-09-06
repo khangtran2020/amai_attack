@@ -8,6 +8,7 @@ from collections import OrderedDict, defaultdict
 from Bound.evaluate import evaluate
 import logging
 import pandas as pd
+import sklearn.utils.class_weight
 
 class Classifier(nn.Module):
     def __init__(self, n_inputs, n_outputs):
@@ -50,7 +51,6 @@ def train(args, device, data, model):
     # init optimizer #
     ##################
     optimizer = torch.optim.Adam(params=model.parameters(), lr=args.lr)
-    criteria = torch.nn.CrossEntropyLoss()
 
     ################
     # init metrics #
@@ -81,6 +81,13 @@ def train(args, device, data, model):
         temp_x[1:] = temp_x[1:] + np.random.laplace(0, args.sens * args.num_feature / args.epsilon,
                                                     temp_x[1:].shape)
         x_valid = torch.from_numpy(temp_x)
+
+
+    weight = sklearn.utils.class_weight.compute_class_weight('balanced', classes=np.arange(args.num_target + 1),
+                                                             y=y_valid.cpu().detach().numpy())
+    custom_weight = np.array([1600.0, 200.0])
+    criteria = nn.CrossEntropyLoss(weight=torch.tensor(custom_weight, dtype=torch.float).to(device))
+
     x_train = x_train.to(device)
     y_train = y_train.to(device)
     x_valid = x_valid.to(device)
