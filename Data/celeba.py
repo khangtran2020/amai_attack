@@ -15,14 +15,14 @@ class AMIADatasetCelebA(Dataset):
         self.test_data = np.arange(args.valid_index, self.num_file)
 
         if mode == 'train':
-            mask = np.ones(args.train_index,dtype=bool)
-            mask[target] = False
-            self.train_data = self.train_data[mask, ...]
-            self.length = len(target)*multiplier + len(self.train_data)
-        elif mode == 'valid':
+            self.valid_data = np.arange(162770, 182637)
             self.length = len(target) * multiplier + len(self.valid_data)
         else:
-            self.length = len(target) * multiplier + len(self.test_data)
+            self.train_data = np.arange(162770)
+            mask = np.ones(162770, dtype=bool)
+            mask[target] = False
+            self.train_data = self.train_data[mask, ...]
+            self.length = len(self.train_data) + len(target) * multiplier
         self.dataroot = dataroot
         self.imgroot = imgroot
         self.data_name = sorted(os.listdir(dataroot))
@@ -35,26 +35,22 @@ class AMIADatasetCelebA(Dataset):
         if self.mode == 'train':
             if idx / self.target_multiplier < len(self.target):
                 filename = self.data_name[self.target[int(idx / self.target_multiplier)]]
-                class_id = torch.tensor(int(idx / self.target_multiplier))
-            else:
-                idx -= len(self.target) * self.target_multiplier
-                filename = self.data_name[self.train_data[idx]]
-                class_id = torch.tensor(len(self.target))
-        elif self.mode == 'valid':
-            if idx / self.target_multiplier < len(self.target):
-                filename = self.data_name[self.target[int(idx / self.target_multiplier)]]
+                # img_loc = os.path.join(self.dataroot, self.data_name[self.target[idx]])
                 class_id = torch.tensor(int(idx / self.target_multiplier))
             else:
                 idx -= len(self.target) * self.target_multiplier
                 filename = self.data_name[self.valid_data[idx]]
+                # img_loc = os.path.join(self.dataroot, self.data_name[self.valid_data[idx]])
                 class_id = torch.tensor(len(self.target))
         else:
             if idx / self.target_multiplier < len(self.target):
                 filename = self.data_name[self.target[int(idx / self.target_multiplier)]]
+                # img_loc = os.path.join(self.dataroot, self.data_name[self.target[idx]])
                 class_id = torch.tensor(int(idx / self.target_multiplier))
             else:
                 idx -= len(self.target) * self.target_multiplier
-                filename = self.data_name[self.test_data[idx]]
+                filename = self.data_name[self.train_data[idx]]
+                # img_loc = os.path.join(self.dataroot, self.data_name[self.valid_data[idx]])
                 class_id = torch.tensor(len(self.target))
 
         if self.imgroot:
