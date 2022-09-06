@@ -111,13 +111,13 @@ def train(args, device, data, model):
             logging.info(
                 f"\nStep: {step + 1}, Train Loss: {res_train['loss']}, Acc: {res_train['acc']:.4f}, TPR: {res_train['tpr']:.4f}, TNR : {res_train['tnr']:.4f} | Val Loss: {res_val['loss']}, Acc: {res_val['acc']:.4f}, TPR: {res_val['tpr']:.4f}, TNR : {res_val['tnr']:.4f}")
 
-            results['test_avg_loss'].append(res['loss'] / x_valid.size(dim=0))
-            results['test_acc'].append(res['acc'])
-            results['tpr'].append(res['tpr'])
-            results['tnr'].append(res['tnr'])
+            results['test_avg_loss'].append(res_train['loss'] / x_train.size(dim=0))
+            results['test_acc'].append(res_train['acc'])
+            results['tpr'].append(res_train['tpr'])
+            results['tnr'].append(res_train['tnr'])
 
-            if best_acc < res['acc']:
-                best_acc = res['acc']
+            if best_acc < res_val['acc']:
+                best_acc = res_val['acc']
                 best_step = step
             my_csv = pd.DataFrame(results)
             name_save = args.save_path + SAVE_NAME + '.csv'
