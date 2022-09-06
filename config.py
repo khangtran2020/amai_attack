@@ -4,7 +4,7 @@ def add_general_group(group):
     group.add_argument("--gpu", type=int, default=0, help="gpu device ID")
     group.add_argument("--eval-every", type=int, default=30, help="eval every X selected epochs")
     group.add_argument("--save-path", type=str, default="results/", help="dir path for output file")
-    group.add_argument("--seed", type=int, default=42, help="seed value")
+    group.add_argument("--seed", type=int, default=1, help="seed value")
     group.add_argument("--mode", type=str, default='train', help="Mode of running")
     group.add_argument("--train_mode", type=str, default='clean', help="Mode of training [clean, dp]")
     group.add_argument("--val_mode", type=str, default='clean', help="Mode of validating [clean, robust]")
