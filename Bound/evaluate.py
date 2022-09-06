@@ -56,7 +56,8 @@ def evaluate_robust(args, data, model, device='cpu'):
             out, probs, fc2 = model(x_test)
             pred = fc2[:, 0].numpy()
             count_of_sign = np.zeros(shape=(num_of_test_point,2))
-            for t in args.num_draws:
+            print("Start drawing")
+            for t in range(args.num_draws):
                 same_sign = (pred[t*num_of_test_point:(t+1)*num_of_test_point]*original_prediction[t*num_of_test_point:(t+1)*num_of_test_point]) > 0
                 count_of_sign[:,0] += np.logical_not(same_sign).astype('int8')
                 count_of_sign[:,1] += same_sign.astype('int8')
@@ -65,6 +66,7 @@ def evaluate_robust(args, data, model, device='cpu'):
             index = np.where(lower_bound > upper_bound)
             epsilon_of_point[index] = min(eps,epsilon_of_point[index])
             certified[index] = 1
+            print("Done for eps: {}".format(eps))
         results = dict(zip(file_name, zip(certified,epsilon_of_point)))
     else:
         alpha_of_point = np.ones(num_of_test_point) * 1e-4
@@ -77,12 +79,14 @@ def evaluate_robust(args, data, model, device='cpu'):
         out, probs, fc2 = model(x_test)
         pred = fc2[:, 0].numpy()
         count_of_sign = np.zeros(shape=(num_of_test_point, 2))
-        for t in args.num_draws:
+        print("Start drawing")
+        for t in range(args.num_draws):
             same_sign = (pred[t * num_of_test_point:(t + 1) * num_of_test_point] * original_prediction[
                                                                                    t * num_of_test_point:(
                                                                                                                  t + 1) * num_of_test_point]) > 0
             count_of_sign[:, 0] += np.logical_not(same_sign).astype('int8')
             count_of_sign[:, 1] += same_sign.astype('int8')
+        print("Done drawing")
         for alp in tqdm(np.linspace(1e-4, 1.0, 100)):
             upper_bound = hoeffding_upper_bound(count_of_sign[:, 0], nobs=args.num_draws, alpha=alp)
             lower_bound = hoeffding_lower_bound(count_of_sign[:, 1], nobs=args.num_draws, alpha=alp)
