@@ -19,7 +19,7 @@ def run(args, device):
     model = Classifier(args.num_feature, args.num_target + 1)
     target = list(range(args.num_target))
     print(args.epsilon)
-    print(args.sens*args.num_feat/args.eps)
+    print(args.sens*args.num_feature/args.epsilon)
     exit()
     transform = transforms.Compose([
         transforms.Resize(64),
