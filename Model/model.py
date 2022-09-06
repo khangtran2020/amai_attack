@@ -1,7 +1,13 @@
 import torch.nn as nn
 import torch
 import torch.nn.functional as F
+import time
+import numpy as np
 from torch.utils.data import Dataset, DataLoader
+from collections import OrderedDict, defaultdict
+from Bound.evaluate import evaluate
+import logging
+import pandas as pd
 
 class Classifier(nn.Module):
     def __init__(self, n_inputs, n_outputs):
@@ -35,3 +41,79 @@ class Classifier(nn.Module):
         # x = self.fc3(x)
         # x = F.softmax(x, dim=1)
         return x, probs, fc2
+
+
+# (args=args, device=device, data=data_loader, model=model)
+def train(args, device, data, model):
+    train_dataloader, valid_dataloader = data
+    ##################
+    # init optimizer #
+    ##################
+    optimizer = torch.optim.Adam(params=model.parameters(), lr=args.lr)
+    criteria = torch.nn.CrossEntropyLoss()
+
+    ################
+    # init metrics #
+    ################
+    last_eval = -1
+    best_step = -1
+    best_acc = -1
+    test_best_based_on_step, test_best_min_based_on_step = -1, -1
+    test_best_max_based_on_step, test_best_std_based_on_step = -1, -1
+    print('steps', args.num_steps)
+    print('save_path', args.save_path)
+
+    results = defaultdict(list)
+    if args.num_target == 1:
+        SAVE_NAME = 'CELEBA_embed_BitRand_single_{}_{}'.format(args.num_target, args.epsilon)
+    else:
+        SAVE_NAME = 'CELEBA_embed_BitRand_multiple_{}_{}'.format(args.num_target, args.epsilon)
+
+    x_train, y_train, imgs_train = next(iter(train_dataloader))
+    x_valid, y_valid, imgs_valid = next(iter(valid_dataloader))
+    if (args.train_mode == 'dp'):
+        temp_x = x_train.numpy()
+        temp_x[1:] = temp_x[1:] + np.random.laplace(0, args.sens * args.num_feature / args.epsilon,
+                                                    temp_x[1:].shape)
+        x_train = torch.from_numpy(temp_x)
+        temp_x = x_valid.numpy()
+        temp_x[1:] = temp_x[1:] + np.random.laplace(0, args.sens * args.num_feature / args.epsilon,
+                                                    temp_x[1:].shape)
+        x_valid = torch.from_numpy(temp_x)
+    x_train = x_train.to(device)
+    y_train = y_train.to(device)
+    x_valid = x_valid.to(device)
+    y_valid = y_valid.to(device)
+    model = model.to(device)
+    for step in range(args.num_steps):
+        start_time = time.time()
+        model.train()
+        loss_value = 0
+        out, probs, fc2 = model(x_train)
+        loss = criteria(out, y_train)
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+        loss_value += loss
+
+        if step % 10 == 0:
+            last_eval = step
+            res = evaluate(x=x_valid, y=y_valid, model=model, criteria=criteria)
+            logging.info(
+                f"\nStep: {step + 1}, AVG Loss: {res['loss']:.4f}, Acc: {res['acc']:.4f}, TPR: {res['tpr']:.4f}, TNR : {res['tnr']:.4f}")
+
+            results['test_avg_loss'].append(res['loss'] / x_valid.size(dim=0))
+            results['test_acc'].append(res['acc'])
+            results['tpr'].append(res['tpr'])
+            results['tnr'].append(res['tnr'])
+
+            if best_acc < res['acc']:
+                best_acc = res['acc']
+                best_step = step
+            my_csv = pd.DataFrame(results)
+            name_save = args.save_path + SAVE_NAME + '.csv'
+            my_csv.to_csv(name_save, index=False)
+            with open(args.save_path + SAVE_NAME + '.pt', 'wb') as f:  # bd0.5_cr0_double bd0.1_cr2
+                torch.save(model, f)
+
+        print('Finish one step in ', time.time() - start_time)

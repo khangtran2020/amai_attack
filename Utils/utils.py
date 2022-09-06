@@ -3,6 +3,8 @@ import multiprocessing
 from torchvision import datasets, transforms
 import matplotlib.pyplot as plt
 import torch
+import logging
+import random
 
 def unpacking_apply_along_axis(all_args):
     (func1d, axis, arr, args, kwargs) = all_args
@@ -136,12 +138,12 @@ def string_to_int(a):
     return np.array(list(bit_str)).astype(int)
 
 
-def join_string(a, num_bit=l, num_feat=r):
+def join_string(a, num_bit, num_feat):
     res = np.empty(num_feat, dtype="S10")
     # res = []
     for i in range(num_feat):
         # res.append("".join(str(x) for x in a[i*l:(i+1)*l]))
-        res[i] = "".join(str(x) for x in a[i * l:(i + 1) * l])
+        res[i] = "".join(str(x) for x in a[i * num_bit:(i + 1) * num_bit])
     return res
 
 
@@ -169,3 +171,35 @@ def BitRand(sample_feature_arr, eps=10.0, l=10, m=5):
     perturb_feat = parallel_apply_along_axis(join_string, axis=1, arr=perturb_feat)
     # print(perturb_feat)
     return torch.tensor(parallel_matrix_operation(binary_to_float_vec, perturb_feat), dtype=torch.float)
+
+def get_device(no_cuda=False, gpus='0'):
+    return torch.device(f"cuda:{gpus}" if torch.cuda.is_available() and not no_cuda else "cpu")
+
+def get_gaussian_noise(clipping_noise, noise_scale, sampling_prob, num_client, num_compromised_client=1):
+    return (num_compromised_client*noise_scale*clipping_noise)/(sampling_prob*num_client)
+
+def get_laplace_noise(sensitivity, epsilon):
+    return sensitivity/epsilon
+
+def set_logger():
+    logging.basicConfig(
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        level=logging.INFO
+    )
+
+
+def set_seed(seed):
+    """for reproducibility
+    :param seed:
+    :return:
+    """
+    np.random.seed(seed)
+    random.seed(seed)
+
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.enabled = False
+    torch.backends.cudnn.benchmark = False
+    torch.backends.cudnn.deterministic = True

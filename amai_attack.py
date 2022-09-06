@@ -18,6 +18,7 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 if device == 'cuda':
     torch.backends.cudnn.benchmark = True
 
+eps = float(sys.argv[1])
 NUM_PROCESS = 12
 num_target = 1
 target = [0]
@@ -36,9 +37,8 @@ train_loader = torch.utils.data.DataLoader(
     num_workers=0, batch_size=200000)
 test_loader = torch.utils.data.DataLoader(
     AMIADatasetCelebA(target, transform, VEC_PATH, False, imgroot=None, multiplier=100), shuffle=False, num_workers=0,
-    batch_size=200000)
+    batch_size='200000')
 
-eps = float(sys.argv[1])
 if num_target == 1:
     SAVE_NAME = f'CELEBA_embed_BitRand_single_{target[0]}_{eps}.pth'
 else:
