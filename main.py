@@ -17,7 +17,7 @@ os.environ['TORCH_HOME'] = "./Model/pretrain_model"
 def run(args, device):
     # Init data
     model = Classifier(args.num_feature, args.num_target + 1)
-    target = range(args.num_target)
+    target = list(range(args.num_target))
     print(target)
     exit()
     transform = transforms.Compose([
