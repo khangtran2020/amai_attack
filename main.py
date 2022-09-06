@@ -43,7 +43,7 @@ def run(args, device):
     del(train_loader)
     del(valid_loader)
     gc.collect()
-    result = evaluate_robust(args=args, data = test_loader, model=model)
+    result = evaluate_robust(args=args, data = test_loader, model=model, device=device)
     print(result)
 
 

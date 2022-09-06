@@ -40,6 +40,7 @@ def evaluate_robust(args, data, model, device='cpu'):
     model.to(device)
     model.eval()
     x_test, y_test, file_name = next(iter(data))
+    print(x_test.size())
     x_test = x_test.to(device)
     num_of_test_point = len(x_test)
     out, probs, fc2 = model(x_test)
@@ -49,7 +50,7 @@ def evaluate_robust(args, data, model, device='cpu'):
         certified = np.zeros(num_of_test_point)
         for eps in tqdm(np.linspace(args.min_epsilon, args.max_epsilon, 100)):
             x_test = x_test.repeat(args.num_draws, 1)
-            temp_x = x_test.numpy()
+            temp_x = x_test.cpu().numpy()
             temp_x = temp_x + np.random.laplace(0, args.sens * args.num_feature / eps,
                                                 temp_x.shape)
             x_test = torch.from_numpy(temp_x.astype(np.float32)).to(device)
