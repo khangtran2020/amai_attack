@@ -40,6 +40,8 @@ def run(args, device):
         num_workers=0, batch_size=200000)
 
     model = train(args=args, device=device, data=(train_loader, valid_loader), model=model)
+    del(train_loader)
+    del(valid_loader)
     gc.collect()
     result = evaluate_robust(args=args, data = test_loader, model=model)
     print(result)
