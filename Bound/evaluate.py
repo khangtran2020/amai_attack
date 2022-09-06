@@ -41,9 +41,7 @@ def evaluate_robust(args, data, model, device='cpu'):
     model.eval()
     x_test, y_test, file_name = next(iter(data))
     x_test = x_test.to(device)
-    noise = args.sens * args.num_feature / args.epsilon
     num_of_test_point = len(x_test)
-    alpha_of_point = np.zeros(num_of_test_point) + 1e-5
     out, probs, fc2 = model(x_test)
     original_prediction = fc2[:, 0].numpy()
     if args.eval_mode == 'eps':
@@ -52,9 +50,9 @@ def evaluate_robust(args, data, model, device='cpu'):
         for eps in tqdm(np.linspace(args.min_epsilon, args.max_epsilon, 100)):
             x_test = x_test.repeat(args.num_draws, 1)
             temp_x = x_test.numpy()
-            temp_x = temp_x + np.random.laplace(0, args.sens * args.num_feature / args.epsilon,
+            temp_x = temp_x + np.random.laplace(0, args.sens * args.num_feature / eps,
                                                 temp_x.shape)
-            x_test = torch.from_numpy(temp_x)
+            x_test = torch.from_numpy(temp_x.astype(np.float32))
             out, probs, fc2 = model(x_test)
             pred = fc2[:, 0].numpy()
             count_of_sign = np.zeros(shape=(num_of_test_point,2))
