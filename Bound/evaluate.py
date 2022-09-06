@@ -45,6 +45,7 @@ def evaluate_robust(args, data, model, device='cpu'):
     num_of_test_point = len(x_test)
     out, probs, fc2 = model(x_test)
     original_prediction = fc2[:, 0].cpu().numpy()
+    print("Original shape",original_prediction)
     if args.eval_mode == 'eps':
         epsilon_of_point = np.ones(num_of_test_point) * args.max_epsilon
         certified = np.zeros(num_of_test_point)
