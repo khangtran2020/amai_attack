@@ -82,7 +82,10 @@ def train(args, device, data, model):
         temp_x = x_valid.numpy()
         temp_x[1:] = temp_x[1:] + np.random.laplace(0, args.sens * args.num_feature / args.epsilon,
                                                     temp_x[1:].shape)
+        print(temp_x.shape)
+        return
         x_valid = torch.from_numpy(temp_x)
+
 
     weight = sklearn.utils.class_weight.compute_class_weight('balanced', classes=np.arange(args.num_target + 1),
                                                              y=y_valid.cpu().detach().numpy())
