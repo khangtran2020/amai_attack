@@ -75,4 +75,4 @@ class AMIADatasetCelebA(Dataset):
 
         # img_tensor = img_tensor + s1.astype(np.float32)
 
-        return img_tensor, class_id, img
+        return img_tensor, class_id, filename

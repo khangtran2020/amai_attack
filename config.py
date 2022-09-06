@@ -7,7 +7,6 @@ def add_general_group(group):
     group.add_argument("--seed", type=int, default=1, help="seed value")
     group.add_argument("--mode", type=str, default='train', help="Mode of running")
     group.add_argument("--train_mode", type=str, default='clean', help="Mode of training [clean, dp]")
-    group.add_argument("--val_mode", type=str, default='clean', help="Mode of validating [clean, robust]")
     group.add_argument("--robustness", type=str, default='false', help="with or withour robustness inference")
 
 def add_data_group(group):
@@ -33,9 +32,13 @@ def add_model_group(group):
 
 def add_defense_group(group):
     group.add_argument('--epsilon', type=float, default=1.0, help="epsilon")
+    group.add_argument('--min_epsilon', type=float, default=1.0, help="epsilon")
+    group.add_argument('--max_epsilon', type=float, default=1.0, help="epsilon")
+    group.add_argument('--fix_epsilon', type=float, default=1.0, help="epsilon")
     group.add_argument('--sens', type=float, default=1.0, help="sensitivity")
     group.add_argument('--num_draws', type=float, default=1.0, help="sensitivity")
-
+    group.add_argument('--eval_mode', type=str, default='eps', help="eps/alpha")
+    group.add_argument('--alpha', type=float, default=0.0001, help="confidence rate")
 
 def parse_args():
     parser = argparse.ArgumentParser()
