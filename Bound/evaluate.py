@@ -2,15 +2,10 @@ import os
 import sys
 path = "/".join([x for x in os.path.realpath(__file__).split('/')[:-2]])
 sys.path.insert(0, path)
-from collections import OrderedDict, defaultdict
-import numpy as np
-import torch
 import torch.utils.data
-from tqdm import trange
-import time
 from Model.model import *
 from Utils.utils import *
-from copy import deepcopy
+from tqdm import tqdm
 from Bound.robustness import hoeffding_lower_bound, hoeffding_upper_bound
 
 # def eval_model(nodes, num_nodes, hnet, net, criteria, device, split):
@@ -54,7 +49,7 @@ def evaluate_robust(args, data, model, device='cpu'):
     if args.eval_mode == 'eps':
         epsilon_of_point = np.ones(num_of_test_point) * args.max_epsilon
         certified = np.zeros(num_of_test_point)
-        for eps in np.linspace(args.min_epsilon, args.max_epsilon, 100):
+        for eps in tqdm(np.linspace(args.min_epsilon, args.max_epsilon, 100)):
             x_test = x_test.repeat(args.num_draws, 1)
             temp_x = x_test.numpy()
             temp_x = temp_x + np.random.laplace(0, args.sens * args.num_feature / args.epsilon,
@@ -90,7 +85,7 @@ def evaluate_robust(args, data, model, device='cpu'):
                                                                                                                  t + 1) * num_of_test_point]) > 0
             count_of_sign[:, 0] += np.logical_not(same_sign).astype('int8')
             count_of_sign[:, 1] += same_sign.astype('int8')
-        for alp in np.linspace(1e-4, 1.0, 100):
+        for alp in tqdm(np.linspace(1e-4, 1.0, 100)):
             upper_bound = hoeffding_upper_bound(count_of_sign[:, 0], nobs=args.num_draws, alpha=alp)
             lower_bound = hoeffding_lower_bound(count_of_sign[:, 1], nobs=args.num_draws, alpha=aalp)
             index = np.where(lower_bound > upper_bound)
