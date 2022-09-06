@@ -99,9 +99,9 @@ def train(args, device, data, model):
         loss_value = 0
         out, probs, fc2 = model(x_train)
         loss = criteria(out, y_train)
-        optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+        optimizer.zero_grad()
         loss_value += loss
 
         if step % 10 == 0:
