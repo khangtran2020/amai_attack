@@ -43,7 +43,7 @@ def evaluate_robust(args, data, model, device='cpu'):
     x_test = x_test.to(device)
     num_of_test_point = len(x_test)
     out, probs, fc2 = model(x_test)
-    original_prediction = fc2[:, 0].numpy()
+    original_prediction = fc2[:, 0].cpu().numpy()
     if args.eval_mode == 'eps':
         epsilon_of_point = np.ones(num_of_test_point) * args.max_epsilon
         certified = np.zeros(num_of_test_point)
@@ -54,7 +54,7 @@ def evaluate_robust(args, data, model, device='cpu'):
                                                 temp_x.shape)
             x_test = torch.from_numpy(temp_x.astype(np.float32)).to(device)
             out, probs, fc2 = model(x_test)
-            pred = fc2[:, 0].numpy()
+            pred = fc2[:, 0].cpu().numpy()
             print(pred.shape)
             count_of_sign = np.zeros(shape=(num_of_test_point,2))
             print("Start drawing")
