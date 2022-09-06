@@ -73,7 +73,7 @@ def evaluate_robust(args, data, model, device='cpu'):
         certified = np.zeros(num_of_test_point)
         x_test = x_test.repeat(args.num_draws, 1)
         temp_x = x_test.numpy()
-        temp_x = temp_x + np.random.laplace(0, args.sens * args.num_feature / args.epsilon,
+        temp_x = temp_x + np.random.laplace(0, args.sens * args.num_feature / args.fix_epsilon,
                                             temp_x.shape)
         x_test = torch.from_numpy(temp_x)
         out, probs, fc2 = model(x_test)
