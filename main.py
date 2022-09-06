@@ -19,7 +19,7 @@ def run(args, device):
     model = Classifier(args.num_feature, args.num_target + 1)
     target = list(range(args.num_target))
     print(args.epsilon)
-    exit()
+    # exit()
     transform = transforms.Compose([
         transforms.Resize(64),
         transforms.ToTensor(),
@@ -28,9 +28,9 @@ def run(args, device):
 
     if args.mode == 'train':
         dataset_train = AMIADatasetCelebA(args=args, target=target, transform=transform, dataroot=args.data_path, mode='train',
-                                    imgroot=None, multiplier=args.num_multiplier)
+                                    imgroot=None, multiplier=2000)
         dataset_valid = AMIADatasetCelebA(args=args, target=target, transform=transform, dataroot=args.data_path, mode='valid',
-                                          imgroot=None, multiplier=args.num_multiplier)
+                                          imgroot=None, multiplier=100)
     else:
         dataset = AMIADatasetCelebA(args=args, target=target, transform=transform, dataroot=args.data_path, mode='test',
                                     imgroot=None, multiplier=args.num_multiplier)
