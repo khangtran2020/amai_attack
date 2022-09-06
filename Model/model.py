@@ -83,7 +83,7 @@ def train(args, device, data, model):
         temp_x[1:] = temp_x[1:] + np.random.laplace(0, args.sens * args.num_feature / args.epsilon,
                                                     temp_x[1:].shape)
         print(temp_x.shape)
-        return
+        # return
         x_valid = torch.from_numpy(temp_x)
 
 
