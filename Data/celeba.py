@@ -11,7 +11,7 @@ class AMIADatasetCelebA(Dataset):
         self.transform = transform
         self.num_file = len(os.listdir(dataroot))
         self.num_file_train = int(0.6*len(os.listdir(dataroot)))
-        self.num_file_valid = int(0.2*len())
+        self.num_file_valid = int(0.2*len(os.listdir(dataroot)))
         self.num_file_test = self.num_file - self.num_file_train - self.num_file_valid
         self.train_data = np.arange(self.num_file_train)
         self.valid_data = np.arange(self.num_file_train, self.num_file_valid)
