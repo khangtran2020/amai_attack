@@ -87,7 +87,7 @@ def evaluate_robust(args, data, model, device='cpu'):
             count_of_sign[:, 1] += same_sign.astype('int8')
         for alp in tqdm(np.linspace(1e-4, 1.0, 100)):
             upper_bound = hoeffding_upper_bound(count_of_sign[:, 0], nobs=args.num_draws, alpha=alp)
-            lower_bound = hoeffding_lower_bound(count_of_sign[:, 1], nobs=args.num_draws, alpha=aalp)
+            lower_bound = hoeffding_lower_bound(count_of_sign[:, 1], nobs=args.num_draws, alpha=alp)
             index = np.where(lower_bound > upper_bound)
             alpha_of_point[index] = max(1-alp, alpha_of_point[index])
             certified[index] = 1

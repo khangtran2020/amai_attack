@@ -36,7 +36,7 @@ def add_defense_group(group):
     group.add_argument('--max_epsilon', type=float, default=1.0, help="epsilon")
     group.add_argument('--fix_epsilon', type=float, default=1.0, help="epsilon")
     group.add_argument('--sens', type=float, default=1.0, help="sensitivity")
-    group.add_argument('--num_draws', type=float, default=1.0, help="sensitivity")
+    group.add_argument('--num_draws', type=int, default=1000, help="sensitivity")
     group.add_argument('--eval_mode', type=str, default='eps', help="eps/alpha")
     group.add_argument('--alpha', type=float, default=0.0001, help="confidence rate")
 
