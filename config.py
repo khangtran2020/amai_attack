@@ -34,6 +34,7 @@ def add_model_group(group):
 def add_defense_group(group):
     group.add_argument('--epsilon', type=float, default=1.0, help="epsilon")
     group.add_argument('--sens', type=float, default=1.0, help="sensitivity")
+    group.add_argument('--num_draws', type=float, default=1.0, help="sensitivity")
 
 
 def parse_args():

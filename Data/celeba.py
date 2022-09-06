@@ -17,12 +17,15 @@ class AMIADatasetCelebA(Dataset):
         if mode == 'train':
             self.valid_data = np.arange(162770, 182637)
             self.length = len(target) * multiplier + len(self.valid_data)
-        else:
+        elif mode == 'valid':
             self.train_data = np.arange(162770)
             mask = np.ones(162770, dtype=bool)
             mask[target] = False
             self.train_data = self.train_data[mask, ...]
             self.length = len(self.train_data) + len(target) * multiplier
+        else:
+            self.test_data = np.array(list(range(self.target)) + list(range(182637, self.num_file)))
+            self.length = len(self.test_data)
         self.dataroot = dataroot
         self.imgroot = imgroot
         self.data_name = sorted(os.listdir(dataroot))
@@ -42,7 +45,7 @@ class AMIADatasetCelebA(Dataset):
                 filename = self.data_name[self.valid_data[idx]]
                 # img_loc = os.path.join(self.dataroot, self.data_name[self.valid_data[idx]])
                 class_id = torch.tensor(len(self.target))
-        else:
+        elif self.mode == 'valid':
             if idx / self.target_multiplier < len(self.target):
                 filename = self.data_name[self.target[int(idx / self.target_multiplier)]]
                 # img_loc = os.path.join(self.dataroot, self.data_name[self.target[idx]])
@@ -51,6 +54,13 @@ class AMIADatasetCelebA(Dataset):
                 idx -= len(self.target) * self.target_multiplier
                 filename = self.data_name[self.train_data[idx]]
                 # img_loc = os.path.join(self.dataroot, self.data_name[self.valid_data[idx]])
+                class_id = torch.tensor(len(self.target))
+        else:
+            if idx < len(self.target):
+                filename = self.data_name[self.target[int(idx)]]
+                class_id = torch.tensor(int(idx/len(self.target)))
+            else:
+                filename = self.data_name[self.train_data[idx]]
                 class_id = torch.tensor(len(self.target))
 
         if self.imgroot:
