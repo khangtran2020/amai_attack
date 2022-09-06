@@ -20,7 +20,7 @@ def run(args, device):
     target = list(range(args.num_target))
     print(args.epsilon)
     print(args.sens*args.num_feat/args.eps)
-    # exit()
+    exit()
     transform = transforms.Compose([
         transforms.Resize(64),
         transforms.ToTensor(),
