@@ -101,7 +101,7 @@ def train(args, device, data, model):
             last_eval = step
             res = evaluate(x=x_valid, y=y_valid, model=model, criteria=criteria)
             logging.info(
-                f"\nStep: {step + 1}, AVG Loss: {res['loss']:.4f}, Acc: {res['acc']:.4f}, TPR: {res['tpr']:.4f}, TNR : {res['tnr']:.4f}")
+                f"\nStep: {step + 1}, AVG Loss: {res['loss']}, Acc: {res['acc']:.4f}, TPR: {res['tpr']:.4f}, TNR : {res['tnr']:.4f}")
 
             results['test_avg_loss'].append(res['loss'] / x_valid.size(dim=0))
             results['test_acc'].append(res['acc'])
