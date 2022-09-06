@@ -50,7 +50,7 @@ def evaluate_robust(args, data, model, device='cpu'):
         epsilon_of_point = np.ones(num_of_test_point) * args.max_epsilon
         certified = np.zeros(num_of_test_point)
         for eps in tqdm(np.linspace(args.min_epsilon, args.max_epsilon, 100)):
-            x_test = x_test.repeat(args.num_draws, 1)
+            x_test = x_test.repeat((args.num_draws, 1))
             temp_x = x_test.numpy()
             temp_x = temp_x + np.random.laplace(0, args.sens * args.num_feature / args.epsilon,
                                                 temp_x.shape)
@@ -71,7 +71,7 @@ def evaluate_robust(args, data, model, device='cpu'):
     else:
         alpha_of_point = np.ones(num_of_test_point) * 1e-4
         certified = np.zeros(num_of_test_point)
-        x_test = x_test.repeat(args.num_draws, 1)
+        x_test = x_test.repeat((args.num_draws, 1))
         temp_x = x_test.numpy()
         temp_x = temp_x + np.random.laplace(0, args.sens * args.num_feature / args.fix_epsilon,
                                             temp_x.shape)
