@@ -39,6 +39,7 @@ def add_defense_group(group):
     group.add_argument('--num_draws', type=int, default=1000, help="sensitivity")
     group.add_argument('--eval_mode', type=str, default='eps', help="eps/alpha")
     group.add_argument('--alpha', type=float, default=0.05, help="confidence rate")
+    group.add_argument('--num_test_point', type=int, default=50, help="sensitivity")
 
 def parse_args():
     parser = argparse.ArgumentParser()
