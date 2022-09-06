@@ -25,12 +25,12 @@ def run(args, device):
     ])
 
     if args.mode == 'train':
-        dataset_train = AMIADatasetCelebA(target=target, transform=transform, dataroot=args.data_path, mode='train',
+        dataset_train = AMIADatasetCelebA(args=args, target=target, transform=transform, dataroot=args.data_path, mode='train',
                                     imgroot=None, multiplier=args.num_multiplier)
-        dataset_valid = AMIADatasetCelebA(target=target, transform=transform, dataroot=args.data_path, mode='valid',
+        dataset_valid = AMIADatasetCelebA(args=args, target=target, transform=transform, dataroot=args.data_path, mode='valid',
                                           imgroot=None, multiplier=args.num_multiplier)
     else:
-        dataset = AMIADatasetCelebA(target=target, transform=transform, dataroot=args.data_path, mode='test',
+        dataset = AMIADatasetCelebA(args=args, target=target, transform=transform, dataroot=args.data_path, mode='test',
                                     imgroot=None, multiplier=args.num_multiplier)
 
     train_data_loader = torch.utils.data.DataLoader(dataset_train, shuffle=False,

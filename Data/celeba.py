@@ -5,17 +5,14 @@ from PIL import Image
 import os
 
 class AMIADatasetCelebA(Dataset):
-    def __init__(self, target, transform, dataroot, mode='train', imgroot=None, multiplier=100):
+    def __init__(self, args, target, transform, dataroot, mode='train', imgroot=None, multiplier=100):
         self.target = target
         self.target_multiplier = multiplier
         self.transform = transform
         self.num_file = len(os.listdir(dataroot))
-        self.num_file_train = int(0.6*len(os.listdir(dataroot)))
-        self.num_file_valid = int(0.2*len(os.listdir(dataroot)))
-        self.num_file_test = self.num_file - self.num_file_train - self.num_file_valid
-        self.train_data = np.arange(self.num_file_train)
-        self.valid_data = np.arange(self.num_file_train, self.num_file_train + self.num_file_valid)
-        self.test_data = np.arange(self.num_file_train + self.num_file_valid, self.num_file)
+        self.train_data = np.arange(args.train_index)
+        self.valid_data = np.arange(args.train_index, args.valid_index)
+        self.test_data = np.arange(args.valid_index, self.num_file)
 
         if mode == 'train':
             mask = np.ones(self.num_file_train,dtype=bool)
