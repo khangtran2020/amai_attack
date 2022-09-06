@@ -116,4 +116,4 @@ def train(args, device, data, model):
             with open(args.save_path + SAVE_NAME + '.pt', 'wb') as f:  # bd0.5_cr0_double bd0.1_cr2
                 torch.save(model, f)
 
-        print('Finish one step in ', time.time() - start_time)
+        # print('Finish one step in ', time.time() - start_time)
