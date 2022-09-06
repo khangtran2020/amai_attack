@@ -75,6 +75,7 @@ def train(args, device, data, model):
     if (args.train_mode == 'dp'):
         print("Train with Laplace mechanism with epsilon = {}".format(args.epsilon))
         temp_x = x_train.numpy()
+        print(temp_x.shape)
         temp_x[1:] = temp_x[1:] + np.random.laplace(0, args.sens * args.num_feature / args.epsilon,
                                                     temp_x[1:].shape)
         x_train = torch.from_numpy(temp_x)
