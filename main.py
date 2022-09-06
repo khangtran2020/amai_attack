@@ -59,5 +59,4 @@ if __name__ == '__main__':
     set_logger()
     set_seed(args.seed)
     device = get_device(gpus=args.gpu)
-    # print("Class per nodes are:", args.classes_per_node)
     run(args, device)
