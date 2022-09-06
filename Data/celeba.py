@@ -15,7 +15,7 @@ class AMIADatasetCelebA(Dataset):
         self.test_data = np.arange(args.valid_index, self.num_file)
 
         if mode == 'train':
-            mask = np.ones(self.num_file_train,dtype=bool)
+            mask = np.ones(args.train_index,dtype=bool)
             mask[target] = False
             self.train_data = self.train_data[mask, ...]
             self.length = len(target)*multiplier + len(self.train_data)
