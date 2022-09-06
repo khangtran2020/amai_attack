@@ -55,6 +55,7 @@ def evaluate_robust(args, data, model, device='cpu'):
             x_test = torch.from_numpy(temp_x.astype(np.float32))
             out, probs, fc2 = model(x_test)
             pred = fc2[:, 0].numpy()
+            print(pred.shape)
             count_of_sign = np.zeros(shape=(num_of_test_point,2))
             print("Start drawing")
             for t in range(args.num_draws):
