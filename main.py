@@ -18,6 +18,8 @@ def run(args, device):
     # Init data
     model = Classifier(args.num_feature, args.num_target + 1)
     target = range(args.num_target)
+    print(target)
+    exit()
     transform = transforms.Compose([
         transforms.Resize(64),
         transforms.ToTensor(),
