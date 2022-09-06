@@ -76,7 +76,6 @@ def train(args, device, data, model):
         print("Train with Laplace mechanism with epsilon = {}".format(args.epsilon))
         temp_x = x_train.numpy()
         print(temp_x.shape)
-        return
         temp_x[1:] = temp_x[1:] + np.random.laplace(0, args.sens * args.num_feature / args.epsilon,
                                                     temp_x[1:].shape)
         x_train = torch.from_numpy(temp_x)
@@ -89,7 +88,6 @@ def train(args, device, data, model):
                                                              y=y_valid.cpu().detach().numpy())
     custom_weight = np.array([1600.0, 200.0])
     criteria = nn.CrossEntropyLoss(weight=torch.tensor(custom_weight, dtype=torch.float).to(device))
-
     x_train = x_train.to(device)
     y_train = y_train.to(device)
     x_valid = x_valid.to(device)
