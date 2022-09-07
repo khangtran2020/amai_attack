@@ -32,7 +32,7 @@ def run(args, device):
         AMIADatasetCelebA(args, target, transform, args.data_path, 'train', imgroot=None, multiplier=2000), shuffle=False,
         num_workers=0, batch_size=200000)
     valid_loader = torch.utils.data.DataLoader(
-        AMIADatasetCelebA(args, target, transform, args.data_path, 'valid', imgroot=None, multiplier=100), shuffle=False,
+        AMIADatasetCelebA(args, target, transform, args.data_path, 'valid', imgroot=None, multiplier=args.num_draws), shuffle=False,
         num_workers=0, batch_size=200000)
     test_loader = torch.utils.data.DataLoader(
         AMIADatasetCelebA(args, target, transform, args.data_path, 'valid', imgroot=None, multiplier=args.num_draws),
@@ -46,7 +46,7 @@ def run(args, device):
     # del(train_loader)
     # del(valid_loader)
     # gc.collect()
-    result = evaluate_robust(args=args, data = test_loader, model=model)
+    result = evaluate_robust(args=args, data = valid_loader, model=model)
     print(result)
     json_object = json.dumps(result, indent=4)
     SAVE_NAME = 'CELEBA_embed_Lap_single_{}_{}_lr_{}.json'.format(args.num_target, args.epsilon, args.lr)
