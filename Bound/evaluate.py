@@ -6,6 +6,7 @@ import torch.utils.data
 from Model.model import *
 from Utils.utils import *
 from tqdm import tqdm
+import sklearn
 from Bound.robustness import hoeffding_lower_bound, hoeffding_upper_bound
 
 # def eval_model(nodes, num_nodes, hnet, net, criteria, device, split):
