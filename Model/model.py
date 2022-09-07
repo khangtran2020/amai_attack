@@ -66,9 +66,9 @@ def train(args, device, data, model):
 
     results = defaultdict(list)
     if args.num_target == 1:
-        SAVE_NAME = 'CELEBA_embed_BitRand_single_{}_{}'.format(args.num_target, args.epsilon)
+        SAVE_NAME = 'CELEBA_embed_Lap_single_{}_{}'.format(args.num_target, args.epsilon)
     else:
-        SAVE_NAME = 'CELEBA_embed_BitRand_multiple_{}_{}'.format(args.num_target, args.epsilon)
+        SAVE_NAME = 'CELEBA_embed_Lap_multiple_{}_{}'.format(args.num_target, args.epsilon)
 
     x_train, y_train, imgs_train = next(iter(train_dataloader))
     x_valid, y_valid, imgs_valid = next(iter(valid_dataloader))
