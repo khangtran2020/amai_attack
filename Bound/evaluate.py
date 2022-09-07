@@ -50,26 +50,27 @@ def evaluate_robust(args, data, model, device='cpu'):
     original_prediction = fc2[:, 0].cpu().numpy()
     print("Original shape",original_prediction.shape)
     if args.eval_mode == 'eps':
-        epsilon_of_point = np.ones(num_of_test_point) * args.max_epsilon
-        certified = np.zeros(num_of_test_point)
-        x_test = x_test.repeat(args.num_draws, 1)
+        epsilon_of_point = args.max_epsilon
+        certified = 0
+        # x_test = x_test.repeat(args.num_draws, 1)
         for eps in tqdm(np.linspace(args.min_epsilon, args.max_epsilon, 100)):
             temp_x = x_test.cpu().numpy()
-            temp_x = temp_x + np.random.laplace(0, args.sens * args.num_feature / eps,
-                                                temp_x.shape)
-            temp_x = torch.from_numpy(temp_x.astype(np.float32)).to(device)
+            temp_x[1:args.num_draws] = temp_x[1:args.num_draws] + np.random.laplace(0, args.sens * args.num_feature / eps,
+                                                temp_x[1:args.num_draws].shape)
+            temp_x = torch.from_numpy(temp_x[1:args.num_draws].astype(np.float32)).to(device)
             out, probs, fc2 = model(temp_x)
             pred = fc2[:, 0].cpu().numpy()
             print(pred.shape)
-            count_of_sign = np.zeros(shape=(num_of_test_point,2))
+            count_of_sign = np.zeros(shape=(1,2))
             print("Start drawing")
-            for t in range(args.num_draws):
-                same_sign = (pred[t*num_of_test_point:(t+1)*num_of_test_point]*original_prediction) > 0
-                count_of_sign[:,0] += np.logical_not(same_sign).astype('int8')
-                count_of_sign[:,1] += same_sign.astype('int8')
-            upper_bound = hoeffding_upper_bound(count_of_sign[:,0],nobs=args.num_draws,alpha=args.alpha)
-            lower_bound = hoeffding_lower_bound(count_of_sign[:,1], nobs=args.num_draws, alpha=args.alpha)
-            # print(upper_bound.shape, lower_bound.shape)
+            # for t in range(args.num_draws):
+            same_sign = (pred*original_prediction[:args.num_draws,:]) > 0
+            count_of_sign[0,0] += np.sum(np.logical_not(same_sign).astype('int8'))
+            count_of_sign[0,1] += np.sum(same_sign.astype('int8'))
+            upper_bound = hoeffding_upper_bound(count_of_sign[0,0],nobs=args.num_draws,alpha=args.alpha)
+            lower_bound = hoeffding_lower_bound(count_of_sign[0,1], nobs=args.num_draws, alpha=args.alpha)
+            print(upper_bound, lower_bound)
+            return
             index = np.where(lower_bound > upper_bound)
             for i in index[0]:
                 # print(epsilon_of_point[i], eps)

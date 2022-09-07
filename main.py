@@ -35,7 +35,7 @@ def run(args, device):
         AMIADatasetCelebA(args, target, transform, args.data_path, 'valid', imgroot=None, multiplier=100), shuffle=False,
         num_workers=0, batch_size=200000)
     test_loader = torch.utils.data.DataLoader(
-        AMIADatasetCelebA(args, target, transform, args.data_path, 'test', imgroot=None, multiplier=20),
+        AMIADatasetCelebA(args, target, transform, args.data_path, 'test', imgroot=None, multiplier=args.num_draws),
         shuffle=False,
         num_workers=0, batch_size=200000)
 
@@ -63,4 +63,5 @@ if __name__ == '__main__':
     set_logger()
     set_seed(args.seed)
     device = get_device(gpus=args.gpu)
+    args.num_test_point = 2*args.num_draws
     run(args, device)

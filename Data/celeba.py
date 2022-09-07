@@ -12,7 +12,7 @@ class AMIADatasetCelebA(Dataset):
         self.num_file = len(os.listdir(dataroot))
         self.train_data = np.arange(args.train_index)
         self.valid_data = np.arange(args.train_index, args.valid_index)
-        self.test_data = np.arange(args.valid_index, self.num_file)
+        # self.test_data = np.arange(args.valid_index, self.num_file)
 
         if mode == 'train':
             self.valid_data = np.arange(162770, 182637)
@@ -25,7 +25,7 @@ class AMIADatasetCelebA(Dataset):
             self.length = len(self.train_data) + len(target) * multiplier
         else:
             # print(type(self))
-            self.test_data = np.array(list(self.target) + list(range(self.num_file-50, self.num_file)))
+            self.test_data = np.array(list(self.target) + list(range(self.num_file-args.num_draws, self.num_file)))
             self.length = len(self.test_data + self.target_multiplier - 1)
         self.dataroot = dataroot
         self.imgroot = imgroot
