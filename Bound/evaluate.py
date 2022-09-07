@@ -57,7 +57,7 @@ def evaluate_robust(args, data, model, device='cpu'):
             temp_x = x_test.cpu().numpy()
             temp_x[1:args.num_draws] = temp_x[1:args.num_draws] + np.random.laplace(0, args.sens * args.num_feature / eps,
                                                 temp_x[1:args.num_draws].shape)
-            temp_x = torch.from_numpy(temp_x[1:args.num_draws].astype(np.float32)).to(device)
+            temp_x = torch.from_numpy(temp_x[:args.num_draws].astype(np.float32)).to(device)
             out, probs, fc2 = model(temp_x)
             pred = fc2[:, 0].cpu().numpy()
             print(pred.shape)
