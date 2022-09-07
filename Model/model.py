@@ -128,5 +128,5 @@ def train(args, device, data, model):
             my_csv.to_csv(name_save, index=False)
             with open(args.save_path + SAVE_NAME + '.pt', 'wb') as f:  # bd0.5_cr0_double bd0.1_cr2
                 torch.save(model, f)
-    return model
+    return model, SAVE_NAME
         # print('Finish one step in ', time.time() - start_time)

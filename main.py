@@ -39,10 +39,13 @@ def run(args, device):
         shuffle=False,
         num_workers=0, batch_size=200000)
 
-    model = train(args=args, device=device, data=(train_loader, valid_loader), model=model)
-    del(train_loader)
-    del(valid_loader)
-    gc.collect()
+    model, name = train(args=args, device=device, data=(train_loader, valid_loader), model=model)
+    model_name = args.save_path + name + '.pt'
+    model = torch.load(model_name)
+
+    # del(train_loader)
+    # del(valid_loader)
+    # gc.collect()
     result = evaluate_robust(args=args, data = test_loader, model=model)
     print(result)
     json_object = json.dumps(result, indent=4)
