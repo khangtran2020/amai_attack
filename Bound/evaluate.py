@@ -91,31 +91,33 @@ def evaluate_robust(args, data, model, device='cpu'):
             'confidence': 1 - args.alpha
         }
     else:
-        alpha_of_point = np.ones(num_of_test_point) * 1e-4
-        certified = np.zeros(num_of_test_point)
-        x_test = x_test.repeat(args.num_draws, 1)
-        temp_x = x_test.numpy()
-        temp_x = temp_x + np.random.laplace(0, args.sens * args.num_feature / args.fix_epsilon,
-                                            temp_x.shape)
-        x_test = torch.from_numpy(temp_x)
-        out, probs, fc2 = model(x_test)
-        pred = fc2[:, 0].numpy()
-        count_of_sign = np.zeros(shape=(num_of_test_point, 2))
+        alpha_of_point = 1e-4
+        certified = 0.0
+        # x_test = x_test.repeat(args.num_draws, 1)
+        temp_x = x_test.cpu().numpy()
+        temp_x[1:args.num_draws] = temp_x[1:args.num_draws] + np.random.laplace(0, args.sens * args.num_feature / args.fix_epsilon,
+                                                                                temp_x[1:args.num_draws].shape)
+        temp_x = torch.from_numpy(temp_x[:args.num_draws].astype(np.float32)).to(device)
+        out, probs, fc2 = model(temp_x)
+        pred = fc2[:, 0].cpu().numpy()
+        count_of_sign = np.zeros(shape=(1, 2))
         print("Start drawing")
-        for t in range(args.num_draws):
-            same_sign = (pred[t * num_of_test_point:(t + 1) * num_of_test_point] * original_prediction[
-                                                                                   t * num_of_test_point:(
-                                                                                                                 t + 1) * num_of_test_point]) > 0
-            count_of_sign[:, 0] += np.logical_not(same_sign).astype('int8')
-            count_of_sign[:, 1] += same_sign.astype('int8')
+        # for t in range(args.num_draws):
+        same_sign = (pred * original_prediction[:args.num_draws]) > 0
+        count_of_sign[0, 0] += np.sum(np.logical_not(same_sign).astype('int8'))
+        count_of_sign[0, 1] += np.sum(same_sign.astype('int8'))
         print("Done drawing")
         for alp in tqdm(np.linspace(1e-4, 1.0, 100)):
-            upper_bound = hoeffding_upper_bound(count_of_sign[:, 0], nobs=args.num_draws, alpha=alp)
-            lower_bound = hoeffding_lower_bound(count_of_sign[:, 1], nobs=args.num_draws, alpha=alp)
-            index = np.where(lower_bound > upper_bound)
-            alpha_of_point[index] = max(1-alp, alpha_of_point[index])
-            certified[index] = 1
-        results = dict(zip(file_name, zip(certified, alpha_of_point)))
+            upper_bound = hoeffding_upper_bound(count_of_sign[0, 0], nobs=args.num_draws, alpha=alp)
+            lower_bound = hoeffding_lower_bound(count_of_sign[0, 1], nobs=args.num_draws, alpha=alp)
+            if lower_bound > upper_bound:
+                alpha_of_point = max(1-alp, alpha_of_point)
+                certified = 1.0
+        results['certified_for_target'] = {
+            'certified': bool(certified),
+            'eps_min': args.fix_epsilon,
+            'confidence': 1 - alpha_of_point
+        }
     return results
 
 # def user_dp_draw_noise(args, hnet):
