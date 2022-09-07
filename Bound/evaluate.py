@@ -29,7 +29,7 @@ def evaluate(x, y, model, criteria):
     out, probs, fc2 = model(x)
     loss = criteria(out, y).item()
     pred = fc2[:, 0] < 0
-    print(pred)
+    # print(pred)
     tpr, tnr, acc = tpr_tnr(pred, y)
     results['loss'] = loss
     results['acc'] = acc
