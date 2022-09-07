@@ -32,8 +32,8 @@ def add_model_group(group):
 
 def add_defense_group(group):
     group.add_argument('--epsilon', type=float, default=1.0, help="epsilon")
-    group.add_argument('--min_epsilon', type=float, default=1.0, help="epsilon")
-    group.add_argument('--max_epsilon', type=float, default=1.0, help="epsilon")
+    group.add_argument('--min_epsilon', type=float, default=0.1, help="epsilon")
+    group.add_argument('--max_epsilon', type=float, default=20.0, help="epsilon")
     group.add_argument('--fix_epsilon', type=float, default=1.0, help="epsilon")
     group.add_argument('--sens', type=float, default=1.0, help="sensitivity")
     group.add_argument('--num_draws', type=int, default=1000, help="sensitivity")

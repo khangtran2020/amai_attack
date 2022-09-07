@@ -66,10 +66,10 @@ def evaluate_robust(args, data, model, device='cpu'):
                 count_of_sign[:,1] += same_sign.astype('int8')
             upper_bound = hoeffding_upper_bound(count_of_sign[:,0],nobs=args.num_draws,alpha=args.alpha)
             lower_bound = hoeffding_lower_bound(count_of_sign[:,1], nobs=args.num_draws, alpha=args.alpha)
-            print(upper_bound.shape, lower_bound.shape)
+            # print(upper_bound.shape, lower_bound.shape)
             index = np.where(lower_bound > upper_bound)
             for i in index[0]:
-                print(epsilon_of_point[i], eps)
+                # print(epsilon_of_point[i], eps)
                 epsilon_of_point[i] = min(eps,epsilon_of_point[i])
             certified[index] = 1
             print("Done for eps: {}".format(eps))
