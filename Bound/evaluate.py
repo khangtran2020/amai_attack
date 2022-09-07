@@ -44,10 +44,10 @@ def evaluate_robust(args, data, model, device='cpu'):
     x_test, y_test, file_name = next(iter(data))
 
     # evaluate
-    weight = sklearn.utils.class_weight.compute_class_weight('balanced', classes=np.arange(args.num_target + 1),
-                                                             y=y_test.cpu().detach().numpy())
-    # custom_weight = np.array([1600.0, 200.0])
-    criteria = nn.CrossEntropyLoss(weight=torch.tensor(weight, dtype=torch.float).to(device))
+    # weight = sklearn.utils.class_weight.compute_class_weight('balanced', classes=np.arange(args.num_target + 1),
+    #                                                          y=y_test.cpu().detach().numpy())
+    custom_weight = np.array([1600.0, 200.0])
+    criteria = nn.CrossEntropyLoss(weight=torch.tensor(custom_weight, dtype=torch.float).to(device))
     res_test = evaluate(x=x_test, y=y_test, model=model, criteria=criteria)
     results['target_file_name'] = file_name[0]
     results['loss'] = res_test['loss']
