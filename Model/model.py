@@ -110,8 +110,8 @@ def train(args, device, data, model):
 
         if step % 10 == 0:
             last_eval = step
-            res_train = evaluate(x=x_train, y=y_train, model=model, criteria=criteria)
-            res_val = evaluate(x=x_valid, y=y_valid, model=model, criteria=criteria)
+            res_train = evaluate(x=x_train, y=y_train, model=model, criteria=criteria, device=device)
+            res_val = evaluate(x=x_valid, y=y_valid, model=model, criteria=criteria, device=device)
             logging.info(
                 f"\nStep: {step + 1}, Train Loss: {res_train['loss']}, Acc: {res_train['acc']:.4f}, TPR: {res_train['tpr']:.4f}, TNR : {res_train['tnr']:.4f} | Val Loss: {res_val['loss']}, Acc: {res_val['acc']:.4f}, TPR: {res_val['tpr']:.4f}, TNR : {res_val['tnr']:.4f}")
 
