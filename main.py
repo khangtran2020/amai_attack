@@ -35,7 +35,7 @@ def run(args, device):
         AMIADatasetCelebA(args, target, transform, args.data_path, 'valid', imgroot=None, multiplier=100), shuffle=False,
         num_workers=0, batch_size=200000)
     test_loader = torch.utils.data.DataLoader(
-        AMIADatasetCelebA(args, target, transform, args.data_path, 'test', imgroot=None, multiplier=args.num_draws),
+        AMIADatasetCelebA(args, target, transform, args.data_path, 'valid', imgroot=None, multiplier=args.num_draws),
         shuffle=False,
         num_workers=0, batch_size=200000)
 
