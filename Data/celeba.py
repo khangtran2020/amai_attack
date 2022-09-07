@@ -25,8 +25,8 @@ class AMIADatasetCelebA(Dataset):
             self.length = len(self.train_data) + len(target) * multiplier
         else:
             # print(type(self))
-            self.test_data = np.array(list(self.target) + list(range(self.num_file-args.num_draws, self.num_file)))
-            self.length = len(self.test_data + self.target_multiplier - 1)
+            self.test_data = np.arange(self.num_file-args.num_draws, self.num_file)
+            self.length = len(target) * multiplier + len(self.test_data)
         self.dataroot = dataroot
         self.imgroot = imgroot
         self.data_name = sorted(os.listdir(dataroot))
