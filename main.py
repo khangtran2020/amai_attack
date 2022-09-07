@@ -39,6 +39,12 @@ def run(args, device):
     model_name = args.save_path + name + '.pt'
     model = torch.load(model_name)
     x_valid, y_valid, imgs_valid = next(iter(valid_loader))
+    temp_x = x_valid.numpy()
+    temp_x[1:args.num_draws] = temp_x[1:args.num_draws] + np.random.laplace(0,
+                                                                            args.sens * args.num_feature / args.epsilon,
+                                                                            temp_x[1:args.num_draws].shape)
+    # return
+    x_valid = torch.from_numpy(temp_x)
     custom_weight = np.array([1600.0, 200.0])
     criteria = nn.CrossEntropyLoss(weight=torch.tensor(custom_weight, dtype=torch.float).to(device))
     res_test = evaluate(x=x_valid, y=y_valid, model=model, criteria=criteria, device=device)
