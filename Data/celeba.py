@@ -26,7 +26,7 @@ class AMIADatasetCelebA(Dataset):
         else:
             # print(type(self))
             self.test_data = np.array(list(self.target) + list(range(self.num_file-50, self.num_file)))
-            self.length = len(self.test_data)
+            self.length = len(self.test_data + self.target_multiplier - 1)
         self.dataroot = dataroot
         self.imgroot = imgroot
         self.data_name = sorted(os.listdir(dataroot))
@@ -57,11 +57,14 @@ class AMIADatasetCelebA(Dataset):
                 # img_loc = os.path.join(self.dataroot, self.data_name[self.valid_data[idx]])
                 class_id = torch.tensor(len(self.target))
         else:
-            if idx < len(self.target):
-                filename = self.data_name[self.target[int(idx)]]
-                class_id = torch.tensor(int(idx/len(self.target)))
+            if idx / self.target_multiplier < len(self.target):
+                filename = self.data_name[self.target[int(idx / self.target_multiplier)]]
+                # img_loc = os.path.join(self.dataroot, self.data_name[self.target[idx]])
+                class_id = torch.tensor(int(idx / self.target_multiplier))
             else:
-                filename = self.data_name[self.train_data[idx]]
+                idx -= len(self.target) * self.target_multiplier
+                filename = self.data_name[self.test_data[idx]]
+                # img_loc = os.path.join(self.dataroot, self.data_name[self.valid_data[idx]])
                 class_id = torch.tensor(len(self.target))
 
         if self.imgroot:
