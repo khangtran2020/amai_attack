@@ -45,9 +45,9 @@ def run(args, device):
     gc.collect()
     result = evaluate_robust(args=args, data = test_loader, model=model, device=device)
     json_object = json.dumps(result, indent=4)
-    SAVE_NAME = 'CELEBA_embed_Lap_single_{}_{}'.format(args.num_target, args.epsilon)
+    SAVE_NAME = 'CELEBA_embed_Lap_single_{}_{}.json'.format(args.num_target, args.epsilon)
     # Writing to sample.json
-    with open(SAVE_NAME, "w") as outfile:
+    with open(args.save_path + SAVE_NAME, "w") as outfile:
         outfile.write(json_object)
 
 
