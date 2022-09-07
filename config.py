@@ -15,7 +15,7 @@ def add_data_group(group):
     group.add_argument('--data_path', type=str, default='../../Datasets/CelebA/embeddings/', help="the directory used to save dataset")
     group.add_argument('--num_feature', type=int, default=512, help="number of target")
     group.add_argument('--num_target', type=int, default=1, help="number of target")
-    group.add_argument('--num_multiplier', type=int, default=2000, help="number of multiplier")
+    group.add_argument('--train_multiplier', type=int, default=2000, help="number of multiplier")
     group.add_argument('--train_index', type=int, default=162770, help="number of multiplier")
     group.add_argument('--valid_index', type=int, default=182637, help="number of multiplier")
 
