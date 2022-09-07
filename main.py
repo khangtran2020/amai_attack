@@ -42,6 +42,12 @@ def run(args, device):
     model, name = train(args=args, device=device, data=(train_loader, valid_loader), model=model)
     model_name = args.save_path + name + '.pt'
     model = torch.load(model_name)
+    x_valid, y_valid, imgs_valid = next(iter(valid_loader))
+    custom_weight = np.array([1600.0, 200.0])
+    criteria = nn.CrossEntropyLoss(weight=torch.tensor(custom_weight, dtype=torch.float).to(device))
+    res_test = evaluate(x=x_valid, y=y_valid, model=model, criteria=criteria)
+    print(res_test)
+    exit()
 
     # del(train_loader)
     # del(valid_loader)
