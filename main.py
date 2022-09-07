@@ -43,7 +43,7 @@ def run(args, device):
     del(train_loader)
     del(valid_loader)
     gc.collect()
-    result = evaluate_robust(args=args, data = test_loader, model=model, device=device)
+    result = evaluate_robust(args=args, data = test_loader, model=model)
     print(result)
     json_object = json.dumps(result, indent=4)
     SAVE_NAME = 'CELEBA_embed_Lap_single_{}_{}_lr_{}.json'.format(args.num_target, args.epsilon, args.lr)
