@@ -64,7 +64,7 @@ def evaluate_robust(args, data, model, device='cpu'):
             count_of_sign = np.zeros(shape=(1,2))
             print("Start drawing")
             # for t in range(args.num_draws):
-            same_sign = (pred*original_prediction[:args.num_draws,:]) > 0
+            same_sign = (pred*original_prediction[:args.num_draws]) > 0
             count_of_sign[0,0] += np.sum(np.logical_not(same_sign).astype('int8'))
             count_of_sign[0,1] += np.sum(same_sign.astype('int8'))
             upper_bound = hoeffding_upper_bound(count_of_sign[0,0],nobs=args.num_draws,alpha=args.alpha)
