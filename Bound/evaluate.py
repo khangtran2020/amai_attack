@@ -22,7 +22,10 @@ from Bound.robustness import hoeffding_lower_bound, hoeffding_upper_bound
 
 
 @torch.no_grad()
-def evaluate(x, y, model, criteria):
+def evaluate(x, y, model, criteria, device):
+    model.to(device)
+    x = x.to(device)
+    y = y.to(device)
     model.eval()
     results = defaultdict(lambda: defaultdict(list))
     running_loss, running_correct, running_samples = 0., 0., 0.

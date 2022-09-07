@@ -45,7 +45,7 @@ def run(args, device):
     x_valid, y_valid, imgs_valid = next(iter(valid_loader))
     custom_weight = np.array([1600.0, 200.0])
     criteria = nn.CrossEntropyLoss(weight=torch.tensor(custom_weight, dtype=torch.float).to(device))
-    res_test = evaluate(x=x_valid, y=y_valid, model=model, criteria=criteria)
+    res_test = evaluate(x=x_valid, y=y_valid, model=model, criteria=criteria, device=device)
     print(res_test)
     exit()
 
