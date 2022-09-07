@@ -39,7 +39,19 @@ def evaluate(x, y, model, criteria):
 def evaluate_robust(args, data, model, device='cpu'):
     model.to(device)
     model.eval()
+    results = {}
     x_test, y_test, file_name = next(iter(data))
+
+    # evaluate
+    weight = sklearn.utils.class_weight.compute_class_weight('balanced', classes=np.arange(args.num_target + 1),
+                                                             y=y_test.cpu().detach().numpy())
+    # custom_weight = np.array([1600.0, 200.0])
+    criteria = nn.CrossEntropyLoss(weight=torch.tensor(weight, dtype=torch.float).to(device))
+    res_test = evaluate(x=x_test, y=y_test, model=model, criteria=criteria)
+    results['loss'] = res_test['loss']
+    results['acc'] = res_test['acc']
+    results['tpr'] = res_test['tpr']
+    results['tnr'] = res_test['tnr']
     print("Test y_test:",torch.bincount(y_test))
     print(x_test.size())
     print(file_name)
@@ -69,15 +81,15 @@ def evaluate_robust(args, data, model, device='cpu'):
             count_of_sign[0,1] += np.sum(same_sign.astype('int8'))
             upper_bound = hoeffding_upper_bound(count_of_sign[0,0],nobs=args.num_draws,alpha=args.alpha)
             lower_bound = hoeffding_lower_bound(count_of_sign[0,1], nobs=args.num_draws, alpha=args.alpha)
-            print(upper_bound, lower_bound)
-            return
-            index = np.where(lower_bound > upper_bound)
-            for i in index[0]:
-                # print(epsilon_of_point[i], eps)
-                epsilon_of_point[i] = min(eps,epsilon_of_point[i])
-            certified[index] = 1
+            if (lower_bound > upper_bound):
+                certified = int(1.0)
+                epsilon_of_point = min(epsilon_of_point, eps)
             print("Done for eps: {}".format(eps))
-        results = dict(zip(file_name, zip(certified,epsilon_of_point)))
+        results['certified_for_target'] = {
+            'certified': bool(certified),
+            'eps_min': epsilon_of_point,
+            'confidence': 1 - args.alpha
+        }
     else:
         alpha_of_point = np.ones(num_of_test_point) * 1e-4
         certified = np.zeros(num_of_test_point)
