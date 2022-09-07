@@ -46,6 +46,7 @@ def evaluate_robust(args, data, model, device='cpu'):
     custom_weight = np.array([1600.0, 200.0])
     criteria = nn.CrossEntropyLoss(weight=torch.tensor(custom_weight, dtype=torch.float).to(device))
     res_test = evaluate(x=x_test, y=y_test, model=model, criteria=criteria)
+    print(res_test)
     results['target_file_name'] = file_name[0]
     results['loss'] = res_test['loss']
     results['acc'] = res_test['acc']
