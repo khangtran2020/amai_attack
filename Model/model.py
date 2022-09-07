@@ -72,7 +72,7 @@ def train(args, device, data, model):
 
     x_train, y_train, imgs_train = next(iter(train_dataloader))
     x_valid, y_valid, imgs_valid = next(iter(valid_dataloader))
-    print(y_train)
+    print(torch.bincount(y_train))
     if (args.train_mode == 'dp'):
         print("Train with Laplace mechanism with epsilon = {}".format(args.epsilon))
         temp_x = x_train.numpy()

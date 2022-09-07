@@ -40,6 +40,7 @@ def evaluate_robust(args, data, model, device='cpu'):
     model.to(device)
     model.eval()
     x_test, y_test, file_name = next(iter(data))
+    print("Test y_test:",torch.bincount(y_test))
     print(x_test.size())
     x_test = x_test.to(device)
     num_of_test_point = len(x_test)
