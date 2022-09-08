@@ -85,7 +85,7 @@ def run(args, device):
                 'precision': precision,
                 'recall': recall,
                 'has_target': int(sample[0]),
-                'predicted': int(bool(min(1, sum(pred.cpu().numpy()))))
+                'predicted': int(sum(pred_) > 0)
             }
         acc = accuracy_score(true_label,predicted)
         precision = precision_score(true_label,predicted)
