@@ -99,10 +99,10 @@ def train(args, device, data, model):
         x_valid = torch.from_numpy(temp_x)
 
 
-    weight = sklearn.utils.class_weight.compute_class_weight('balanced', classes=np.arange(args.num_target + 1),
-                                                             y=y_valid.cpu().detach().numpy())
-    custom_weight = np.array([1600.0, 200.0])
-    criteria = nn.CrossEntropyLoss(weight=torch.tensor(custom_weight, dtype=torch.float).to(device))
+    # weight = sklearn.utils.class_weight.compute_class_weight('balanced', classes=np.arange(args.num_target + 1),
+    #                                                          y=y_valid.cpu().detach().numpy())
+    # custom_weight = np.array([1600.0, 200.0])
+    criteria = nn.CrossEntropyLoss()
     x_train = x_train.to(device)
     y_train = y_train.to(device)
     x_valid = x_valid.to(device)
