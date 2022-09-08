@@ -42,6 +42,7 @@ def run(args, device):
         results = {}
         true_label = []
         predicted = []
+        x_t = None
         for i in tqdm(range(args.num_test_point)):
             sample = np.random.binomial(n=1, p=args.sample_target_rate, size=1).astype(bool)
             true_label.append(int(sample[0]))
@@ -81,19 +82,55 @@ def run(args, device):
             'tpr': tpr,
             'tnr': tnr,
         }
+        test_loader = torch.utils.data.DataLoader(
+            CelebA(args, target, transform, args.data_path, 'test', imgroot=None,
+                   multiplier=args.num_draws, include_tar=True), shuffle=False,
+            num_workers=0, batch_size=args.batch_size)
+        x_test, y_test, file_name = next(iter(test_loader))
+        epsilon_of_point = args.max_epsilon
+        certified = False
+        for eps in tqdm(np.linspace(args.min_epsilon, args.max_epsilon, 100)):
+            temp_x = x_test.numpy()
+            generated_target = np.tile(temp_x[0, :], (args.num_draws + 1, 1))
+            generated_target[1:, :] = generated_target[1:, :] + np.random.laplace(0,
+                                                                                  args.sens * args.num_feature / args.epsilon,
+                                                                                  generated_target[1:, :].shape)
+            temp_x = torch.from_numpy(generated_target.astype(np.float32)).to(device)
+            out, probs, fc2 = model(temp_x)
+            pred = fc2[:, 0].cpu().numpy()
+            print(pred.shape)
+            count_of_sign = np.zeros(shape=(1, 2))
+            print("Start drawing")
+            # for t in range(args.num_draws):
+            same_sign = (pred[1:] * pred[0]) > 0
+            count_of_sign[0, 0] += np.sum(np.logical_not(same_sign).astype('int8'))
+            count_of_sign[0, 1] += np.sum(same_sign.astype('int8'))
+            upper_bound = hoeffding_upper_bound(count_of_sign[0, 0], nobs=args.num_draws, alpha=args.alpha)
+            lower_bound = hoeffding_lower_bound(count_of_sign[0, 1], nobs=args.num_draws, alpha=args.alpha)
+            if (lower_bound > upper_bound):
+                certified = int(1.0)
+                epsilon_of_point = min(epsilon_of_point, eps)
+            print("Done for eps: {}".format(eps))
+        results['certified_for_target'] = {
+            'certified': bool(certified),
+            'eps_min': epsilon_of_point,
+            'confidence': 1 - args.alpha
+        }
+
         print(results)
-    exit()
+        json_object = json.dumps(results, indent=4)
+        SAVE_NAME = 'CELEBA_embed_Lap_single_{}_{}_lr_{}.json'.format(args.num_target, args.epsilon, args.lr)
+        # Writing to sample.json
+        with open(args.save_path + SAVE_NAME, "w") as outfile:
+            outfile.write(json_object)
+        exit()
 
     # del(train_loader)
     # del(valid_loader)
     # gc.collect()
     result = evaluate_robust(args=args, data=valid_loader, model=model)
     print(result)
-    json_object = json.dumps(result, indent=4)
-    SAVE_NAME = 'CELEBA_embed_Lap_single_{}_{}_lr_{}.json'.format(args.num_target, args.epsilon, args.lr)
-    # Writing to sample.json
-    with open(args.save_path + SAVE_NAME, "w") as outfile:
-        outfile.write(json_object)
+
 
 
 if __name__ == '__main__':
