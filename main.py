@@ -122,7 +122,7 @@ def run(args, device):
             count_of_diff_sign = args.num_draws - count_of_same_sign
             print(
                 'For eps {}, we have the number of draws that has same sign: {}, number of draws have diff sign: {}'.format(
-                    eps, count_of_diff_sign, count_of_same_sign))
+                    eps, count_of_same_sign, count_of_diff_sign))
             upper_bound = hoeffding_upper_bound(count_of_diff_sign, nobs=args.num_draws, alpha=args.alpha)
             lower_bound = hoeffding_lower_bound(count_of_same_sign, nobs=args.num_draws, alpha=args.alpha)
             if (lower_bound > upper_bound):
