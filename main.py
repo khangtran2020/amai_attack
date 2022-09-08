@@ -100,12 +100,13 @@ def run(args, device):
                    multiplier=args.num_draws, include_tar=True), shuffle=False,
             num_workers=0, batch_size=args.batch_size)
         x_test, y_test, file_name = next(iter(test_loader))
-        print(file_name[0])
         epsilon_of_point = args.max_epsilon
         certified = 0
         for eps in tqdm(np.linspace(args.min_epsilon, args.max_epsilon, 100)):
             temp_x = x_test.numpy()
             generated_target = np.tile(temp_x[0, :], (args.num_draws + 1, 1))
+            print(generated_target)
+            exit()
             generated_target[1:, :] = generated_target[1:, :] + np.random.laplace(0,
                                                                                   args.sens * args.num_feature / eps,
                                                                                   generated_target[1:, :].shape)
