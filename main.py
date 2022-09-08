@@ -87,8 +87,8 @@ def run(args, device):
                 'has_target': int(sample[0]),
                 'predicted': int(sum(pred_) > 0)
             }
-        acc = accuracy_score(true_label,predicted)
-        precision = precision_score(true_label,predicted)
+        acc = accuracy_score(true_label, predicted)
+        precision = precision_score(true_label, predicted)
         recall = recall_score(true_label, predicted)
         results['test_result'] = {
             'acc': acc,
@@ -102,7 +102,8 @@ def run(args, device):
         x_test, y_test, file_name = next(iter(test_loader))
         epsilon_of_point = args.max_epsilon
         certified = 0
-        for eps in tqdm(np.linspace(args.min_epsilon, args.max_epsilon, 100)):
+        # for eps in tqdm(np.linspace(args.min_epsilon, args.max_epsilon, 100)):
+        for eps in np.linspace(args.min_epsilon, args.max_epsilon, 100):
             temp_x = x_test.numpy()
             generated_target = np.tile(temp_x[0, :], (args.num_draws + 1, 1))
             # print(generated_target)
@@ -119,7 +120,9 @@ def run(args, device):
             # print(same_sign)
             count_of_same_sign = sum(same_sign.astype(int))
             count_of_diff_sign = args.num_draws - count_of_same_sign
-            print(count_of_diff_sign, count_of_same_sign)
+            print(
+                'For eps {}, we have the number of draws that has same sign: {}, number of draws have diff sign: {}'.format(
+                    eps, count_of_diff_sign, count_of_same_sign))
             upper_bound = hoeffding_upper_bound(count_of_diff_sign, nobs=args.num_draws, alpha=args.alpha)
             lower_bound = hoeffding_lower_bound(count_of_same_sign, nobs=args.num_draws, alpha=args.alpha)
             if (lower_bound > upper_bound):
@@ -136,7 +139,9 @@ def run(args, device):
 
         print(results)
         json_object = json.dumps(results, indent=4)
-        SAVE_NAME = 'CELEBA_train_eps_{}_sample_rate_{}_num_test_point_{}.json'.format(args.epsilon, args.sample_target_rate, args.num_test_point)
+        SAVE_NAME = 'CELEBA_train_eps_{}_sample_rate_{}_num_test_point_{}.json'.format(args.epsilon,
+                                                                                       args.sample_target_rate,
+                                                                                       args.num_test_point)
         # SAVE_NAME = 'test.json'
         # Writing to sample.json
         with open(args.save_path + SAVE_NAME, "w") as outfile:
