@@ -64,7 +64,7 @@ def run(args, device):
             out, probs, fc2 = model(x_test)
             loss = criteria(out, y_test).item()
             pred = fc2[:, 0] < 0
-            predicted.append(min(1, sum(pred.cpu().numpy())))
+            predicted.append(1-min(1, sum(pred.cpu().numpy())))
             tpr, tnr, acc = tpr_tnr(pred, y_test)
             results['test_{}'.format(i)] = {
                 'loss': loss,
