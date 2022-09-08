@@ -10,6 +10,7 @@ from Utils.utils import *
 from config import parse_args
 import os
 import json
+from sklearn.metrics import accuracy_score, precision_score, recall_score
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"] = "4"
@@ -20,7 +21,7 @@ def run(args, device):
     # Init data
     model = Classifier(args.num_feature, args.num_target + 1)
     target = list(range(args.num_target))
-    print(args.epsilon)
+    # print(args.epsilon)
     # print(args.sens*args.num_feature/args.epsilon)
     # exit()
     transform = transforms.Compose([
@@ -70,7 +71,7 @@ def run(args, device):
             loss = criteria(out, y_test).item()
             pred = fc2[:, 0] < 0
             predicted.append(min(1, sum(1 - pred.cpu().numpy().astype(int))))
-            print(sample, pred, sum(1 - pred.cpu().numpy().astype(int)), min(1, sum(1 - pred.cpu().numpy().astype(int))))
+            # print(sample, pred, sum(1 - pred.cpu().numpy().astype(int)), min(1, sum(1 - pred.cpu().numpy().astype(int))))
             tpr, tnr, acc = tpr_tnr(pred, y_test)
             results['res_of_each_test']['test_{}'.format(i)] = {
                 'loss': loss,
@@ -80,12 +81,13 @@ def run(args, device):
                 'has_target': int(sample[0]),
                 'predicted': int(bool(min(1, sum(pred.cpu().numpy()))))
             }
-        tpr, tnr, acc, = tpr_tnr(prediction=torch.from_numpy(np.array(predicted).astype(int)),
-                                      truth=torch.from_numpy(np.array(true_label).astype(int)))
+        acc = accuracy_score(true_label,predicted)
+        precision = precision_score(true_label,predicted)
+        recall = recall_score(true_label, predicted)
         results['test_result'] = {
             'acc': acc,
-            'tpr': tpr,
-            'tnr': tnr,
+            'precision': precision,
+            'recall': recall,
         }
         test_loader = torch.utils.data.DataLoader(
             CelebA(args, target, transform, args.data_path, 'test', imgroot=None,
