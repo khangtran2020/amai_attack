@@ -30,6 +30,7 @@ def add_model_group(group):
     group.add_argument('--eval_every', type=int, default=5, help='evaluate every x epoch')
     group.add_argument('--model_save_path', type=str, default='results/model/')
     group.add_argument("--num_steps", type=int, default=2000)
+    group.add_argument("--early_stopping", type=int, default=100)
 
 def add_defense_group(group):
     group.add_argument('--epsilon', type=float, default=1.0, help="epsilon")

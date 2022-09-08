@@ -73,8 +73,15 @@ def run(args, device):
             pred = fc2[:, 0] < 0
             pred_ = 1 - pred.cpu().numpy().astype(int)
             if sum(pred_ <= 0):
-                print("Test", i)
-            predicted.append(sum(pred_) > 0)
+                predicted.append(0)
+                results['res_of_each_test']['test_{}'.format(i)]['has_target'] = sample[0]
+                results['res_of_each_test']['test_{}'.format(i)]['predict'] = 0
+            else:
+                predicted.append(1)
+                results['res_of_each_test']['test_{}'.format(i)]['has_target'] = sample[0]
+                results['res_of_each_test']['test_{}'.format(i)]['predict'] = 1
+                # print("Test", i)
+
             # print(sample, pred, sum(1 - pred.cpu().numpy().astype(int)), min(1, sum(1 - pred.cpu().numpy().astype(int))))
             acc = accuracy_score(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
             precision = precision_score(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
@@ -83,9 +90,7 @@ def run(args, device):
                 'loss': loss,
                 'acc': acc,
                 'precision': precision,
-                'recall': recall,
-                'has_target': int(sample[0]),
-                'predicted': int(sum(pred_) > 0)
+                'recall': recall
             }
         acc = accuracy_score(true_label, predicted)
         precision = precision_score(true_label, predicted)
