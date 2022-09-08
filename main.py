@@ -88,7 +88,7 @@ def run(args, device):
                 results['res_of_each_test']['test_{}'.format(i)]['predict'] = 0
             else:
                 predicted.append(1)
-                results['res_of_each_test']['test_{}'.format(i)]['has_target'] = sample[0]
+                results['res_of_each_test']['test_{}'.format(i)]['has_target'] = int(sample[0])
                 results['res_of_each_test']['test_{}'.format(i)]['predict'] = 1
                 # print("Test", i)
         acc = accuracy_score(true_label, predicted)
