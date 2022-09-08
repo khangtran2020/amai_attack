@@ -62,9 +62,9 @@ def run(args, device):
                 temp_x[0] = temp_x[0] + np.random.laplace(0, args.sens * args.num_feature / args.epsilon,
                                                           temp_x[0].shape)
                 x_test = torch.from_numpy(temp_x.astype(np.float32))
-            weight = sklearn.utils.class_weight.compute_class_weight('balanced', classes=np.arange(args.num_target + 1),
-                                                                     y=y_test.cpu().detach().numpy())
-            criteria = nn.CrossEntropyLoss(weight=torch.tensor(weight, dtype=torch.float).to(device))
+            # weight = sklearn.utils.class_weight.compute_class_weight('balanced', classes=np.arange(args.num_target + 1),
+            #                                                          y=y_test.cpu().detach().numpy())
+            criteria = nn.CrossEntropyLoss()
             model.to(device)
             x_test = x_test.to(device)
             y_test = y_test.to(device)
@@ -73,12 +73,14 @@ def run(args, device):
             pred = fc2[:, 0] < 0
             predicted.append(min(1, sum(1 - pred.cpu().numpy().astype(int))))
             print(sample, pred, sum(1 - pred.cpu().numpy().astype(int)), min(1, sum(1 - pred.cpu().numpy().astype(int))))
-            tpr, tnr, acc = tpr_tnr(pred, y_test)
+            acc = accuracy_score(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
+            precision = precision_score(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
+            recall = recall_score(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
             results['res_of_each_test']['test_{}'.format(i)] = {
                 'loss': loss,
                 'acc': acc,
-                'tpr': tpr,
-                'tnr': tnr,
+                'precision': precision,
+                'recall': recall,
                 'has_target': int(sample[0]),
                 'predicted': int(bool(min(1, sum(pred.cpu().numpy()))))
             }
