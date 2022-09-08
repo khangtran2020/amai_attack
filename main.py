@@ -109,22 +109,22 @@ def run(args, device):
             # print(generated_target)
             # exit()
             generated_target[1:, :] = generated_target[1:, :] + np.random.laplace(0,
-                                                                                  args.sens * args.num_feature / args.epsilon,
+                                                                                  args.sens * args.num_feature / eps,
                                                                                   generated_target[1:, :].shape)
             # print(generated_target)
             # exit()
             temp_x = torch.from_numpy(generated_target.astype(np.float32)).to(device)
             out, probs, fc2 = model(temp_x)
             pred = fc2[:, 0].cpu().detach().numpy()
-            print(pred)
+            # print(pred)
             # exit()
             same_sign = (pred[1:] * pred[0]) > 0
             # print(same_sign)
             count_of_same_sign = sum(same_sign.astype(int))
             count_of_diff_sign = args.num_draws - count_of_same_sign
             print(
-                'For step {}, # same sign: {}, # diff sign: {}'.format(
-                    i, count_of_same_sign, count_of_diff_sign))
+                'For eps {}, # same sign: {}, # diff sign: {}'.format(
+                    eps, count_of_same_sign, count_of_diff_sign))
             upper_bound = hoeffding_upper_bound(count_of_diff_sign, nobs=args.num_draws, alpha=args.alpha)
             lower_bound = hoeffding_lower_bound(count_of_same_sign, nobs=args.num_draws, alpha=args.alpha)
             if (lower_bound > upper_bound):
