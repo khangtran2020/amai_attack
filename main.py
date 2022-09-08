@@ -84,7 +84,7 @@ def run(args, device):
             pred_ = 1 - pred.cpu().numpy().astype(int)
             if sum(pred_ <= 0):
                 predicted.append(0)
-                results['res_of_each_test']['test_{}'.format(i)]['has_target'] = sample[0]
+                results['res_of_each_test']['test_{}'.format(i)]['has_target'] = int(sample[0])
                 results['res_of_each_test']['test_{}'.format(i)]['predict'] = 0
             else:
                 predicted.append(1)
