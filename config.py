@@ -40,7 +40,7 @@ def add_defense_group(group):
     group.add_argument('--eval_mode', type=str, default='eps', help="eps/alpha")
     group.add_argument('--alpha', type=float, default=0.05, help="confidence rate")
     group.add_argument('--num_test_set', type=int, default=100, help="number of generated test set")
-    group.add_argument('--num_test_point', type=int, default=50, help="number of test point in one test set")
+    group.add_argument('--num_test_point', type=int, default=1, help="number of test point in one test set")
     group.add_argument('--sample_target_rate', type=float, default=0.1, help="rate of target")
 
 
