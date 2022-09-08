@@ -120,6 +120,7 @@ def run(args, device):
             # print("Start drawing")
             # for t in range(args.num_draws):
             same_sign = (pred[1:] * pred[0]) > 0
+            print(same_sign.shape)
             count_of_sign[0, 0] += np.sum(np.logical_not(same_sign).astype('int8'))
             count_of_sign[0, 1] += np.sum(same_sign.astype('int8'))
             upper_bound = hoeffding_upper_bound(count_of_sign[0, 0], nobs=args.num_draws, alpha=args.alpha)
