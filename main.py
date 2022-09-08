@@ -36,14 +36,6 @@ def run(args, device):
         CelebA(args, target, transform, args.data_path, 'valid', imgroot=None, multiplier=args.num_draws),
         shuffle=False,
         num_workers=0, batch_size=args.batch_size)
-    test_loader = torch.utils.data.DataLoader(
-        CelebA(args, target, transform, args.data_path, 'test', imgroot=None,
-               multiplier=args.num_draws, include_tar=True), shuffle=False,
-        num_workers=0, batch_size=args.batch_size)
-    x_test, y_test, file_name = next(iter(test_loader))
-    print(x_test.size())
-    exit()
-
     model = train(args=args, device=device, data=(train_loader, valid_loader), model=model)
 
     if args.train_mode == 'target':
@@ -54,7 +46,8 @@ def run(args, device):
         true_label = []
         predicted = []
         x_t = None
-        for i in tqdm(range(args.num_test_point)):
+        # for i in tqdm(range(args.num_test_point)):
+        for i in range(args.num_test_point):
             sample = np.random.binomial(n=1, p=args.sample_target_rate, size=1).astype(bool)
             true_label.append(int(sample[0]))
             test_loader = torch.utils.data.DataLoader(
@@ -73,8 +66,6 @@ def run(args, device):
             model.to(device)
             x_test = x_test.to(device)
             y_test = y_test.to(device)
-            print(sample,x_test.size(), y_test.size())
-            exit()
             out, probs, fc2 = model(x_test)
             loss = criteria(out, y_test).item()
             pred = fc2[:, 0] < 0
