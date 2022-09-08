@@ -111,9 +111,9 @@ def run(args, device):
             temp_x = torch.from_numpy(generated_target.astype(np.float32)).to(device)
             out, probs, fc2 = model(temp_x)
             pred = fc2[:, 0].cpu().detach().numpy()
-            print(pred.shape)
+            # print(pred.shape)
             count_of_sign = np.zeros(shape=(1, 2))
-            print("Start drawing")
+            # print("Start drawing")
             # for t in range(args.num_draws):
             same_sign = (pred[1:] * pred[0]) > 0
             count_of_sign[0, 0] += np.sum(np.logical_not(same_sign).astype('int8'))
@@ -123,7 +123,7 @@ def run(args, device):
             if (lower_bound > upper_bound):
                 certified = int(1.0)
                 epsilon_of_point = min(epsilon_of_point, eps)
-            print("Done for eps: {}".format(eps))
+            # print("Done for eps: {}".format(eps))
         results['certified_for_target'] = {
             'search_range_min': args.min_epsilon,
             'search_range_max': args.max_epsilon,
