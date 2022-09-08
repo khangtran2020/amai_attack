@@ -115,16 +115,13 @@ def run(args, device):
             temp_x = torch.from_numpy(generated_target.astype(np.float32)).to(device)
             out, probs, fc2 = model(temp_x)
             pred = fc2[:, 0].cpu().detach().numpy()
-            # print(pred.shape)
-            count_of_sign = np.zeros(shape=(1, 2))
-            # print("Start drawing")
-            # for t in range(args.num_draws):
             same_sign = (pred[1:] * pred[0]) > 0
-            print(same_sign)
-            count_of_sign[0, 0] += np.sum(np.logical_not(same_sign).astype('int8'))
-            count_of_sign[0, 1] += np.sum(same_sign.astype('int8'))
-            upper_bound = hoeffding_upper_bound(count_of_sign[0, 0], nobs=args.num_draws, alpha=args.alpha)
-            lower_bound = hoeffding_lower_bound(count_of_sign[0, 1], nobs=args.num_draws, alpha=args.alpha)
+            # print(same_sign)
+            count_of_same_sign = sum(same_sign.astype(int))
+            count_of_diff_sign = args.num_draws - count_of_same_sign
+            print(count_of_diff_sign, count_of_same_sign)
+            # upper_bound = hoeffding_upper_bound(count_of_sign[0, 0], nobs=args.num_draws, alpha=args.alpha)
+            # lower_bound = hoeffding_lower_bound(count_of_sign[0, 1], nobs=args.num_draws, alpha=args.alpha)
             if (lower_bound > upper_bound):
                 certified = int(1.0)
                 epsilon_of_point = min(epsilon_of_point, eps)
