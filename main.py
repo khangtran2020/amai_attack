@@ -117,7 +117,7 @@ def run(args, device):
             out, probs, fc2 = model(temp_x)
             pred = fc2[:, 0].cpu().detach().numpy()
             print(pred)
-            exit()
+            # exit()
             same_sign = (pred[1:] * pred[0]) > 0
             # print(same_sign)
             count_of_same_sign = sum(same_sign.astype(int))
