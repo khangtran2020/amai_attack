@@ -4,6 +4,7 @@ import numpy as np
 from PIL import Image
 import os
 
+
 class AMIADatasetCelebA(Dataset):
     def __init__(self, args, target, transform, dataroot, mode='train', imgroot=None, multiplier=100):
         self.target = target
@@ -24,7 +25,7 @@ class AMIADatasetCelebA(Dataset):
             self.length = len(target) * multiplier + len(self.valid_data)
         else:
             # print(type(self))
-            self.test_data = np.arange(self.num_file-args.num_draws, self.num_file)
+            self.test_data = np.arange(self.num_file - args.num_draws, self.num_file)
             self.length = len(target) * multiplier + len(self.test_data)
         self.dataroot = dataroot
         self.imgroot = imgroot
@@ -70,8 +71,10 @@ class AMIADatasetCelebA(Dataset):
 
         return img_tensor, class_id, filename
 
+
 class CelebA(Dataset):
-    def __init__(self, args, target, transform, dataroot, mode='train', imgroot=None, multiplier=100, include_tar=True):
+    def __init__(self, args, target, transform, dataroot, mode='train', imgroot=None, multiplier=100, include_tar=True,
+                 draw_noise=False):
         self.args = args
         self.target = target
         self.target_multiplier = multiplier
@@ -80,14 +83,15 @@ class CelebA(Dataset):
         self.num_file = len(os.listdir(dataroot))
 
         if mode == 'train':
-            self.train_data = np.arange(162770)
+            self.train_data = np.arange(int(0.6 * self.num_file))
             self.length = len(self.train_data) + len(target) * multiplier
         elif mode == 'valid':
-            self.valid_data = np.array(self.target + list(range(162770, 182637)))
+            self.valid_data = np.array(self.target + list(range(int(0.6 * self.num_file), int(0.8 * self.num_file))))
             self.length = len(self.valid_data)
         else:
             # print(args.num_test_point)
-            test_point = np.random.choice(a=np.array(list(range(182637, self.num_file))), size=args.num_test_point, replace=False)
+            test_point = np.random.choice(a=np.array(list(range(int(0.8 * self.num_file), self.num_file))),
+                                          size=args.num_test_point, replace=False)
             if include_tar:
                 self.test_data = np.array(self.target + list(test_point))
             else:
