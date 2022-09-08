@@ -106,11 +106,12 @@ def run(args, device):
             temp_x = x_test.numpy()
             generated_target = np.tile(temp_x[0, :], (args.num_draws + 1, 1))
             # print(generated_target)
-            exit()
+            # exit()
             generated_target[1:, :] = generated_target[1:, :] + np.random.laplace(0,
                                                                                   args.sens * args.num_feature / eps,
                                                                                   generated_target[1:, :].shape)
             print(generated_target)
+            exit()
             temp_x = torch.from_numpy(generated_target.astype(np.float32)).to(device)
             out, probs, fc2 = model(temp_x)
             pred = fc2[:, 0].cpu().detach().numpy()
