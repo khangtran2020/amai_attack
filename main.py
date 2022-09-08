@@ -29,10 +29,12 @@ def run(args, device):
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
     train_loader = torch.utils.data.DataLoader(
-        CelebA(args, target, transform, args.data_path, 'train', imgroot=None, multiplier=args.train_multiplier), shuffle=False,
+        CelebA(args, target, transform, args.data_path, 'train', imgroot=None, multiplier=args.train_multiplier),
+        shuffle=False,
         num_workers=0, batch_size=args.batch_size)
     valid_loader = torch.utils.data.DataLoader(
-        CelebA(args, target, transform, args.data_path, 'valid', imgroot=None, multiplier=args.num_draws), shuffle=False,
+        CelebA(args, target, transform, args.data_path, 'valid', imgroot=None, multiplier=args.num_draws),
+        shuffle=False,
         num_workers=0, batch_size=args.batch_size)
     model = train(args=args, device=device, data=(train_loader, valid_loader), model=model)
 
@@ -41,17 +43,17 @@ def run(args, device):
         true_label = []
         predicted = []
         for i in tqdm(range(args.num_test_point)):
-            sample = np.random.binomial(n=1, p=args.sample_target_rate,size=1).astype(bool)
+            sample = np.random.binomial(n=1, p=args.sample_target_rate, size=1).astype(bool)
             true_label.append(int(sample[0]))
             test_loader = torch.utils.data.DataLoader(
                 CelebA(args, target, transform, args.data_path, 'test', imgroot=None,
-                                  multiplier=args.num_draws, include_tar=sample[0]), shuffle=False,
+                       multiplier=args.num_draws, include_tar=sample[0]), shuffle=False,
                 num_workers=0, batch_size=args.batch_size)
             x_test, y_test, file_name = next(iter(test_loader))
             if sample[0]:
                 temp_x = x_test.numpy()
                 temp_x[0] = temp_x[0] + np.random.laplace(0, args.sens * args.num_feature / args.epsilon,
-                                                      temp_x[0].shape)
+                                                          temp_x[0].shape)
                 x_test = torch.from_numpy(temp_x.astype(np.float32))
             weight = sklearn.utils.class_weight.compute_class_weight('balanced', classes=np.arange(args.num_target + 1),
                                                                      y=y_test.cpu().detach().numpy())
@@ -62,7 +64,7 @@ def run(args, device):
             out, probs, fc2 = model(x_test)
             loss = criteria(out, y_test).item()
             pred = fc2[:, 0] < 0
-            predicted.append(min(1,sum(pred.cpu().numpy())))
+            predicted.append(min(1, sum(pred.cpu().numpy())))
             tpr, tnr, acc = tpr_tnr(pred, y_test)
             results['test_{}'.format(i)] = {
                 'loss': loss,
@@ -70,9 +72,10 @@ def run(args, device):
                 'tpr': tpr,
                 'tnr': tnr,
                 'has_target': sample[0],
-                'predicted': bool(min(1,sum(pred.cpu().numpy())))
+                'predicted': bool(min(1, sum(pred.cpu().numpy())))
             }
-        tpr, tnr, acc, = tpr_tnr_true(prediction=np.array(predicted),truth=np.array(true_label))
+        tpr, tnr, acc, = tpr_tnr_true(prediction=torch.from_numpy(np.array(predicted).astype(int)),
+                                      truth=torch.from_numpy(np.array(true_label).astype(int)))
         results['test_result'] = {
             'acc': acc,
             'tpr': tpr,
@@ -84,16 +87,13 @@ def run(args, device):
     # del(train_loader)
     # del(valid_loader)
     # gc.collect()
-    result = evaluate_robust(args=args, data = valid_loader, model=model)
+    result = evaluate_robust(args=args, data=valid_loader, model=model)
     print(result)
     json_object = json.dumps(result, indent=4)
     SAVE_NAME = 'CELEBA_embed_Lap_single_{}_{}_lr_{}.json'.format(args.num_target, args.epsilon, args.lr)
     # Writing to sample.json
     with open(args.save_path + SAVE_NAME, "w") as outfile:
         outfile.write(json_object)
-
-
-
 
 
 if __name__ == '__main__':
@@ -105,5 +105,5 @@ if __name__ == '__main__':
     set_logger()
     set_seed(args.seed)
     device = get_device(gpus=args.gpu)
-    args.num_test_point = 2*args.num_draws
+    args.num_test_point = 2 * args.num_draws
     run(args, device)
