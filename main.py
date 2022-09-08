@@ -37,15 +37,34 @@ def run(args, device):
     model = train(args=args, device=device, data=(train_loader, valid_loader), model=model)
 
     if args.train_mode == 'target':
+        results = {}
+        true_label = []
+        predicted = []
         for i in tqdm(range(args.num_test_point)):
             sample = np.random.binomial(n=1, p=args.sample_target_rate,size=1).astype(bool)
-            print(sample)
-            exit()
+            true_label.append(int(sample[0]))
             test_loader = torch.utils.data.DataLoader(
                 CelebA(args, target, transform, args.data_path, 'test', imgroot=None,
-                                  multiplier=args.num_draws, include_tar=sample), shuffle=False,
+                                  multiplier=args.num_draws, include_tar=sample[0]), shuffle=False,
                 num_workers=0, batch_size=args.batch_size)
-
+            x_test, y_test, file_name = next(iter(test_loader))
+            weight = sklearn.utils.class_weight.compute_class_weight('balanced', classes=np.arange(args.num_target + 1),
+                                                                     y=y_test.cpu().detach().numpy())
+            criteria = nn.CrossEntropyLoss(weight=torch.tensor(weight, dtype=torch.float).to(device))
+            out, probs, fc2 = model(x_test)
+            loss = criteria(out, y_test).item()
+            pred = fc2[:, 0] < 0
+            predicted.append(min(1,sum(pred.cpu().numpy())))
+            tpr, tnr, acc = tpr_tnr(pred, y_test)
+            results['test_{}'.format(i)] = {
+                'loss': loss,
+                'acc': acc,
+                'tpr': tpr,
+                'tnr': tnr,
+                'has_target': sample[0],
+                'predicted': bool(min(1,sum(pred.cpu().numpy())))
+            }
+        print(true_label, predicted)
     exit()
 
     # del(train_loader)
