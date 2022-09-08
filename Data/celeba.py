@@ -86,12 +86,14 @@ class CelebA(Dataset):
             self.valid_data = np.array(self.target + list(range(162770, 182637)))
             self.length = len(self.valid_data)
         else:
+            print(args.num_test_point)
             test_point = np.random.choice(a=np.array(list(range(182637, self.num_file))), size=args.num_test_point, replace=False)
             if include_tar:
                 self.test_data = np.array(self.target + list(test_point))
             else:
                 self.test_data = test_point
             self.length = len(self.test_data)
+            print(self.length)
 
         self.dataroot = dataroot
         self.imgroot = imgroot

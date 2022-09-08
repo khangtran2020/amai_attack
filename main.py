@@ -36,6 +36,14 @@ def run(args, device):
         CelebA(args, target, transform, args.data_path, 'valid', imgroot=None, multiplier=args.num_draws),
         shuffle=False,
         num_workers=0, batch_size=args.batch_size)
+    test_loader = torch.utils.data.DataLoader(
+        CelebA(args, target, transform, args.data_path, 'test', imgroot=None,
+               multiplier=args.num_draws, include_tar=True), shuffle=False,
+        num_workers=0, batch_size=args.batch_size)
+    x_test, y_test, file_name = next(iter(test_loader))
+    print(x_test.size())
+    exit()
+
     model = train(args=args, device=device, data=(train_loader, valid_loader), model=model)
 
     if args.train_mode == 'target':
