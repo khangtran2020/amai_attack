@@ -48,6 +48,7 @@ def run(args, device):
         predicted = []
         x_t = None
         # for i in tqdm(range(args.num_test_point)):
+        print(args.num_test_point)
         for i in range(args.num_test_point):
             sample = np.random.binomial(n=1, p=args.sample_target_rate, size=1).astype(bool)
             true_label.append(int(sample[0]))
