@@ -29,26 +29,23 @@ def run(args, device):
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
     train_loader = torch.utils.data.DataLoader(
-        AMIADatasetCelebA(args, target, transform, args.data_path, 'train', imgroot=None, multiplier=args.train_multiplier), shuffle=False,
-        num_workers=0, batch_size=200000)
+        CelebA(args, target, transform, args.data_path, 'train', imgroot=None, multiplier=args.train_multiplier), shuffle=False,
+        num_workers=0, batch_size=args.batch_size)
     valid_loader = torch.utils.data.DataLoader(
-        AMIADatasetCelebA(args, target, transform, args.data_path, 'valid', imgroot=None, multiplier=args.num_draws), shuffle=False,
-        num_workers=0, batch_size=200000)
+        CelebA(args, target, transform, args.data_path, 'valid', imgroot=None, multiplier=args.num_draws), shuffle=False,
+        num_workers=0, batch_size=args.batch_size)
+    model = train(args=args, device=device, data=(train_loader, valid_loader), model=model)
 
-    model, name = train(args=args, device=device, data=(train_loader, valid_loader), model=model)
-    model_name = args.save_path + name + '.pt'
-    model = torch.load(model_name)
-    x_valid, y_valid, imgs_valid = next(iter(valid_loader))
-    temp_x = x_valid.numpy()
-    temp_x[1:args.num_draws] = temp_x[1:args.num_draws] + np.random.laplace(0,
-                                                                            args.sens * args.num_feature / args.epsilon,
-                                                                            temp_x[1:args.num_draws].shape)
-    # return
-    x_valid = torch.from_numpy(temp_x)
-    custom_weight = np.array([1600.0, 200.0])
-    criteria = nn.CrossEntropyLoss(weight=torch.tensor(custom_weight, dtype=torch.float).to(device))
-    res_test = evaluate(x=x_valid, y=y_valid, model=model, criteria=criteria, device=device)
-    print(res_test)
+    if args.train_mode == 'target':
+        for i in tqdm(range(args.num_test_point)):
+            sample = np.random.binomial(n=1, p=args.sample_target_rate,size=1).astype(bool)
+            print(sample)
+            exit()
+            test_loader = torch.utils.data.DataLoader(
+                CelebA(args, target, transform, args.data_path, 'test', imgroot=None,
+                                  multiplier=args.num_draws, include_tar=sample), shuffle=False,
+                num_workers=0, batch_size=args.batch_size)
+
     exit()
 
     # del(train_loader)

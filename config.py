@@ -6,7 +6,7 @@ def add_general_group(group):
     group.add_argument("--save_path", type=str, default="results/", help="dir path for output file")
     group.add_argument("--seed", type=int, default=1, help="seed value")
     group.add_argument("--mode", type=str, default='train', help="Mode of running")
-    group.add_argument("--train_mode", type=str, default='clean', help="Mode of training [clean, dp]")
+    group.add_argument("--train_mode", type=str, default='clean', help="Mode of training [clean, dp, target]")
     group.add_argument("--robustness", type=str, default='false', help="with or withour robustness inference")
 
 def add_data_group(group):
@@ -39,7 +39,10 @@ def add_defense_group(group):
     group.add_argument('--num_draws', type=int, default=1000, help="sensitivity")
     group.add_argument('--eval_mode', type=str, default='eps', help="eps/alpha")
     group.add_argument('--alpha', type=float, default=0.05, help="confidence rate")
-    group.add_argument('--num_test_point', type=int, default=50, help="sensitivity")
+    group.add_argument('--num_test_set', type=int, default=100, help="number of generated test set")
+    group.add_argument('--num_test_point', type=int, default=50, help="number of test point in one test set")
+    group.add_argument('--sample_target_rate', type=float, default=0.1, help="rate of target")
+
 
 def parse_args():
     parser = argparse.ArgumentParser()

@@ -72,30 +72,27 @@ class AMIADatasetCelebA(Dataset):
 
 class CelebA(Dataset):
     def __init__(self, args, target, transform, dataroot, mode='train', imgroot=None, multiplier=100, include_tar=True):
+        self.args = args
         self.target = target
         self.target_multiplier = multiplier
         self.transform = transform
         self.include = include_tar
         self.num_file = len(os.listdir(dataroot))
-        self.train_data = np.arange(args.train_index)
-        self.valid_data = np.arange(args.train_index, args.valid_index)
-        # self.test_data = np.arange(args.valid_index, self.num_file)
 
         if mode == 'train':
             self.train_data = np.arange(162770)
-            mask = np.ones(162770, dtype=bool)
-            self.train_data = self.train_data[mask, ...]
-            if include_tar:
-                self.length = len(self.train_data) + len(target) * multiplier
-            else:
-                self.length = len(self.train_data)
-
+            self.length = len(self.train_data) + len(target) * multiplier
+        elif mode == 'valid':
+            self.valid_data = np.array(self.target + list(range(162770, 182637)))
+            self.length = len(self.valid_data)
         else:
-            self.valid_data = np.arange(162770, 182637)
+            test_point = np.random.choice(a=np.array(list(range(182637, self.num_file))), size=args.num_test_point, replace=False)
             if include_tar:
-                self.length = len(target) * multiplier + len(self.valid_data)
+                self.test_data = np.array(self.target + list(test_point))
             else:
-                self.length = len(self.valid_data)
+                self.test_data = test_point
+            self.length = len(self.test_data)
+
         self.dataroot = dataroot
         self.imgroot = imgroot
         self.data_name = sorted(os.listdir(dataroot))
@@ -116,19 +113,20 @@ class CelebA(Dataset):
                 # img_loc = os.path.join(self.dataroot, self.data_name[self.valid_data[idx]])
                 class_id = torch.tensor(len(self.target))
         elif self.mode == 'valid':
-            if self.include:
-                if idx / self.target_multiplier < len(self.target):
-                    filename = self.data_name[self.target[int(idx / self.target_multiplier)]]
-                    # img_loc = os.path.join(self.dataroot, self.data_name[self.target[idx]])
-                    class_id = torch.tensor(int(idx / self.target_multiplier))
-                else:
-                    idx -= len(self.target) * self.target_multiplier
-                    filename = self.data_name[self.valid_data[idx]]
-                    class_id = torch.tensor(len(self.target))
+            if idx / self.target_multiplier < len(self.target):
+                filename = self.data_name[self.target[int(idx / self.target_multiplier)]]
+                class_id = torch.tensor(int(idx / self.target_multiplier))
             else:
-                if idx not in self.target:
-                    filename = self.data_name[self.valid_data[idx]]
-                    class_id = torch.tensor(len(self.target))
+                idx -= len(self.target) * self.target_multiplier
+                filename = self.data_name[self.valid_data[idx]]
+                class_id = torch.tensor(len(self.target))
+        else:
+            if idx < len(self.target):
+                filename = self.data_name[self.target[idx]]
+                class_id = torch.tensor(idx)
+            else:
+                filename = self.data_name[self.test_data[idx]]
+                class_id = torch.tensor(len(self.target))
 
         if self.imgroot:
             img = Image.open(self.imgroot + filename)
@@ -136,10 +134,11 @@ class CelebA(Dataset):
         else:
             img = torch.tensor([])
 
-        # img_tensor = img2vec.get_vec(img, tensor=True)
-        # img_tensor = torch.squeeze(img_tensor)
         img_tensor = torch.load(self.dataroot + filename)
-
-        # img_tensor = img_tensor + s1.astype(np.float32)
-
+        if  (self.mode == 'test') and self.include:
+            if idx < len(self.target):
+                img_ten = img_tensor.numpy()
+                img_ten = img_ten + np.random.laplace(0, self.args.sens * self.args.num_feature / self.args.epsilon,
+                                                    img_ten.shape)
+                img_tensor = torch.from_numpy(img_ten)
         return img_tensor, class_id, filename
