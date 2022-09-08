@@ -80,7 +80,7 @@ def run(args, device):
                 'has_target': int(sample[0]),
                 'predicted': int(bool(min(1, sum(pred.cpu().numpy()))))
             }
-        tpr, tnr, acc, = tpr_tnr_true(prediction=torch.from_numpy(np.array(predicted).astype(int)),
+        tpr, tnr, acc, = tpr_tnr(prediction=torch.from_numpy(np.array(predicted).astype(int)),
                                       truth=torch.from_numpy(np.array(true_label).astype(int)))
         results['test_result'] = {
             'acc': acc,
