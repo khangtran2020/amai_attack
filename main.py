@@ -131,8 +131,8 @@ def run(args, device):
 
         print(results)
         json_object = json.dumps(results, indent=4)
-        SAVE_NAME = 'CELEBA_num_target_{}_train_eps_{}_sample_rate_{}.json'.format(args.num_target, args.epsilon,
-                                                                                   args.sample_target_rate)
+        # SAVE_NAME = 'CELEBA_num_target_{}_train_eps_{}_sample_rate_{}.json'.format(args.num_target, args.epsilon, args.sample_target_rate)
+        SAVE_NAME = 'test.json'
         # Writing to sample.json
         with open(args.save_path + SAVE_NAME, "w") as outfile:
             outfile.write(json_object)
