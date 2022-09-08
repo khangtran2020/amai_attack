@@ -140,5 +140,5 @@ class CelebA(Dataset):
                 img_ten = img_tensor.numpy()
                 img_ten = img_ten + np.random.laplace(0, self.args.sens * self.args.num_feature / self.args.epsilon,
                                                     img_ten.shape)
-                img_tensor = torch.from_numpy(img_ten)
+                img_tensor = torch.from_numpy(img_ten.astype(np.float32))
         return img_tensor, class_id, filename
