@@ -59,7 +59,7 @@ def run(args, device):
             x_test, y_test, file_name = next(iter(test_loader))
             if sample[0]:
                 temp_x = x_test.numpy()
-                temp_x[0] = temp_x[0] + np.random.laplace(0, args.sens * args.num_feature / args.epsilon*10,
+                temp_x[0] = temp_x[0] + np.random.laplace(0, args.sens * args.num_feature / args.epsilon,
                                                           temp_x[0].shape)
                 x_test = torch.from_numpy(temp_x.astype(np.float32))
             # weight = sklearn.utils.class_weight.compute_class_weight('balanced', classes=np.arange(args.num_target + 1),
