@@ -65,6 +65,8 @@ def run(args, device):
             model.to(device)
             x_test = x_test.to(device)
             y_test = y_test.to(device)
+            print(sample,x_test.size(), y_test.size())
+            exit()
             out, probs, fc2 = model(x_test)
             loss = criteria(out, y_test).item()
             pred = fc2[:, 0] < 0
