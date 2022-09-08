@@ -40,6 +40,9 @@ def run(args, device):
 
     if args.train_mode == 'target':
         results = {}
+        results['number_of_test_set'] = args.num_test_point
+        results['sample_target_rate'] = args.sample_target_rate
+        results['res_of_each_test'] = {}
         true_label = []
         predicted = []
         x_t = None
@@ -67,7 +70,7 @@ def run(args, device):
             pred = fc2[:, 0] < 0
             predicted.append(1-min(1, sum(pred.cpu().numpy())))
             tpr, tnr, acc = tpr_tnr(pred, y_test)
-            results['test_{}'.format(i)] = {
+            results['res_of_each_test']['test_{}'.format(i)] = {
                 'loss': loss,
                 'acc': acc,
                 'tpr': tpr,
@@ -112,6 +115,8 @@ def run(args, device):
                 epsilon_of_point = min(epsilon_of_point, eps)
             print("Done for eps: {}".format(eps))
         results['certified_for_target'] = {
+            'search_range_min': args.min_epsilon,
+            'search_range_max': args.max_epsilon,
             'certified': certified,
             'eps_min': epsilon_of_point,
             'confidence': 1 - args.alpha
