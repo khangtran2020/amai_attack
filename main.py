@@ -71,17 +71,6 @@ def run(args, device):
             out, probs, fc2 = model(x_test)
             loss = criteria(out, y_test).item()
             pred = fc2[:, 0] < 0
-            pred_ = 1 - pred.cpu().numpy().astype(int)
-            if sum(pred_ <= 0):
-                predicted.append(0)
-                results['res_of_each_test']['test_{}'.format(i)]['has_target'] = sample[0]
-                results['res_of_each_test']['test_{}'.format(i)]['predict'] = 0
-            else:
-                predicted.append(1)
-                results['res_of_each_test']['test_{}'.format(i)]['has_target'] = sample[0]
-                results['res_of_each_test']['test_{}'.format(i)]['predict'] = 1
-                # print("Test", i)
-
             # print(sample, pred, sum(1 - pred.cpu().numpy().astype(int)), min(1, sum(1 - pred.cpu().numpy().astype(int))))
             acc = accuracy_score(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
             precision = precision_score(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
@@ -92,6 +81,16 @@ def run(args, device):
                 'precision': precision,
                 'recall': recall
             }
+            pred_ = 1 - pred.cpu().numpy().astype(int)
+            if sum(pred_ <= 0):
+                predicted.append(0)
+                results['res_of_each_test']['test_{}'.format(i)]['has_target'] = sample[0]
+                results['res_of_each_test']['test_{}'.format(i)]['predict'] = 0
+            else:
+                predicted.append(1)
+                results['res_of_each_test']['test_{}'.format(i)]['has_target'] = sample[0]
+                results['res_of_each_test']['test_{}'.format(i)]['predict'] = 1
+                # print("Test", i)
         acc = accuracy_score(true_label, predicted)
         precision = precision_score(true_label, predicted)
         recall = recall_score(true_label, predicted)
@@ -146,10 +145,10 @@ def run(args, device):
 
         print(results)
         json_object = json.dumps(results, indent=4)
-        SAVE_NAME = 'CELEBA_train_eps_{}_sample_rate_{}_num_step.json'.format(args.epsilon ,
-                                                                                       args.sample_target_rate,
-                                                                                       args.num_steps)
-        # SAVE_NAME = 'test.json'
+        # SAVE_NAME = 'CELEBA_train_eps_{}_sample_rate_{}_num_step.json'.format(args.epsilon ,
+        #                                                                                args.sample_target_rate,
+        #                                                                                args.num_steps)
+        SAVE_NAME = 'test_{}.json'.format(args.test_ver)
         # Writing to sample.json
         with open(args.save_path + SAVE_NAME, "w") as outfile:
             outfile.write(json_object)

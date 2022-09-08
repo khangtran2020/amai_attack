@@ -31,6 +31,7 @@ def add_model_group(group):
     group.add_argument('--model_save_path', type=str, default='results/model/')
     group.add_argument("--num_steps", type=int, default=2000)
     group.add_argument("--early_stopping", type=int, default=100)
+    group.add_argument("--test_ver", type=int, default=1)
 
 def add_defense_group(group):
     group.add_argument('--epsilon', type=float, default=1.0, help="epsilon")
