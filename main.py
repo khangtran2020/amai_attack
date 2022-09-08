@@ -88,7 +88,7 @@ def run(args, device):
             num_workers=0, batch_size=args.batch_size)
         x_test, y_test, file_name = next(iter(test_loader))
         epsilon_of_point = args.max_epsilon
-        certified = False
+        certified = 0
         for eps in tqdm(np.linspace(args.min_epsilon, args.max_epsilon, 100)):
             temp_x = x_test.numpy()
             generated_target = np.tile(temp_x[0, :], (args.num_draws + 1, 1))
@@ -112,7 +112,7 @@ def run(args, device):
                 epsilon_of_point = min(epsilon_of_point, eps)
             print("Done for eps: {}".format(eps))
         results['certified_for_target'] = {
-            'certified': bool(certified),
+            'certified': certified,
             'eps_min': epsilon_of_point,
             'confidence': 1 - args.alpha
         }
