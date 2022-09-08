@@ -84,7 +84,7 @@ def run(args, device):
                 'recall': recall
             }
             pred_ = 1 - pred.cpu().numpy().astype(int)
-            if sum(pred_ <= 0):
+            if sum(pred_) <= 0:
                 # print('Test {}'.format(i))
                 predicted.append(0)
                 results['res_of_each_test']['test_{}'.format(i)]['has_target'] = int(sample[0])
