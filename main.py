@@ -103,13 +103,13 @@ def run(args, device):
         epsilon_of_point = args.max_epsilon
         certified = 0
         # for eps in tqdm(np.linspace(args.min_epsilon, args.max_epsilon, 100)):
-        for eps in np.linspace(args.min_epsilon, args.max_epsilon, 100):
+        for i, eps in enumerate(np.linspace(args.min_epsilon, args.max_epsilon, 100)):
             temp_x = x_test.numpy()
             generated_target = np.tile(temp_x[0, :], (args.num_draws + 1, 1))
             # print(generated_target)
             # exit()
             generated_target[1:, :] = generated_target[1:, :] + np.random.laplace(0,
-                                                                                  args.sens * args.num_feature / eps,
+                                                                                  args.sens * args.num_feature / args.epsilon,
                                                                                   generated_target[1:, :].shape)
             # print(generated_target)
             # exit()
@@ -121,8 +121,8 @@ def run(args, device):
             count_of_same_sign = sum(same_sign.astype(int))
             count_of_diff_sign = args.num_draws - count_of_same_sign
             print(
-                'For eps {}, # same sign: {}, # diff sign: {}'.format(
-                    eps, count_of_same_sign, count_of_diff_sign))
+                'For step {}, # same sign: {}, # diff sign: {}'.format(
+                    i, count_of_same_sign, count_of_diff_sign))
             upper_bound = hoeffding_upper_bound(count_of_diff_sign, nobs=args.num_draws, alpha=args.alpha)
             lower_bound = hoeffding_lower_bound(count_of_same_sign, nobs=args.num_draws, alpha=args.alpha)
             if (lower_bound > upper_bound):
