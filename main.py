@@ -100,6 +100,7 @@ def run(args, device):
                    multiplier=args.num_draws, include_tar=True), shuffle=False,
             num_workers=0, batch_size=args.batch_size)
         x_test, y_test, file_name = next(iter(test_loader))
+        print(file_name[0])
         epsilon_of_point = args.max_epsilon
         certified = 0
         for eps in tqdm(np.linspace(args.min_epsilon, args.max_epsilon, 100)):
