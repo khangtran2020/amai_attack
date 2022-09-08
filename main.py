@@ -51,6 +51,7 @@ def run(args, device):
             weight = sklearn.utils.class_weight.compute_class_weight('balanced', classes=np.arange(args.num_target + 1),
                                                                      y=y_test.cpu().detach().numpy())
             criteria = nn.CrossEntropyLoss(weight=torch.tensor(weight, dtype=torch.float).to(device))
+            model.to(device)
             out, probs, fc2 = model(x_test)
             loss = criteria(out, y_test).item()
             pred = fc2[:, 0] < 0
