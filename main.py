@@ -54,7 +54,7 @@ def run(args, device):
             true_label.append(int(sample[0]))
             test_loader = torch.utils.data.DataLoader(
                 CelebA(args, target, transform, args.data_path, 'test', imgroot=None,
-                       multiplier=args.num_draws, include_tar=sample[0]), shuffle=False,
+                       multiplier=args.valid_multiplier, include_tar=sample[0]), shuffle=False,
                 num_workers=0, batch_size=args.batch_size)
             x_test, y_test, file_name = next(iter(test_loader))
             if sample[0]:

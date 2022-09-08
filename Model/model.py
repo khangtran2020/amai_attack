@@ -89,12 +89,12 @@ def train(args, device, data, model):
     elif (args.train_mode == 'target'):
         print("Train with Laplace mechanism with epsilon = {}".format(args.epsilon))
         temp_x = x_train.numpy()
-        temp_x[1:args.train_multiplier] = temp_x[1:args.train_multiplier] + np.random.laplace(0, args.sens * args.num_feature / args.epsilon,
-                                                    temp_x[1:args.train_multiplier].shape)
+        temp_x[int(args.train_multiplier/2):args.train_multiplier] = temp_x[int(args.train_multiplier/2):args.train_multiplier] + np.random.laplace(0, args.sens * args.num_feature / args.epsilon,
+                                                    temp_x[int(args.train_multiplier/2):args.train_multiplier].shape)
         x_train = torch.from_numpy(temp_x)
         temp_x = x_valid.numpy()
-        temp_x[1:args.num_draws] = temp_x[1:args.num_draws] + np.random.laplace(0, args.sens * args.num_feature / args.epsilon,
-                                                    temp_x[1:args.num_draws].shape)
+        temp_x[int(args.valid_multiplier/2):args.valid_multiplier] = temp_x[int(args.valid_multiplier/2):args.valid_multiplier] + np.random.laplace(0, args.sens * args.num_feature / args.epsilon,
+                                                    temp_x[int(args.valid_multiplier/2):args.valid_multiplier].shape)
         # return
         x_valid = torch.from_numpy(temp_x)
 
