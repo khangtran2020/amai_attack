@@ -158,5 +158,5 @@ if __name__ == '__main__':
     set_logger()
     set_seed(args.seed)
     device = get_device(gpus=args.gpu)
-    args.num_test_point = 2 * args.num_draws
+    # args.num_test_point = 2 * args.num_draws
     run(args, device)
