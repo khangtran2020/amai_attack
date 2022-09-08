@@ -68,7 +68,7 @@ def run(args, device):
             out, probs, fc2 = model(x_test)
             loss = criteria(out, y_test).item()
             pred = fc2[:, 0] < 0
-            predicted.append(1-min(1, sum(pred.cpu().numpy())))
+            predicted.append(1 - min(1, sum(pred.cpu().numpy())))
             tpr, tnr, acc = tpr_tnr(pred, y_test)
             results['res_of_each_test']['test_{}'.format(i)] = {
                 'loss': loss,
@@ -124,7 +124,8 @@ def run(args, device):
 
         print(results)
         json_object = json.dumps(results, indent=4)
-        SAVE_NAME = 'CELEBA_embed_Lap_single_{}_{}_lr_{}.json'.format(args.num_target, args.epsilon, args.lr)
+        SAVE_NAME = 'CELEBA_num_target_{}_train_eps_{}_sample_rate_{}.json'.format(args.num_target, args.epsilon,
+                                                                                   args.sample_target_rate)
         # Writing to sample.json
         with open(args.save_path + SAVE_NAME, "w") as outfile:
             outfile.write(json_object)
@@ -135,7 +136,6 @@ def run(args, device):
     # gc.collect()
     result = evaluate_robust(args=args, data=valid_loader, model=model)
     print(result)
-
 
 
 if __name__ == '__main__':
