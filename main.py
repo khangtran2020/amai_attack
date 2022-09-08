@@ -120,8 +120,8 @@ def run(args, device):
             count_of_same_sign = sum(same_sign.astype(int))
             count_of_diff_sign = args.num_draws - count_of_same_sign
             print(count_of_diff_sign, count_of_same_sign)
-            # upper_bound = hoeffding_upper_bound(count_of_sign[0, 0], nobs=args.num_draws, alpha=args.alpha)
-            # lower_bound = hoeffding_lower_bound(count_of_sign[0, 1], nobs=args.num_draws, alpha=args.alpha)
+            upper_bound = hoeffding_upper_bound(count_of_diff_sign, nobs=args.num_draws, alpha=args.alpha)
+            lower_bound = hoeffding_lower_bound(count_of_same_sign, nobs=args.num_draws, alpha=args.alpha)
             if (lower_bound > upper_bound):
                 certified = int(1.0)
                 epsilon_of_point = min(epsilon_of_point, eps)
