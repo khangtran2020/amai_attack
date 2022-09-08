@@ -48,6 +48,11 @@ def run(args, device):
                                   multiplier=args.num_draws, include_tar=sample[0]), shuffle=False,
                 num_workers=0, batch_size=args.batch_size)
             x_test, y_test, file_name = next(iter(test_loader))
+            if sample[0]:
+                temp_x = x_test.numpy()
+                temp_x[0] = temp_x[0] + np.random.laplace(0, args.sens * args.num_feature / args.epsilon,
+                                                      temp_x[0].shape)
+                x_test = torch.from_numpy(temp_x.astype(np.float32))
             weight = sklearn.utils.class_weight.compute_class_weight('balanced', classes=np.arange(args.num_target + 1),
                                                                      y=y_test.cpu().detach().numpy())
             criteria = nn.CrossEntropyLoss(weight=torch.tensor(weight, dtype=torch.float).to(device))
@@ -67,7 +72,13 @@ def run(args, device):
                 'has_target': sample[0],
                 'predicted': bool(min(1,sum(pred.cpu().numpy())))
             }
-        print(true_label, predicted)
+        tpr, tnr, acc, = tpr_tnr_true(prediction=np.array(predicted),truth=np.array(true_label))
+        results['test_result'] = {
+            'acc': acc,
+            'tpr': tpr,
+            'tnr': tnr,
+        }
+        print(results)
     exit()
 
     # del(train_loader)
