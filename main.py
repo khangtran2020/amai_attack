@@ -141,7 +141,7 @@ def run(args, device):
 
         print(results)
         json_object = json.dumps(results, indent=4)
-        SAVE_NAME = 'CELEBA_train_eps_{}_sample_rate_{}_num_step.json'.format(args.epsilon,
+        SAVE_NAME = 'CELEBA_train_eps_{}_sample_rate_{}_num_step.json'.format(args.epsilon ,
                                                                                        args.sample_target_rate,
                                                                                        args.num_steps)
         # SAVE_NAME = 'test.json'
