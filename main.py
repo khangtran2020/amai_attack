@@ -10,6 +10,8 @@ from Utils.utils import *
 from config import parse_args
 import os
 import json
+import warnings
+warnings.filterwarnings('ignore')
 from sklearn.metrics import accuracy_score, precision_score, recall_score
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
