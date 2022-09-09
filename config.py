@@ -20,8 +20,8 @@ def add_data_group(group):
     group.add_argument('--num_target', type=int, default=1, help="number of target")
     group.add_argument('--target', type=str, default='0',
                        help="The targets must be separate by a - (For example: 1-16-24-10)")
-    group.add_argument('--train_multiplier', type=int, default=50000, help="number of multiplier")
-    group.add_argument('--valid_multiplier', type=int, default=10000, help="number of multiplier")
+    group.add_argument('--train_multiplier', type=int, default=20, help="number of multiplier")
+    group.add_argument('--valid_multiplier', type=int, default=20, help="number of multiplier")
     group.add_argument('--train_index', type=int, default=162770, help="number of multiplier")
     group.add_argument('--valid_index', type=int, default=182637, help="number of multiplier")
 
