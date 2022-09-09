@@ -112,7 +112,7 @@ def run(args, target, device):
                                                                                   args.sens * args.num_feature / eps,
                                                                                   generated_target[1:, :].shape)
             temp_x = torch.from_numpy(generated_target.astype(np.float32)).to(device)
-            out, probs, fc2 = model(temp_x)
+            out, fc2 = model(temp_x)
             pred = fc2[:, 0].cpu().detach().numpy()
             print(pred)
             # exit()

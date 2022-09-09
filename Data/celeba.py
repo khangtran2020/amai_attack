@@ -27,8 +27,12 @@ class CelebA(Dataset):
             self.valid_data = np.arange(int(0.6 * self.num_file), int(0.8 * self.num_file))
             self.length = len(self.valid_data)
         else:
-            test_point = np.random.choice(a=np.array(list(range(int(0.8 * self.num_file), self.num_file))),
-                                          size=args.num_test_point, replace=False)
+            if include_tar:
+                test_point = np.random.choice(a=np.array(list(range(int(0.8 * self.num_file), self.num_file))),
+                                              size=args.num_test_point-1, replace=False)
+            else:
+                test_point = np.random.choice(a=np.array(list(range(int(0.8 * self.num_file), self.num_file))),
+                                              size=args.num_test_point - 1, replace=False)
             self.test_data = test_point
             self.length = len(self.test_data)
 
