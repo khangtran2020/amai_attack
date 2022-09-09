@@ -10,7 +10,7 @@ from collections import OrderedDict, defaultdict
 from Bound.evaluate import evaluate
 import logging
 import pandas as pd
-from sklearn.metrics import accuracy_score, f1_score
+from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
 
 
 class Classifier(nn.Module):
@@ -60,6 +60,7 @@ def train(args, target, device, data, model):
         train_loss = 0.0
         train_label = []
         train_predict = []
+        train_predict_prob = []
         for i, batch_data in enumerate(train_dataloader):
             x, y, imgs = batch_data
             x = torch.cat((target_data,x), 0)
@@ -84,7 +85,9 @@ def train(args, target, device, data, model):
             optimizer.step()
             train_loss += loss.item()
             y_pred = fc2[:, 0] < 0
+            y_prob = out[:,1]
             train_predict = train_predict + y_pred.cpu().detach().numpy().tolist()
+            train_predict_prob = train_predict_prob + y_prob.cpu().detach().numpy().tolist()
 
         if step % 1 == 0:
             model.eval()
@@ -93,9 +96,11 @@ def train(args, target, device, data, model):
                 train_f1 = f1_score(train_label, train_predict, average='micro')
             else:
                 train_f1 = f1_score(train_label, train_predict, average='binary')
+            train_auc = roc_auc_score(train_label, train_predict_prob)
             valid_loss = 0
             valid_label = []
             valid_predict = []
+            valid_predict_prob = []
             for i, batch_data in enumerate(valid_dataloader):
                 x, y, imgs = batch_data
                 x = torch.cat((target_data, x), 0)
@@ -117,16 +122,18 @@ def train(args, target, device, data, model):
                 loss = criteria(out, y)
                 valid_loss += loss.item()
                 y_pred = fc2[:, 0] < 0
+                y_prob = out[:,1]
                 valid_predict = valid_predict + y_pred.cpu().detach().numpy().tolist()
+                valid_predict_prob = valid_predict_prob + y_prob.cpu().detach().numpy().tolist()
 
             valid_acc = accuracy_score(valid_label, valid_predict)
             if args.num_target > 2:
                 valid_f1 = f1_score(valid_label, valid_predict, average='micro')
             else:
                 valid_f1 = f1_score(valid_label, valid_predict, average='binary')
-
+            valid_auc = roc_auc_score(valid_label, valid_predict_prob)
             logging.info(
-                f"\nStep: {step + 1}, AVG TRAIN Loss: {train_loss}, Acc: {train_acc}, F1: {train_f1}| AVG VALID Loss: {valid_loss}, Acc: {valid_acc}, F1: {valid_f1}")
+                f"\nStep: {step + 1}, AVG TRAIN Loss: {train_loss}, Acc: {train_acc}, F1: {train_f1}, AUC: {train_auc}| AVG VALID Loss: {valid_loss}, Acc: {valid_acc}, F1: {valid_f1}, AUC: {valid_auc}")
 
             results['valid_loss'].append(valid_loss)
             results['valid_acc'].append(valid_acc)
