@@ -22,10 +22,10 @@ class CelebA(Dataset):
 
         if mode == 'train':
             self.train_data = np.arange(int(0.6 * self.num_file))
-            self.length = len(self.train_data) + len(self.target)
+            self.length = len(self.train_data)
         elif mode == 'valid':
             self.valid_data = np.arange(int(0.6 * self.num_file), int(0.8 * self.num_file))
-            self.length = len(self.valid_data) + len(self.target)
+            self.length = len(self.valid_data)
         else:
             test_point = np.random.choice(a=np.array(list(range(int(0.8 * self.num_file), self.num_file))),
                                           size=args.num_test_point, replace=False)
@@ -42,13 +42,13 @@ class CelebA(Dataset):
 
     def __getitem__(self, idx):
         if self.mode == 'train':
-            filename = self.data_name[self.train_data[idx]]
+            filename = self.data_name[self.non_target[self.train_data[idx]]]
             class_id = torch.tensor(len(self.target))
         elif self.mode == 'valid':
-            filename = self.data_name[self.valid_data[idx]]
+            filename = self.data_name[self.non_target[self.valid_data[idx]]]
             class_id = torch.tensor(len(self.target))
         else:
-            filename = self.data_name[self.test_data[idx]]
+            filename = self.data_name[self.non_target[self.test_data[idx]]]
             class_id = torch.tensor(len(self.target))
 
         img_tensor = torch.load(self.dataroot + filename)
