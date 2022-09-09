@@ -56,8 +56,7 @@ def run(args, target, device):
             sample = np.random.binomial(n=1, p=args.sample_target_rate, size=1).astype(bool)
             true_label.append(int(sample[0]))
             test_loader = torch.utils.data.DataLoader(
-                CelebA(args, target, transform, args.data_path, 'test', imgroot=None,
-                       multiplier=args.valid_multiplier, include_tar=sample[0]), shuffle=False,
+                CelebA(args, target, transform, args.data_path, 'test', imgroot=None, include_tar=sample[0]), shuffle=False,
                 num_workers=0, batch_size=args.num_test_point)
             x_test, y_test, file_name = next(iter(test_loader))
             if sample[0]:
