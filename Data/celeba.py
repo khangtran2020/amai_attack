@@ -11,7 +11,8 @@ class CelebA(Dataset):
         self.args = args
         self.target = target
         self.num_file = len(os.listdir(dataroot))
-        print(0 in list(range(self.num_file)))
+        for i in self.target:
+            print(type(i))
         self.non_target = list(range(self.num_file)).remove(i for i in self.target)
         self.transform = transform
         self.include = include_tar
