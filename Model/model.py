@@ -41,10 +41,8 @@ def train(args, target, device, data, model):
     list_target = tuple(list_target)
     target_data = torch.cat(list_target, 0)
     target_label = torch.from_numpy(np.array(list_target_label))
-    print(target_data.size(), target_label.size())
     train_dataloader, valid_dataloader = data
     optimizer = torch.optim.Adam(params=model.parameters(), lr=args.lr)
-    print('Start training process with {} epochs', args.num_steps)
     results = defaultdict(list)
     if args.num_target == 1:
         SAVE_NAME = 'CELEBA_single_Laplace_eps_{}'.format(args.epsilon)
@@ -53,6 +51,7 @@ def train(args, target, device, data, model):
 
     criteria = nn.CrossEntropyLoss()
     model.to(device)
+    print('Start training process with {} epochs', args.num_steps)
     for step in range(args.num_steps):
         model.train()
         train_loss = 0.0
@@ -60,6 +59,8 @@ def train(args, target, device, data, model):
         train_predict = []
         for i, batch_data in enumerate(train_dataloader):
             x, y, imgs = batch_data
+            print(y.size())
+            return
             train_label = train_label + y.numpy().tolist()
             optimizer.zero_grad()
             num_data_point = x.size(dim=1)
