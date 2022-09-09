@@ -41,6 +41,8 @@ def train(args, target, device, data, model):
     list_target = tuple(list_target)
     target_data = torch.cat(list_target, 0)
     target_label = torch.from_numpy(np.array(list_target_label))
+    target_data = target_data.repeat(args.batch_size, 1)
+    target_label = target_label.repeat(args.batch_size)
     train_dataloader, valid_dataloader = data
     optimizer = torch.optim.Adam(params=model.parameters(), lr=args.lr)
     results = defaultdict(list)
