@@ -94,19 +94,21 @@ def train(args, target, device, data, model):
             valid_predict = []
             for i, batch_data in enumerate(valid_dataloader):
                 x, y, imgs = batch_data
+                x = torch.cat((target_data, x), 0)
+                y = torch.cat((target_label, y), 0)
                 valid_label = valid_label + y.numpy().tolist()
                 optimizer.zero_grad()
                 num_data_point = x.size(dim=1)
-                x = x.repeat(args.train_multiplier, 1)
-                y = y.repeat(args.train_multiplier, 1)
+                x = x.repeat(args.valid_multiplier, 1)
+                y = y.repeat(args.valid_multiplier, 1)
                 if args.train_mode == 'target':
                     temp_x = x.numpy()
                     temp_x[num_data_point:] = temp_x[num_data_point:] + np.random.laplace(0,
                                                                                           args.sens * args.num_feature / args.epsilon,
                                                                                           temp_x[num_data_point:].shape)
                     x = torch.from_numpy(temp_x)
-                x.to(device)
-                y.to(device)
+                x = x.to(device)
+                y = y.to(device)
                 out, fc2 = model(x)
                 loss = criteria(out, y)
                 valid_loss += loss.item()
