@@ -74,7 +74,7 @@ def train(args, target, device, data, model):
                 x = torch.from_numpy(temp_x)
             x.to(device)
             y.to(device)
-            print(x.get_device(),y.get_device(), model.get_device())
+            print(x.get_device(),y.get_device(), next(model.parameters()).is_cuda)
             out, fc2 = model(x)
             loss = criteria(out, y)
             loss.backward()
