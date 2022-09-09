@@ -75,7 +75,7 @@ def train(args, target, device, data, model):
             x.to("cuda:0")
             y.to("cuda:0")
             model.to(device)
-            print(x.get_device(),y.get_device(), next(model.parameters()).is_cuda)
+            print(x.is_cuda,y.is_cuda, next(model.parameters()).is_cuda)
             out, fc2 = model(x)
             loss = criteria(out, y)
             loss.backward()
