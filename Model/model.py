@@ -66,7 +66,7 @@ def train(args, target, device, data, model):
             num_data_point = x.size(dim=1)
             x = x.repeat(args.train_multiplier, 1)
             y = y.repeat(args.train_multiplier)
-            print(x.size(), y.size())
+            # print(x.size(), y.size())
             if args.train_mode == 'target':
                 temp_x = x.numpy()
                 temp_x[num_data_point:] = temp_x[num_data_point:] + np.random.laplace(0,
@@ -101,7 +101,7 @@ def train(args, target, device, data, model):
                 optimizer.zero_grad()
                 num_data_point = x.size(dim=1)
                 x = x.repeat(args.valid_multiplier, 1)
-                y = y.repeat(args.valid_multiplier, 1)
+                y = y.repeat(args.valid_multiplier)
                 if args.train_mode == 'target':
                     temp_x = x.numpy()
                     temp_x[num_data_point:] = temp_x[num_data_point:] + np.random.laplace(0,
