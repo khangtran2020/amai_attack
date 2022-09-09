@@ -83,7 +83,7 @@ def train(args, target, device, data, model):
             y_pred = fc2[:, 0] < 0
             train_predict = train_predict + y_pred.cpu().detach().numpy().tolist()
 
-        if step % 10 == 0:
+        if step % 1 == 0:
             model.eval()
             train_acc = accuracy_score(train_label, train_predict)
             if args.num_target > 2:
