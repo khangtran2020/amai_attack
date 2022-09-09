@@ -61,12 +61,12 @@ def train(args, target, device, data, model):
             x, y, imgs = batch_data
             x = torch.cat((target_data,x), 0)
             y = torch.cat((target_label,y),0)
-            print(x.size(), y.size())
             train_label = train_label + y.numpy().tolist()
             optimizer.zero_grad()
             num_data_point = x.size(dim=1)
             x = x.repeat(args.train_multiplier, 1)
             y = y.repeat(args.train_multiplier, 1)
+            print(x.size(), y.size())
             if args.train_mode == 'target':
                 temp_x = x.numpy()
                 temp_x[num_data_point:] = temp_x[num_data_point:] + np.random.laplace(0,
