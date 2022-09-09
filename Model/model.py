@@ -129,7 +129,7 @@ def train(args, target, device, data, model):
             results['valid_acc'].append(valid_acc)
             results['valid_f1'].append(valid_f1)
 
-            if best_acc < results['valid_acc']:
+            if best_acc < valid_acc:
                 best_acc = valid_acc
                 best_step = step
             my_csv = pd.DataFrame(results)
