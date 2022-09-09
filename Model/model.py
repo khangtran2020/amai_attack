@@ -35,7 +35,7 @@ def train(args, target, device, data, model):
     data_name = sorted(os.listdir(args.data_path))
     list_target = []
     for i in target:
-        list_target.append(torch.load(args.data_path + data_name[i]))
+        list_target.append(torch.unsqueeze(torch.load(args.data_path + data_name[i]), 0))
     list_target = tuple(list_target)
     target_data = torch.cat(list_target, 0)
     print(target_data.size())
