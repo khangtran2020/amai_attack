@@ -72,8 +72,8 @@ def train(args, target, device, data, model):
                                                                                       args.sens * args.num_feature / args.epsilon,
                                                                                       temp_x[num_data_point:].shape)
                 x = torch.from_numpy(temp_x)
-            x.to(device)
-            y.to(device)
+            x.to("cuda:0")
+            y.to("cuda:0")
             model.to(device)
             print(x.get_device(),y.get_device(), next(model.parameters()).is_cuda)
             out, fc2 = model(x)
