@@ -37,11 +37,10 @@ def train(args, target, device, data, model):
     list_target_label = []
     for i, f in enumerate(target):
         list_target.append(torch.unsqueeze(torch.load(args.data_path + data_name[f]), 0))
-        list_target_label.append(torch.unsqueeze(torch.Tensor(i), 0))
+        list_target_label.append(i)
     list_target = tuple(list_target)
-    list_target_label = tuple(list_target_label)
     target_data = torch.cat(list_target, 0)
-    target_label = torch.cat(list_target_label, 0)
+    target_label = torch.from_numpy(np.array(list_target_label))
     print(target_data.size(), target_label.size())
     train_dataloader, valid_dataloader = data
     optimizer = torch.optim.Adam(params=model.parameters(), lr=args.lr)
