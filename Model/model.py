@@ -51,8 +51,9 @@ def train(args, target, device, data, model):
     else:
         SAVE_NAME = 'CELEBA_multiple_{}_Lap_eps_{}'.format(args.num_target, args.epsilon)
 
-    custom_weight = np.array([float(args.batch_size), 1.0])
-    criteria = nn.CrossEntropyLoss(weight=torch.tensor(custom_weight, dtype=torch.float).to(device))
+    # custom_weight = np.array([float(args.batch_size), 1.0])
+    # criteria = nn.CrossEntropyLoss(weight=torch.tensor(custom_weight, dtype=torch.float).to(device))
+    criteria = nn.CrossEntropyLoss()
     model.to(device)
     print('Start training process with {} epochs'.format(args.num_steps))
     for step in range(args.num_steps):
