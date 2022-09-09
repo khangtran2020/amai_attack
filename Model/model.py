@@ -123,14 +123,14 @@ def train(args, target, device, data, model):
                 valid_f1 = f1_score(valid_label, valid_predict, average='binary')
 
             logging.info(
-                f"\nStep: {step + 1}, TRAIN Loss: {train_loss}, Acc: {train_acc}, F1: {train_f1}| VALID Loss: {valid_loss}, Acc: {valid_acc}, F1: {valid_f1}")
+                f"\nStep: {step + 1}, TRAIN Loss: {train_loss/len(train_label)}, Acc: {train_acc}, F1: {train_f1}| VALID Loss: {valid_loss/len(valid_label)}, Acc: {valid_acc}, F1: {valid_f1}")
 
             results['valid_loss'].append(valid_loss)
             results['valid_acc'].append(valid_acc)
             results['valid_f1'].append(valid_f1)
 
             if best_acc < results['valid_acc']:
-                best_acc = results['valid_acc']
+                best_acc = valid_acc
                 best_step = step
             my_csv = pd.DataFrame(results)
             name_save = args.save_path + SAVE_NAME + '.csv'
