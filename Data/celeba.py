@@ -11,9 +11,9 @@ class CelebA(Dataset):
         self.args = args
         self.target = target
         self.num_file = len(os.listdir(dataroot))
+        self.non_target = list(range(self.num_file))
         for i in self.target:
-            print(i in list(range(self.num_file)))
-        self.non_target = list(range(self.num_file)).remove(i for i in self.target)
+            self.non_target.remove(i)
         self.transform = transform
         self.include = include_tar
         if shuffle:
