@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import torch
 import logging
 import random
+from sklearn.metrics import accuracy_score, precision_score, recall_score
+
 
 def unpacking_apply_along_axis(all_args):
     (func1d, axis, arr, args, kwargs) = all_args
@@ -109,34 +111,18 @@ def tpr_tnr(prediction, truth):
 
     # print(true_negatives, false_negatives, true_positives, false_positives)
     return true_positives / (true_positives + false_negatives), true_negatives / (true_negatives + false_positives), (
-                true_positives + true_negatives) / (true_negatives + false_negatives + true_positives + false_positives)
+            true_positives + true_negatives) / (true_negatives + false_negatives + true_positives + false_positives)
 
-def tpr_tnr_true(prediction, truth):
-    """ Returns the confusion matrix for the values in the `prediction` and `truth`
-    tensors, i.e. the amount of positions where the values of `prediction`
-    and `truth` are
-    - 1 and 1 (True Positive)
-    - 1 and 0 (False Positive)
-    - 0 and 0 (True Negative)
-    - 0 and 1 (False Negative)
-    """
 
-    confusion_vector = prediction / truth
-    # Element-wise division of the 2 tensors returns a new tensor which holds a
-    # unique value for each case:
-    #   1     where prediction and truth are 1 (True Negative)
-    #   inf   where prediction is 1 and truth is 0 (False Negative)
-    #   nan   where prediction and truth are 0 (True Positive)
-    #   0     where prediction is 0 and truth is 1 (False Positive)
-
-    true_positives = torch.sum(confusion_vector == 1).item()
-    false_negatives = torch.sum(confusion_vector == 0).item()
-    true_negatives = torch.sum(torch.isnan(confusion_vector)).item()
-    false_positives = torch.sum(confusion_vector == float('inf')).item()
-
-    # print(true_negatives, false_negatives, true_positives, false_positives)
-    return true_positives / (true_positives + false_negatives), true_negatives / (true_negatives + false_positives), (
-                true_positives + true_negatives) / (true_negatives + false_negatives + true_positives + false_positives)
+def metric(prediction, truth, num_target):
+    prediction = prediction.cpu().detach().numpy()
+    truth = truth.cpu().detach().numpy()
+    if num_target > 1:
+        return accuracy_score(truth, prediction), precision_score(truth, prediction, average='micro'), recall_score(
+            truth, prediction, average='micro')
+    else:
+        return accuracy_score(truth, prediction), precision_score(truth, prediction, average='binary'), recall_score(
+            truth, prediction, average='binary')
 
 
 def float_to_binary(x, m, n):
@@ -177,8 +163,8 @@ def join_string(a, num_bit, num_feat):
 def BitRand(sample_feature_arr, eps=10.0, l=10, m=5):
     r = sample_feature_arr.shape[1]
 
-    float_to_binary_vec = np.vectorize(float_to_binary, m, l-m)
-    binary_to_float_vec = np.vectorize(binary_to_float, m, l-m)
+    float_to_binary_vec = np.vectorize(float_to_binary, m, l - m)
+    binary_to_float_vec = np.vectorize(binary_to_float, m, l - m)
 
     feat_tmp = parallel_matrix_operation(float_to_binary_vec, sample_feature_arr)
     feat = parallel_apply_along_axis(string_to_int, axis=1, arr=feat_tmp)
@@ -199,14 +185,18 @@ def BitRand(sample_feature_arr, eps=10.0, l=10, m=5):
     # print(perturb_feat)
     return torch.tensor(parallel_matrix_operation(binary_to_float_vec, perturb_feat), dtype=torch.float)
 
+
 def get_device(no_cuda=False, gpus='0'):
     return torch.device(f"cuda:{gpus}" if torch.cuda.is_available() and not no_cuda else "cpu")
 
+
 def get_gaussian_noise(clipping_noise, noise_scale, sampling_prob, num_client, num_compromised_client=1):
-    return (num_compromised_client*noise_scale*clipping_noise)/(sampling_prob*num_client)
+    return (num_compromised_client * noise_scale * clipping_noise) / (sampling_prob * num_client)
+
 
 def get_laplace_noise(sensitivity, epsilon):
-    return sensitivity/epsilon
+    return sensitivity / epsilon
+
 
 def set_logger():
     logging.basicConfig(

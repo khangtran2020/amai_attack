@@ -1,3 +1,5 @@
+import os
+
 import torch.nn as nn
 import torch
 import torch.nn.functional as F
@@ -8,132 +10,121 @@ from collections import OrderedDict, defaultdict
 from Bound.evaluate import evaluate
 import logging
 import pandas as pd
-import sklearn.utils.class_weight
+from sklearn.metrics import accuracy_score, f1_score
 
 
 class Classifier(nn.Module):
-    def __init__(self, n_inputs, n_outputs):
+    def __init__(self, args, n_inputs, n_outputs):
         super(Classifier, self).__init__()
-        self.kernel_size = 200
+        self.kernel_size = args.embed_dim
         self.fc1 = nn.Linear(n_inputs, self.kernel_size)
-        # self.fc15 = nn.Linear(10000, 7000)
-        # self.fc16 = nn.Linear(7000, 4000)
-        # self.fc17 = nn.Linear(4000, 12000)
         self.fc2 = nn.Linear(self.kernel_size, n_outputs)
-        # self.fc3 = nn.Linear(200, 2)
-        # self.fc2 = nn.Linear(1024, 512)
-        # self.fc3 = nn.Linear(512, 10)
 
     def forward(self, x):
-        x = torch.flatten(x, 1)
         x = self.fc1(x)
         x = F.relu(x)
-        # x = self.fc15(x)
-        # x = F.relu(x)
-        # x = self.fc16(x)
-        # x = F.relu(x)
-        # x = self.fc17(x)
-        # x = F.relu(x)
         fc2 = self.fc2(x)
-        # x = F.relu(x)
-        # fc3 = self.fc3(x)
-        x = torch.sigmoid(fc2)
-        probs = F.softmax(x, dim=1)
-        # x = F.relu(x)
-        # x = self.fc3(x)
-        # x = F.softmax(x, dim=1)
-        return x, probs, fc2
+        x = torch.softmax(fc2, dim=1)
+        return x, fc2
 
 
 # (args=args, device=device, data=data_loader, model=model)
-def train(args, device, data, model):
-    train_dataloader, valid_dataloader = data
-    ##################
-    # init optimizer #
-    ##################
-    optimizer = torch.optim.Adam(params=model.parameters(), lr=args.lr)
-
-    ################
-    # init metrics #
-    ################
-    last_eval = -1
+def train(args, target, device, data, model):
     best_step = -1
     best_acc = -1
-    test_best_based_on_step, test_best_min_based_on_step = -1, -1
-    test_best_max_based_on_step, test_best_std_based_on_step = -1, -1
-    print('steps', args.num_steps)
-    print('save_path', args.save_path)
-
+    data_name = sorted(os.listdir(args.data_path))
+    list_target = []
+    for i in target:
+        list_target.append(torch.load(args.data_path + data_name[i]))
+    list_target = tuple(list_target)
+    target_data = torch.cat(list_target, 0)
+    print(target_data)
+    return
+    train_dataloader, valid_dataloader = data
+    optimizer = torch.optim.Adam(params=model.parameters(), lr=args.lr)
+    print('Start training process with {} epochs', args.num_steps)
     results = defaultdict(list)
     if args.num_target == 1:
-        SAVE_NAME = 'CELEBA_embed_Lap_single_{}_{}'.format(args.num_target, args.epsilon)
+        SAVE_NAME = 'CELEBA_single_Laplace_eps_{}'.format(args.epsilon)
     else:
-        SAVE_NAME = 'CELEBA_embed_Lap_multiple_{}_{}'.format(args.num_target, args.epsilon)
+        SAVE_NAME = 'CELEBA_multiple_{}_Lap_eps_{}'.format(args.num_target, args.epsilon)
 
-    x_train, y_train, imgs_train = next(iter(train_dataloader))
-    x_valid, y_valid, imgs_valid = next(iter(valid_dataloader))
-    print(torch.bincount(y_train))
-    print(torch.bincount(y_valid))
-    if (args.train_mode == 'dp'):
-        print("Train with Laplace mechanism with epsilon = {}".format(args.epsilon))
-        temp_x = x_train.numpy()
-        print(temp_x.shape)
-        temp_x[1:] = temp_x[1:] + np.random.laplace(0, args.sens * args.num_feature / args.epsilon,
-                                                    temp_x[1:].shape)
-        x_train = torch.from_numpy(temp_x)
-        temp_x = x_valid.numpy()
-        temp_x[1:] = temp_x[1:] + np.random.laplace(0, args.sens * args.num_feature / args.epsilon,
-                                                    temp_x[1:].shape)
-        print(temp_x.shape)
-        # return
-        x_valid = torch.from_numpy(temp_x)
-    elif (args.train_mode == 'target'):
-        print("Train with Laplace mechanism with epsilon = {}".format(args.epsilon))
-        temp_x = x_train.numpy()
-        temp_x[int(args.train_multiplier*0.1):] = temp_x[int(args.train_multiplier*0.1):] + np.random.laplace(0, args.sens * args.num_feature / args.epsilon,
-                                                    temp_x[int(args.train_multiplier*0.1):].shape)
-        x_train = torch.from_numpy(temp_x)
-        temp_x = x_valid.numpy()
-        temp_x[int(args.valid_multiplier*0.1):] = temp_x[int(args.valid_multiplier*0.1):] + np.random.laplace(0, args.sens * args.num_feature / args.epsilon,
-                                                    temp_x[int(args.valid_multiplier*0.1):].shape)
-        # return
-        x_valid = torch.from_numpy(temp_x)
-
-
-    # weight = sklearn.utils.class_weight.compute_class_weight('balanced', classes=np.arange(args.num_target + 1),
-    #                                                          y=y_valid.cpu().detach().numpy())
-    # custom_weight = np.array([1600.0, 200.0])
     criteria = nn.CrossEntropyLoss()
-    x_train = x_train.to(device)
-    y_train = y_train.to(device)
-    x_valid = x_valid.to(device)
-    y_valid = y_valid.to(device)
-    model = model.to(device)
+    model.to(device)
     for step in range(args.num_steps):
-        start_time = time.time()
         model.train()
-        loss_value = 0
-        out, probs, fc2 = model(x_train)
-        loss = criteria(out, y_train)
-        loss.backward()
-        optimizer.step()
-        optimizer.zero_grad()
-        loss_value += loss
+        train_loss = 0.0
+        train_label = []
+        train_predict = []
+        for i, batch_data in enumerate(train_dataloader):
+            x, y, imgs = batch_data
+            train_label = train_label + y.numpy().tolist()
+            optimizer.zero_grad()
+            num_data_point = x.size(dim=1)
+            x = x.repeat(args.train_multiplier, 1)
+            y = y.repeat(args.train_multiplier, 1)
+            if args.train_mode == 'target':
+                temp_x = x.numpy()
+                temp_x[num_data_point:] = temp_x[num_data_point:] + np.random.laplace(0,
+                                                                                      args.sens * args.num_feature / args.epsilon,
+                                                                                      temp_x[num_data_point:].shape)
+                x = torch.from_numpy(temp_x)
+            x.to(device)
+            y.to(device)
+            out, fc2 = model(x)
+            loss = criteria(out, y)
+            loss.backward()
+            optimizer.step()
+            train_loss += loss.item()
+            y_pred = fc2[:, 0] < 0
+            train_predict = train_predict + y_pred.cpu().detach().numpy().tolist()
 
         if step % 10 == 0:
-            last_eval = step
-            res_train = evaluate(x=x_train, y=y_train, model=model, criteria=criteria, device=device)
-            res_val = evaluate(x=x_valid, y=y_valid, model=model, criteria=criteria, device=device)
+            model.eval()
+            train_acc = accuracy_score(train_label, train_predict)
+            if args.num_target > 2:
+                train_f1 = f1_score(train_label, train_predict, average='micro')
+            else:
+                train_f1 = f1_score(train_label, train_predict, average='binary')
+            valid_loss = 0
+            valid_label = []
+            valid_predict = []
+            for i, batch_data in enumerate(valid_dataloader):
+                x, y, imgs = batch_data
+                valid_label = valid_label + y.numpy().tolist()
+                optimizer.zero_grad()
+                num_data_point = x.size(dim=1)
+                x = x.repeat(args.train_multiplier, 1)
+                y = y.repeat(args.train_multiplier, 1)
+                if args.train_mode == 'target':
+                    temp_x = x.numpy()
+                    temp_x[num_data_point:] = temp_x[num_data_point:] + np.random.laplace(0,
+                                                                                          args.sens * args.num_feature / args.epsilon,
+                                                                                          temp_x[num_data_point:].shape)
+                    x = torch.from_numpy(temp_x)
+                x.to(device)
+                y.to(device)
+                out, fc2 = model(x)
+                loss = criteria(out, y)
+                valid_loss += loss.item()
+                y_pred = fc2[:, 0] < 0
+                valid_predict = valid_predict + y_pred.cpu().detach().numpy().tolist()
+
+            valid_acc = accuracy_score(valid_label, valid_predict)
+            if args.num_target > 2:
+                valid_f1 = f1_score(valid_label, valid_predict, average='micro')
+            else:
+                valid_f1 = f1_score(valid_label, valid_predict, average='binary')
+
             logging.info(
-                f"\nStep: {step + 1}, Train Loss: {res_train['loss']}, Acc: {res_train['acc']:.4f}, TPR: {res_train['tpr']:.4f}, TNR : {res_train['tnr']:.4f} | Val Loss: {res_val['loss']}, Acc: {res_val['acc']:.4f}, TPR: {res_val['tpr']:.4f}, TNR : {res_val['tnr']:.4f}")
+                f"\nStep: {step + 1}, TRAIN Loss: {train_loss}, Acc: {train_acc}, F1: {train_f1}| VALID Loss: {valid_loss}, Acc: {valid_acc}, F1: {valid_f1}")
 
-            results['test_avg_loss'].append(res_train['loss'] / x_train.size(dim=0))
-            results['test_acc'].append(res_train['acc'])
-            results['tpr'].append(res_train['tpr'])
-            results['tnr'].append(res_train['tnr'])
+            results['valid_loss'].append(valid_loss)
+            results['valid_acc'].append(valid_acc)
+            results['valid_f1'].append(valid_f1)
 
-            if best_acc < res_val['acc']:
-                best_acc = res_val['acc']
+            if best_acc < results['valid_acc']:
+                best_acc = results['valid_acc']
                 best_step = step
             my_csv = pd.DataFrame(results)
             name_save = args.save_path + SAVE_NAME + '.csv'
@@ -141,4 +132,4 @@ def train(args, device, data, model):
             with open(args.save_path + SAVE_NAME + '.pt', 'wb') as f:  # bd0.5_cr0_double bd0.1_cr2
                 torch.save(model, f)
     return model
-        # print('Finish one step in ', time.time() - start_time)
+    # print('Finish one step in ', time.time() - start_time)
