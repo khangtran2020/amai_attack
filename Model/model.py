@@ -59,8 +59,8 @@ def train(args, target, device, data, model):
         train_predict = []
         for i, batch_data in enumerate(train_dataloader):
             x, y, imgs = batch_data
-            print(y.size())
-            return
+            x = torch.cat((target_data,x), 0)
+            y = torch.cat((target_label,y),0)
             train_label = train_label + y.numpy().tolist()
             optimizer.zero_grad()
             num_data_point = x.size(dim=1)
