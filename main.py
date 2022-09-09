@@ -20,7 +20,7 @@ os.environ['TORCH_HOME'] = "./Model/pretrain_model"
 
 
 def run(args, target, device):
-    model = Classifier(args.num_feature, args.num_target + 1)
+    model = Classifier(args=args, n_inputs=args.num_feature, n_outputs=args.num_target + 1)
     transform = transforms.Compose([
         transforms.Resize(64),
         transforms.ToTensor(),
