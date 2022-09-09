@@ -51,7 +51,7 @@ def train(args, target, device, data, model):
 
     criteria = nn.CrossEntropyLoss()
     model.to(device)
-    print('Start training process with {} epochs', args.num_steps)
+    print('Start training process with {} epochs'.format(args.num_steps))
     for step in range(args.num_steps):
         model.train()
         train_loss = 0.0
@@ -74,6 +74,7 @@ def train(args, target, device, data, model):
                 x = torch.from_numpy(temp_x)
             x.to(device)
             y.to(device)
+            print(x.get_device(),y.get_device(), model.get_device())
             out, fc2 = model(x)
             loss = criteria(out, y)
             loss.backward()
