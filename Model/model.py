@@ -123,7 +123,7 @@ def train(args, target, device, data, model):
                 valid_f1 = f1_score(valid_label, valid_predict, average='binary')
 
             logging.info(
-                f"\nStep: {step + 1}, AVG TRAIN Loss: {train_loss/len(train_label)}, Acc: {train_acc}, F1: {train_f1}| AVG VALID Loss: {valid_loss/len(valid_label)}, Acc: {valid_acc}, F1: {valid_f1}")
+                f"\nStep: {step + 1}, AVG TRAIN Loss: {train_loss}, Acc: {train_acc}, F1: {train_f1}| AVG VALID Loss: {valid_loss}, Acc: {valid_acc}, F1: {valid_f1}")
 
             results['valid_loss'].append(valid_loss)
             results['valid_acc'].append(valid_acc)
