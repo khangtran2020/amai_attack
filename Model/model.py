@@ -38,7 +38,7 @@ def train(args, target, device, data, model):
         list_target.append(torch.load(args.data_path + data_name[i]))
     list_target = tuple(list_target)
     target_data = torch.cat(list_target, 0)
-    print(target_data)
+    print(target_data.size())
     return
     train_dataloader, valid_dataloader = data
     optimizer = torch.optim.Adam(params=model.parameters(), lr=args.lr)
