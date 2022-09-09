@@ -61,6 +61,7 @@ def train(args, target, device, data, model):
             x, y, imgs = batch_data
             x = torch.cat((target_data,x), 0)
             y = torch.cat((target_label,y),0)
+            print(x.size(), y.size())
             train_label = train_label + y.numpy().tolist()
             optimizer.zero_grad()
             num_data_point = x.size(dim=1)
