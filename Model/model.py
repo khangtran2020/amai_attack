@@ -34,12 +34,15 @@ def train(args, target, device, data, model):
     best_acc = -1
     data_name = sorted(os.listdir(args.data_path))
     list_target = []
-    for i in target:
-        list_target.append(torch.unsqueeze(torch.load(args.data_path + data_name[i]), 0))
+    list_target_label = []
+    for i, f in enumerate(target):
+        list_target.append(torch.unsqueeze(torch.load(args.data_path + data_name[f]), 0))
+        list_target_label.append([i])
     list_target = tuple(list_target)
+    list_target_label = tuple(list_target_label)
     target_data = torch.cat(list_target, 0)
-    print(target_data.size())
-    return
+    target_label = torch.cat(list_target_label, 0)
+    print(target_data.size(), target_label.size())
     train_dataloader, valid_dataloader = data
     optimizer = torch.optim.Adam(params=model.parameters(), lr=args.lr)
     print('Start training process with {} epochs', args.num_steps)
