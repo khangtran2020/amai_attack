@@ -85,7 +85,7 @@ def train(args, target, device, data, model):
             loss.backward()
             optimizer.step()
             train_loss += loss.item()
-            y_pred = fc2[:, 0] < 0
+            y_pred = fc2[:, 0] > 0
             y_prob = out[:,1]
             train_predict = train_predict + y_pred.cpu().detach().numpy().tolist()
             train_predict_prob = train_predict_prob + y_prob.cpu().detach().numpy().tolist()
@@ -122,7 +122,7 @@ def train(args, target, device, data, model):
                 out, fc2 = model(x)
                 loss = criteria(out, y)
                 valid_loss += loss.item()
-                y_pred = fc2[:, 0] < 0
+                y_pred = fc2[:, 0] > 0
                 y_prob = out[:,1]
                 valid_predict = valid_predict + y_pred.cpu().detach().numpy().tolist()
                 valid_predict_prob = valid_predict_prob + y_prob.cpu().detach().numpy().tolist()
