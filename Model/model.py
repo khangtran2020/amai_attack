@@ -10,7 +10,7 @@ from collections import OrderedDict, defaultdict
 from Bound.evaluate import evaluate
 import logging
 import pandas as pd
-from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
+from sklearn.metrics import accuracy_score, f1_score, average_precision_score
 
 
 class Classifier(nn.Module):
@@ -41,8 +41,8 @@ def train(args, target, device, data, model):
     list_target = tuple(list_target)
     target_data = torch.cat(list_target, 0)
     target_label = torch.from_numpy(np.array(list_target_label))
-    target_data = target_data.repeat(args.batch_size, 1)
-    target_label = target_label.repeat(args.batch_size)
+    # target_data = target_data.repeat(args.batch_size, 1)
+    # target_label = target_label.repeat(args.batch_size)
     train_dataloader, valid_dataloader = data
     optimizer = torch.optim.Adam(params=model.parameters(), lr=args.lr)
     results = defaultdict(list)
@@ -97,7 +97,7 @@ def train(args, target, device, data, model):
                 train_f1 = f1_score(train_label, train_predict, average='micro')
             else:
                 train_f1 = f1_score(train_label, train_predict, average='binary')
-            train_auc = roc_auc_score(train_label, train_predict_prob)
+            train_auc = average_precision_score(train_label, train_predict_prob)
             valid_loss = 0
             valid_label = []
             valid_predict = []
@@ -132,7 +132,7 @@ def train(args, target, device, data, model):
                 valid_f1 = f1_score(valid_label, valid_predict, average='micro')
             else:
                 valid_f1 = f1_score(valid_label, valid_predict, average='binary')
-            valid_auc = roc_auc_score(valid_label, valid_predict_prob)
+            valid_auc = average_precision_score(valid_label, valid_predict_prob)
             logging.info(
                 f"\nStep: {step + 1}, AVG TRAIN Loss: {train_loss}, Acc: {train_acc}, F1: {train_f1}, AUC: {train_auc}| AVG VALID Loss: {valid_loss}, Acc: {valid_acc}, F1: {valid_f1}, AUC: {valid_auc}")
 
