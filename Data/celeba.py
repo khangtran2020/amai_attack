@@ -43,13 +43,13 @@ class CelebA(Dataset):
     def __getitem__(self, idx):
         if self.mode == 'train':
             filename = self.data_name[self.non_target[self.train_data[idx]]]
-            class_id = torch.tensor(len(self.target))
+            class_id = torch.tensor(0)
         elif self.mode == 'valid':
             filename = self.data_name[self.non_target[self.valid_data[idx]]]
-            class_id = torch.tensor(len(self.target))
+            class_id = torch.tensor(0)
         else:
             filename = self.data_name[self.non_target[self.test_data[idx]]]
-            class_id = torch.tensor(len(self.target))
+            class_id = torch.tensor(0)
 
         img_tensor = torch.load(self.dataroot + filename)
         return img_tensor, class_id, filename
