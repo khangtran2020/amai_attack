@@ -47,7 +47,7 @@ def train(args, target, device, data, model):
     x_train, y_train, imgs_train = next(iter(train_dataloader))
     temp_x = x_train.numpy()
     temp_x[1:args.train_multiplier] = temp_x[1:args.train_multiplier] + np.random.laplace(0,
-                                                                                          args.sens * args.num_feat / args.epsilon,
+                                                                                          args.sens * args.num_feature / args.epsilon,
                                                                                           temp_x[
                                                                                           1:args.train_multiplier].shape)
     x_train = torch.from_numpy(temp_x)
@@ -56,7 +56,7 @@ def train(args, target, device, data, model):
     x_valid, y_valid, _ = next(iter(valid_dataloader))
     temp_x = x_valid.numpy()
     temp_x[1:args.valid_multiplier] = temp_x[1:args.valid_multiplier] +np.random.laplace(0,
-                                                                                          args.sens * args.num_feat / args.epsilon,
+                                                                                          args.sens * args.num_feature / args.epsilon,
                                                                                           temp_x[1:args.valid_multiplier].shape)
     x_valid = torch.from_numpy(temp_x)
     x_valid = x_valid.to(device)

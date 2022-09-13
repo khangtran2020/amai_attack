@@ -16,7 +16,7 @@ def add_data_group(group):
     group.add_argument('--use_embedding', type=bool, default=True, help="Use embedding for LDP or not ")
     group.add_argument('--data_path', type=str, default='../../Datasets/CelebA/embeddings/',
                        help="the directory used to save dataset")
-    group.add_argument('--num_feat', type=int, default=512, help="number of target")
+    group.add_argument('--num_feature', type=int, default=512, help="number of target")
     group.add_argument('--num_target', type=int, default=1, help="number of target")
     group.add_argument('--target', type=str, default='0',
                        help="The targets must be separate by a - (For example: 1-16-24-10)")
