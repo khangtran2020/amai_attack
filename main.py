@@ -35,7 +35,7 @@ def run(args, target, device):
         shuffle=True,
         num_workers=0, batch_size=args.batch_size)
     model = train(args=args, target=target, device=device, data=(train_loader, valid_loader), model=model)
-    # exit()
+    exit()
     if args.train_mode == 'target':
         results = {}
         results['number_of_test_set'] = args.num_test_point
