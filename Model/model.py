@@ -47,16 +47,29 @@ def train(args, target, device, data, model):
     max_correct = 0
     max_tpr = 0.0
     max_tnr = 0.0
-    noise_scale = args.sens / args.epsilon
+    # noise_scale = args.sens / args.epsilon
     print('Start training process with {} epochs'.format(args.num_steps))
     x_train, y_train, imgs_train = next(iter(train_dataloader))
     temp_x = x_train.numpy()
-    over_samp = np.tile(np.expand_dims(temp_x[0, :], 0), (args.over_samp, 1))
-    org_temp_x = np.concatenate((over_samp, temp_x), axis=0)
-    print(org_temp_x[args.over_samp:args.train_multiplier,:])
-    print(temp_x.shape, org_temp_x.shape, org_temp_x[args.over_samp:args.train_multiplier].shape)
-    noise = np.random.laplace(0, noise_scale, org_temp_x[args.over_samp:args.train_multiplier].shape)
-    print('L2 norm of noise:', np.linalg.norm(noise, ord=2))
+    org_temp_x = temp_x.copy()
+    batch = int((args.train_multiplier - 1)/args.eps_train_step)
+    for i, eps in enumerate(np.linspace(args.min_eps, args.max_eps, args.eps_train_step)):
+        noise_scale = args.sens / eps
+        left = i*batch + 1
+        if (i+1)*batch + 1 < args.train_multiplier:
+            right = (i+1)*batch + 1
+        else:
+            right = args.train_multiplier
+        print("Epsilon using is: {}, noise scale is: {}, each batch has {} data points, current batch has left index {} and right index {}".format(eps,noise_scale, batch, left, right))
+        noise = np.random.laplace(0, noise_scale, temp_x[left:right].shape)
+        temp_x[left:right] = temp_x[left:right] + noise
+
+    # over_samp = np.tile(np.expand_dims(temp_x[0, :], 0), (args.over_samp, 1))
+    # org_temp_x = np.concatenate((over_samp, temp_x), axis=0)
+    # print(org_temp_x[args.over_samp:args.train_multiplier,:])
+    # print(temp_x.shape, org_temp_x.shape, org_temp_x[args.over_samp:args.train_multiplier].shape)
+
+    # print('L2 norm of noise:', np.linalg.norm(noise, ord=2))
     temp_x = org_temp_x.copy()
     temp_x[args.over_samp:args.train_multiplier] = temp_x[args.over_samp:args.train_multiplier] + noise
     print('L2 distance:', np.linalg.norm(temp_x - org_temp_x, ord=2))
@@ -70,6 +83,7 @@ def train(args, target, device, data, model):
     y_train = y_train.to(device)
     x_valid, y_valid, _ = next(iter(valid_dataloader))
     temp_x = x_valid.numpy()
+    noise_scale = args.sens / args.epsilon
     noise = np.random.laplace(0, noise_scale, temp_x[1:args.valid_multiplier].shape)
     temp_x[1:args.valid_multiplier] = temp_x[1:args.valid_multiplier] + noise
     x_valid = torch.from_numpy(temp_x)
