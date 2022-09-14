@@ -30,11 +30,11 @@ def run(args, target, device):
     train_loader = torch.utils.data.DataLoader(
         AMIADatasetCelebA(args=args, target=target, transform=transform, dataroot=args.data_path, mode='train', imgroot=None, multiplier=args.train_multiplier),
         shuffle=False,
-        num_workers=0, batch_size=200000)
+        num_workers=0, batch_size=args.batch_size)
     valid_loader = torch.utils.data.DataLoader(
         AMIADatasetCelebA(args=args, target=target, transform=transform, dataroot=args.data_path, mode='valid', imgroot=None, multiplier=args.valid_multiplier),
         shuffle=False,
-        num_workers=0, batch_size=200000)
+        num_workers=0, batch_size=args.batch_size)
     print("Sensitivity: {}, Number of features: {}, epsilon used in training: {}, noise scale: {}".format(args.sens, args.num_feature,
                                                                                          args.epsilon, args.sens/
                                                                                          args.epsilon))
