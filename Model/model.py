@@ -43,6 +43,9 @@ def train(args, target, device, data, model):
     criteria = nn.CrossEntropyLoss(weight=torch.tensor(custom_weight, dtype=torch.float).to(device))
     triplet_loss = nn.TripletMarginLoss(margin=1.0, p=2)
     model.to(device)
+    max_correct = 0
+    max_tpr = 0.0
+    max_tnr = 0.0
     print('Start training process with {} epochs'.format(args.num_steps))
     x_train, y_train, imgs_train = next(iter(train_dataloader))
     temp_x = x_train.numpy()
