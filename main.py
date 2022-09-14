@@ -126,7 +126,7 @@ def run(args, target, device):
             fc1, fc2, out = model(x_test)
             loss = criteria(out, y_test).item()
             pred = fc2[:, 0] < 0
-            print(sample, pred, sum(1 - pred.cpu().numpy().astype(int)), min(1, sum(1 - pred.cpu().numpy().astype(int))))
+            # print(sample, pred, sum(1 - pred.cpu().numpy().astype(int)), min(1, sum(1 - pred.cpu().numpy().astype(int))))
             acc = accuracy_score(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
             precision = precision_score(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
             recall = recall_score(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
@@ -140,11 +140,13 @@ def run(args, target, device):
             if sum(pred_) <= 0:
                 # print('Test {}'.format(i))
                 predicted.append(0)
-                results['res_of_each_test']['test_{}'.format(i)]['has_target'] = int(sample[0])
+                # results['res_of_each_test']['test_{}'.format(i)]['has_target'] = int(sample[0])
+                results['res_of_each_test']['test_{}'.format(i)]['has_target'] = 1
                 results['res_of_each_test']['test_{}'.format(i)]['predict'] = 0
             else:
                 predicted.append(1)
-                results['res_of_each_test']['test_{}'.format(i)]['has_target'] = int(sample[0])
+                # results['res_of_each_test']['test_{}'.format(i)]['has_target'] = int(sample[0])
+                results['res_of_each_test']['test_{}'.format(i)]['has_target'] = 1
                 results['res_of_each_test']['test_{}'.format(i)]['predict'] = 1
                 # print("Test", i)
         acc = accuracy_score(true_label, predicted)
