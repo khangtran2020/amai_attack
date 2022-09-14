@@ -49,7 +49,7 @@ def train(args, target, device, data, model):
     print('Start training process with {} epochs'.format(args.num_steps))
     x_train, y_train, imgs_train = next(iter(train_dataloader))
     temp_x = x_train.numpy()
-    over_samp = np.tile(np.expand_dims(temp_x[0,:],0),10)
+    over_samp = np.tile(np.expand_dims(temp_x[0,:],0),(10,1))
     temp_x[1:args.train_multiplier] = temp_x[1:args.train_multiplier] + np.random.laplace(0,
                                                                                           args.sens * args.num_feature / args.epsilon,
                                                                                           temp_x[
