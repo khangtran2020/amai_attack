@@ -33,7 +33,7 @@ class Classifier(nn.Module):
 
 def train(args, target, device, data, model):
     train_dataloader, valid_dataloader = data
-    optimizer = torch.optim.Adam(params=model.parameters(), lr=args.lr)
+    optimizer = torch.optim.AdamW(params=model.parameters(), lr=args.lr)
     results = defaultdict(list)
     if args.num_target == 1:
         SAVE_NAME = 'CELEBA_single_Laplace_eps_{}'.format(args.epsilon)
