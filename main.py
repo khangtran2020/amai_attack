@@ -21,7 +21,7 @@ os.environ['TORCH_HOME'] = "./Model/pretrain_model"
 
 
 def run(args, target, device):
-    model = Classifier(args=args, n_inputs=args.num_feature, n_outputs=args.num_target + 1)
+    model = ClassifierTriplet(args=args, n_inputs=args.num_feature, n_outputs=args.num_target + 1)
     transform = transforms.Compose([
         transforms.Resize(64),
         transforms.ToTensor(),
@@ -38,7 +38,8 @@ def run(args, target, device):
     print("Sensitivity: {}, Number of features: {}, epsilon used in training: {}, noise scale: {}".format(args.sens, args.num_feature,
                                                                                          args.epsilon, args.sens/
                                                                                          args.epsilon))
-    model = train(args=args, target=target, device=device, data=(train_loader, valid_loader), model=model)
+    model = train_triplet(args=args, target=target, device=device, data=(train_loader, valid_loader), model=model)
+    exit()
     if args.train_mode == 'target':
         results = {}
         data_name = sorted(os.listdir(args.data_path))
