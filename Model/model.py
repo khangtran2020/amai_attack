@@ -68,7 +68,7 @@ def train(args, target, device, data, model):
         loss_value = 0
         model.train()
         fc1, fc2, probs = model(x_train)
-
+        print(torch.bincount(y_train))
         loss = criteria(probs, y_train)
         # loss = triplet_loss(fc1[:args.train_multiplier], fc1[torch.randperm(args.train_multiplier)], fc1[args.train_multiplier + torch.randperm(args.train_multiplier)])
         loss_value += loss
