@@ -58,7 +58,7 @@ def train(args, target, device, data, model):
     x_train = torch.from_numpy(temp_x)
     x_train = x_train.to(device)
     temp_x = y_train.numpy()
-    temp_x = np.concatenate((np.zeros(10), temp_x), axis=0).astype('int8')
+    temp_x = np.concatenate((np.zeros(10), temp_x), axis=0).astype(int)
     y_train = torch.from_numpy(temp_x)
     y_train = y_train.to(device)
     x_valid, y_valid, _ = next(iter(valid_dataloader))
