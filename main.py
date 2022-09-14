@@ -39,8 +39,6 @@ def run(args, target, device):
                                                                                          args.epsilon, args.sens*args.num_feature/
                                                                                          args.epsilon))
     model = train(args=args, target=target, device=device, data=(train_loader, valid_loader), model=model)
-
-
     exit()
     if args.train_mode == 'target':
         results = {}
