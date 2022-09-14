@@ -61,14 +61,14 @@ def train(args, target, device, data, model):
     x_valid = torch.from_numpy(temp_x)
     x_valid = x_valid.to(device)
     y_valid = y_valid.to(device)
-
+    print(torch.bincount(y_train), torch.bincount(y_valid))
     for step in range(args.num_steps):
         num_correct = 0
         num_samples = 0
         loss_value = 0
         model.train()
         fc1, fc2, probs = model(x_train)
-        print(torch.bincount(y_train))
+
         loss = criteria(probs, y_train)
         # loss = triplet_loss(fc1[:args.train_multiplier], fc1[torch.randperm(args.train_multiplier)], fc1[args.train_multiplier + torch.randperm(args.train_multiplier)])
         loss_value += loss
