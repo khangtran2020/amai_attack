@@ -132,8 +132,11 @@ def run(args, target, device):
             y_test = y_test.to(device)
             fc1, fc2, out = model(x_test)
             loss = criteria(out, y_test).item()
-            pred = fc2[:, 0] < 0
+            pred = fc2[:, 0] < 0 # whether it not activated True if its activated, False if it's not activated
+            # a = 1 - pred.cpu().numpy().astype(int) # whether it activated / a[i] = True => i is the target
+            # sum(a) # if 1 of them is activated -> >= 1, if all ofthem are not activated -> 0
             print("Test {}".format(i),sample, pred, sum(1 - pred.cpu().numpy().astype(int)), min(1, sum(1 - pred.cpu().numpy().astype(int))))
+            print(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
             acc = accuracy_score(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
             precision = precision_score(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
             recall = recall_score(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
@@ -143,8 +146,8 @@ def run(args, target, device):
                 'precision': precision,
                 'recall': recall
             }
-            pred_ = 1 - pred.cpu().numpy().astype(int)
-            if sum(pred_) <= 0:
+            pred_ = min(1, sum(pred.cpu().numpy().astype(int)))
+            if pred_ == 0:
                 # print('Test {}'.format(i))
                 predicted.append(0)
                 results['res_of_each_test']['test_{}'.format(i)]['has_target'] = int(sample[0])
