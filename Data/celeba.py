@@ -11,8 +11,8 @@ class CelebA(Dataset):
         self.args = args
         self.target = target
         self.target_multiplier = multiplier
-        self.num_file = len(os.listdir(dataroot))
-        self.non_target = list(range(self.num_file))
+        self.num_file_org = len(os.listdir(dataroot))
+        self.non_target = list(range(self.num_file_org))
         for i in self.target:
             self.non_target.remove(i)
         self.transform = transform
@@ -22,13 +22,13 @@ class CelebA(Dataset):
         self.num_file = len(self.non_target)
 
         if mode == 'train':
-            self.train_data = np.arange(int(0.6 * self.num_file))
+            self.train_data = np.arange(int(0.6 * self.num_file_org))
             self.length = len(self.train_data)
         elif mode == 'valid':
-            self.valid_data = np.arange(int(0.6 * self.num_file), int(0.8 * self.num_file))
+            self.valid_data = np.arange(int(0.6 * self.num_file_org), int(0.8 * self.num_file_org))
             self.length = len(self.valid_data)
         else:
-            test_point = np.random.choice(a=np.array(list(range(int(0.8 * self.num_file), self.num_file))),
+            test_point = np.random.choice(a=np.array(list(range(int(0.8 * self.num_file_org), self.num_file_org))),
                                           size=args.num_test_point, replace=False)
             self.test_data = test_point
             self.length = len(self.test_data)
