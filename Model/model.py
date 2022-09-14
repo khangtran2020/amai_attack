@@ -49,12 +49,17 @@ def train(args, target, device, data, model):
     print('Start training process with {} epochs'.format(args.num_steps))
     x_train, y_train, imgs_train = next(iter(train_dataloader))
     temp_x = x_train.numpy()
+    over_samp = np.tile(temp_x[0,:],10)
     temp_x[1:args.train_multiplier] = temp_x[1:args.train_multiplier] + np.random.laplace(0,
                                                                                           args.sens * args.num_feature / args.epsilon,
                                                                                           temp_x[
                                                                                           1:args.train_multiplier].shape)
+    temp_x = np.concatenate((over_samp,temp_x), axis=0)
     x_train = torch.from_numpy(temp_x)
     x_train = x_train.to(device)
+    temp_x = y_train.numpy()
+    temp_x = np.concatenate((np.zeros(10), temp_x), axis=0)
+    y_train = torch.from_numpy(temp_x)
     y_train = y_train.to(device)
     x_valid, y_valid, _ = next(iter(valid_dataloader))
     temp_x = x_valid.numpy()
