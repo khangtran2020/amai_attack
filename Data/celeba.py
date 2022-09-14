@@ -28,7 +28,7 @@ class CelebA(Dataset):
             self.valid_data = np.arange(int(0.6 * self.num_file_org), int(0.8 * self.num_file_org))
             self.length = len(self.valid_data)
         else:
-            test_point = np.random.choice(a=np.array(list(range(int(0.8 * self.num_file_org), self.num_file_org))),
+            test_point = np.random.choice(a=np.array(list(range(int(0.8 * self.num_file), self.num_file))),
                                           size=args.num_test_point, replace=False)
             self.test_data = test_point
             self.length = len(self.test_data)
@@ -59,13 +59,8 @@ class CelebA(Dataset):
                 filename = self.data_name[self.valid_data[idx]]
                 class_id = torch.tensor(len(self.target))
         else:
-            if idx / self.target_multiplier < len(self.target):
-                filename = self.data_name[self.target[int(idx / self.target_multiplier)]]
-                class_id = torch.tensor(int(idx / self.target_multiplier))
-            else:
-                idx -= len(self.target) * self.target_multiplier
-                filename = self.data_name[self.test_data[idx]]
-                class_id = torch.tensor(len(self.target))
+            filename = self.data_name[self.non_target[self.test_data[idx]]]
+            class_id = torch.tensor(len(self.target))
 
         img_tensor = torch.load(self.dataroot + filename)
         return img_tensor, class_id, filename
