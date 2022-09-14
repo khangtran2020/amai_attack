@@ -53,7 +53,7 @@ def train(args, target, device, data, model):
     temp_x = x_train.numpy()
     over_samp = np.tile(np.expand_dims(temp_x[0, :], 0), (args.over_samp, 1))
     org_temp_x = np.concatenate((over_samp, temp_x), axis=0)
-    print(temp_x.shape, org_temp_x.shape)
+    print(temp_x.shape, org_temp_x.shape, org_temp_x[args.over_samp:args.train_multiplier].shape)
     noise = np.random.laplace(0, noise_scale, org_temp_x[args.over_samp:args.train_multiplier].shape)
     print('L2 norm of noise: {}', np.linalg.norm(noise, ord=2))
     temp_x = org_temp_x.copy()
