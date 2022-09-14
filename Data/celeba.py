@@ -58,6 +58,14 @@ class CelebA(Dataset):
                 idx -= len(self.target) * self.target_multiplier
                 filename = self.data_name[self.valid_data[idx]]
                 class_id = torch.tensor(len(self.target))
+        else:
+            if idx / self.target_multiplier < len(self.target):
+                filename = self.data_name[self.target[int(idx / self.target_multiplier)]]
+                class_id = torch.tensor(int(idx / self.target_multiplier))
+            else:
+                idx -= len(self.target) * self.target_multiplier
+                filename = self.data_name[self.test_data[idx]]
+                class_id = torch.tensor(len(self.target))
 
         img_tensor = torch.load(self.dataroot + filename)
         return img_tensor, class_id, filename
