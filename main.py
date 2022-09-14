@@ -101,7 +101,8 @@ def run(args, target, device):
         if certified:
             noise_scale = args.sens / epsilon_of_point
         else:
-            noise_scale = args.sens / args.epsilon
+            print("Didn't ceritfied")
+            exit()
         for i in range(args.num_test_set):
             # sample = np.random.binomial(n=1, p=args.sample_target_rate, size=1).astype(bool)
             true_label.append(1)
