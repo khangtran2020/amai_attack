@@ -39,9 +39,58 @@ def run(args, target, device):
                                                                                          args.epsilon, args.sens*args.num_feature/
                                                                                          args.epsilon))
     model = train(args=args, target=target, device=device, data=(train_loader, valid_loader), model=model)
-    exit()
     if args.train_mode == 'target':
         results = {}
+        data_name = sorted(os.listdir(args.data_path))
+        list_target = []
+        list_target_label = []
+        for i, f in enumerate(target):
+            list_target.append(torch.unsqueeze(torch.load(args.data_path + data_name[f]), 0))
+            list_target_label.append(i)
+        print(list_target, list_target_label)
+        exit()
+        list_target = tuple(list_target)
+        target_data = torch.cat(list_target, 0)
+        target_label = torch.from_numpy(np.array(list_target_label))
+        epsilon_of_point = args.max_epsilon
+        certified = 0
+        # for eps in tqdm(np.linspace(args.min_epsilon, args.max_epsilon, 100)):
+        for i, eps in enumerate(np.linspace(args.min_epsilon, args.max_epsilon, 100)):
+            temp_x = target_data.numpy()
+            generated_target = np.tile(temp_x, (args.num_draws + 1, 1))
+            generated_target[1:, :] = generated_target[1:, :] + np.random.laplace(0,
+                                                                                  args.sens * args.num_feature / eps,
+                                                                                  generated_target[1:, :].shape)
+            temp_x = torch.from_numpy(generated_target.astype(np.float32)).to(device)
+            fc1, fc2, out = model(temp_x)
+            pred = fc2[:, 0].cpu().detach().numpy()
+            print(pred)
+            # exit()
+            # same_sign = (pred[1:] * pred[0]) > 0
+            larger_than_zero = pred > 0
+            # print(same_sign)
+            # count_of_same_sign = sum(larger_than_zero.astype(int))
+            # count_of_diff_sign = args.num_draws - count_of_same_sign
+            count_of_larger_than_zero = sum(larger_than_zero.astype(int))
+            count_of_smaller_than_zero = args.num_draws - count_of_larger_than_zero
+            print(
+                'For eps {}, # larger than 0: {}, # smaller or equal to 0: {}'.format(
+                    eps, count_of_larger_than_zero, count_of_smaller_than_zero))
+            upper_bound = hoeffding_upper_bound(count_of_smaller_than_zero, nobs=args.num_draws, alpha=args.alpha)
+            lower_bound = hoeffding_lower_bound(count_of_larger_than_zero, nobs=args.num_draws, alpha=args.alpha)
+            if (lower_bound > upper_bound):
+                certified = int(1.0)
+                epsilon_of_point = min(epsilon_of_point, eps)
+            # print("Done for eps: {}".format(eps))
+        results['certified_for_target'] = {
+            'search_range_min': args.min_epsilon,
+            'search_range_max': args.max_epsilon,
+            'certified': certified,
+            'eps_min': epsilon_of_point,
+            'confidence': 1 - args.alpha
+        }
+        exit()
+
         results['number_of_test_set'] = args.num_test_point
         results['sample_target_rate'] = args.sample_target_rate
         results['res_of_each_test'] = {}
@@ -105,43 +154,6 @@ def run(args, target, device):
             'acc': acc,
             'precision': precision,
             'recall': recall,
-        }
-        epsilon_of_point = args.max_epsilon
-        certified = 0
-        # for eps in tqdm(np.linspace(args.min_epsilon, args.max_epsilon, 100)):
-        for i, eps in enumerate(np.linspace(args.min_epsilon, args.max_epsilon, 100)):
-            temp_x = target_data.numpy()
-            generated_target = np.tile(temp_x, (args.num_draws + 1, 1))
-            generated_target[1:, :] = generated_target[1:, :] + np.random.laplace(0,
-                                                                                  args.sens * args.num_feature / eps,
-                                                                                  generated_target[1:, :].shape)
-            temp_x = torch.from_numpy(generated_target.astype(np.float32)).to(device)
-            fc1, fc2, out = model(temp_x)
-            pred = fc2[:, 0].cpu().detach().numpy()
-            print(pred)
-            # exit()
-            # same_sign = (pred[1:] * pred[0]) > 0
-            larger_than_zero = pred > 0
-            # print(same_sign)
-            # count_of_same_sign = sum(larger_than_zero.astype(int))
-            # count_of_diff_sign = args.num_draws - count_of_same_sign
-            count_of_larger_than_zero = sum(larger_than_zero.astype(int))
-            count_of_smaller_than_zero = args.num_draws - count_of_larger_than_zero
-            print(
-                'For eps {}, # larger than 0: {}, # smaller or equal to 0: {}'.format(
-                    eps, count_of_larger_than_zero, count_of_smaller_than_zero))
-            upper_bound = hoeffding_upper_bound(count_of_smaller_than_zero, nobs=args.num_draws, alpha=args.alpha)
-            lower_bound = hoeffding_lower_bound(count_of_larger_than_zero, nobs=args.num_draws, alpha=args.alpha)
-            if (lower_bound > upper_bound):
-                certified = int(1.0)
-                epsilon_of_point = min(epsilon_of_point, eps)
-            # print("Done for eps: {}".format(eps))
-        results['certified_for_target'] = {
-            'search_range_min': args.min_epsilon,
-            'search_range_max': args.max_epsilon,
-            'certified': certified,
-            'eps_min': epsilon_of_point,
-            'confidence': 1 - args.alpha
         }
 
         print(results)
