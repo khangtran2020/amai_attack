@@ -129,6 +129,7 @@ def run(args, target, device):
             criteria = nn.CrossEntropyLoss()
             model.to(device)
             x_test = x_test.to(device)
+            print(x_test)
             y_test = y_test.to(device)
             fc1, fc2, out = model(x_test)
             loss = criteria(out, y_test).item()
