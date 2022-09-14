@@ -107,7 +107,7 @@ def run(args, target, device):
         # list_target = tuple(list_target)
         # target_data = torch.cat(list_target, 0)
         # target_label = torch.from_numpy(np.array(list_target_label))
-        noise_scale = args.sens / epsilon_of_point
+        noise_scale = args.sens / args.epsilon
         for i in range(args.num_test_set):
             sample = np.random.binomial(n=1, p=args.sample_target_rate, size=1).astype(bool)
             true_label.append(int(sample[0]))
