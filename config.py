@@ -30,7 +30,7 @@ def add_model_group(group):
     group.add_argument("--lr", type=float, default=0.01, help="learning rate")
     group.add_argument("--wd", type=float, default=1e-3, help="weight decay")
     group.add_argument("--embed_dim", type=int, default=512, help="embedding dim")
-    group.add_argument('--batch_size', type=int, default=32)
+    group.add_argument('--batch_size', type=int, default=200000)
     group.add_argument('--train_verbose', action='store_true', help="print training details")
     group.add_argument('--log_every', type=int, default=1, help='print every x epoch')
     group.add_argument('--eval_every', type=int, default=5, help='evaluate every x epoch')
