@@ -29,11 +29,11 @@ def run(args, target, device):
     ])
     train_loader = torch.utils.data.DataLoader(
         AMIADatasetCelebA(args=args, target=target, transform=transform, dataroot=args.data_path, mode='train', imgroot=None, multiplier=args.train_multiplier),
-        shuffle=True,
+        shuffle=False,
         num_workers=0, batch_size=args.batch_size)
     valid_loader = torch.utils.data.DataLoader(
         AMIADatasetCelebA(args=args, target=target, transform=transform, dataroot=args.data_path, mode='valid', imgroot=None, multiplier=args.valid_multiplier),
-        shuffle=True,
+        shuffle=False,
         num_workers=0, batch_size=args.batch_size)
     model = train(args=args, target=target, device=device, data=(train_loader, valid_loader), model=model)
     exit()
