@@ -100,8 +100,8 @@ def run(args, target, device):
         predicted = []
         noise_scale = args.sens / args.epsilon
         for i in range(args.num_test_set):
-            sample = np.random.binomial(n=1, p=args.sample_target_rate, size=1).astype(bool)
-            true_label.append(int(sample[0]))
+            # sample = np.random.binomial(n=1, p=args.sample_target_rate, size=1).astype(bool)
+            true_label.append(1)
             x_test = target_data
             y_test = target_label
             temp_x = x_test.numpy()
