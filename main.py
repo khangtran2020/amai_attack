@@ -99,7 +99,7 @@ def run(args, target, device):
         true_label = []
         predicted = []
         if certified:
-            noise_scale = args.sens / epsilon_of_point
+            noise_scale = args.sens / (epsilon_of_point * 10)
             print("Noise scale fore the attack:", noise_scale)
         else:
             print("Didn't ceritfied")
@@ -129,7 +129,6 @@ def run(args, target, device):
             criteria = nn.CrossEntropyLoss()
             model.to(device)
             x_test = x_test.to(device)
-            print(x_test)
             y_test = y_test.to(device)
             fc1, fc2, out = model(x_test)
             loss = criteria(out, y_test).item()
