@@ -56,10 +56,10 @@ def train(args, target, device, data, model):
     print(org_temp_x[args.over_samp:args.train_multiplier,:])
     print(temp_x.shape, org_temp_x.shape, org_temp_x[args.over_samp:args.train_multiplier].shape)
     noise = np.random.laplace(0, noise_scale, org_temp_x[args.over_samp:args.train_multiplier].shape)
-    print('L2 norm of noise: {}', np.linalg.norm(noise, ord=2))
+    print('L2 norm of noise:', np.linalg.norm(noise, ord=2))
     temp_x = org_temp_x.copy()
     temp_x[args.over_samp:args.train_multiplier] = temp_x[args.over_samp:args.train_multiplier] + noise
-    print('L2 distance: {}', np.linalg.norm(temp_x - org_temp_x, ord=2))
+    print('L2 distance:', np.linalg.norm(temp_x - org_temp_x, ord=2))
     # return
     x_train = torch.from_numpy(temp_x)
     x_train = x_train.to(device)
