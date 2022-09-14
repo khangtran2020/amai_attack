@@ -98,7 +98,10 @@ def run(args, target, device):
         results['res_of_each_test'] = {}
         true_label = []
         predicted = []
-        noise_scale = args.sens / args.epsilon
+        if certified:
+            noise_scale = args.sens / epsilon_of_point
+        else:
+            noise_scale = args.sens / args.epsilon
         for i in range(args.num_test_set):
             # sample = np.random.binomial(n=1, p=args.sample_target_rate, size=1).astype(bool)
             true_label.append(1)
