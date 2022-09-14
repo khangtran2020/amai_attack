@@ -52,7 +52,7 @@ def run(args, target, device):
         target_label = torch.from_numpy(np.array(list_target_label))
         epsilon_of_point = args.max_epsilon
         certified = 0
-        for i, eps in enumerate(np.linspace(args.min_epsilon, args.max_epsilon, 100)):
+        for i, eps in enumerate(np.linspace(args.min_epsilon, args.max_epsilon, 10)):
             temp_x = target_data.numpy()
             noise_scale = args.sens / eps
             print("Sensitivity: {}, Number of features: {}, epsilon used in certify: {}, noise scale: {}".format(
