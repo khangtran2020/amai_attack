@@ -71,7 +71,7 @@ def run(args, target, device):
             model.to(device)
             x_test = x_test.to(device)
             y_test = y_test.to(device)
-            out, fc2 = model(x_test)
+            fc1, fc2, out = model(x_test)
             loss = criteria(out, y_test).item()
             pred = fc2[:, 0] > 0
             print(sample, pred, sum(1 - pred.cpu().numpy().astype(int)), min(1, sum(1 - pred.cpu().numpy().astype(int))))
