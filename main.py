@@ -73,7 +73,7 @@ def run(args, target, device):
             y_test = y_test.to(device)
             fc1, fc2, out = model(x_test)
             loss = criteria(out, y_test).item()
-            pred = fc2[:, 0] > 0
+            pred = fc2[:, 0] < 0
             print(sample, pred, sum(1 - pred.cpu().numpy().astype(int)), min(1, sum(1 - pred.cpu().numpy().astype(int))))
             acc = accuracy_score(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
             precision = precision_score(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
