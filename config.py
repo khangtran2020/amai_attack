@@ -43,6 +43,7 @@ def add_model_group(group):
 
 def add_defense_group(group):
     group.add_argument('--epsilon', type=float, default=1.0, help="epsilon")
+    group.add_argument('--eps_step', type=int, default=100, help="epsilon")
     group.add_argument('--min_epsilon', type=float, default=0.1, help="epsilon")
     group.add_argument('--max_epsilon', type=float, default=20.0, help="epsilon")
     group.add_argument('--fix_epsilon', type=float, default=1.0, help="epsilon")
