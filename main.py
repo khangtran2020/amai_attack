@@ -104,13 +104,13 @@ def run(args, target, device):
             print("Didn't ceritfied")
             exit()
         for i in range(args.num_test_set):
-            # sample = np.random.binomial(n=1, p=args.sample_target_rate, size=1).astype(bool)
+            sample = np.random.binomial(n=1, p=args.sample_target_rate, size=1).astype(bool)
             test_loader = torch.utils.data.DataLoader(
-                CelebA(args, target, transform, args.data_path, 'test', imgroot=None, include_tar=False),
+                CelebA(args, target, transform, args.data_path, 'test', imgroot=None, include_tar=sample[0]),
                 shuffle=False,
                 num_workers=0, batch_size=args.num_test_point)
             x_test, y_test, file_name = next(iter(test_loader))
-            true_label.append(0)
+            true_label.append(sample[0])
             # x_test = target_data
             # y_test = target_label
             # temp_x = x_test.numpy()
@@ -118,13 +118,13 @@ def run(args, target, device):
             # temp_x[:args.num_target] = temp_x[:args.num_target] + noise
             # x_test = torch.from_numpy(temp_x.astype(np.float32))
             #
-            # if sample[0]:
-            #     x_test = torch.cat((target_data, x_test), 0)
-            #     y_test = torch.cat((target_label, y_test), 0)
-            #     temp_x = x_test.numpy()
-            #     noise = np.random.laplace(0,noise_scale,temp_x[:args.num_target].shape)
-            #     temp_x[:args.num_target] = temp_x[:args.num_target] + noise
-            #     x_test = torch.from_numpy(temp_x.astype(np.float32))
+            if sample[0]:
+                x_test = torch.cat((target_data, x_test), 0)
+                y_test = torch.cat((target_label, y_test), 0)
+                temp_x = x_test.numpy()
+                noise = np.random.laplace(0,noise_scale,temp_x[:args.num_target].shape)
+                temp_x[:args.num_target] = temp_x[:args.num_target] + noise
+                x_test = torch.from_numpy(temp_x.astype(np.float32))
             criteria = nn.CrossEntropyLoss()
             model.to(device)
             x_test = x_test.to(device)
@@ -132,7 +132,7 @@ def run(args, target, device):
             fc1, fc2, out = model(x_test)
             loss = criteria(out, y_test).item()
             pred = fc2[:, 0] < 0
-            # print(sample, pred, sum(1 - pred.cpu().numpy().astype(int)), min(1, sum(1 - pred.cpu().numpy().astype(int))))
+            print(sample, pred, sum(1 - pred.cpu().numpy().astype(int)), min(1, sum(1 - pred.cpu().numpy().astype(int))))
             acc = accuracy_score(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
             precision = precision_score(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
             recall = recall_score(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
@@ -146,13 +146,13 @@ def run(args, target, device):
             if sum(pred_) <= 0:
                 # print('Test {}'.format(i))
                 predicted.append(0)
-                # results['res_of_each_test']['test_{}'.format(i)]['has_target'] = int(sample[0])
-                results['res_of_each_test']['test_{}'.format(i)]['has_target'] = 0
+                results['res_of_each_test']['test_{}'.format(i)]['has_target'] = int(sample[0])
+                # results['res_of_each_test']['test_{}'.format(i)]['has_target'] = 0
                 results['res_of_each_test']['test_{}'.format(i)]['predict'] = 0
             else:
                 predicted.append(1)
-                # results['res_of_each_test']['test_{}'.format(i)]['has_target'] = int(sample[0])
-                results['res_of_each_test']['test_{}'.format(i)]['has_target'] = 0
+                results['res_of_each_test']['test_{}'.format(i)]['has_target'] = int(sample[0])
+                # results['res_of_each_test']['test_{}'.format(i)]['has_target'] = 0
                 results['res_of_each_test']['test_{}'.format(i)]['predict'] = 1
                 # print("Test", i)
         acc = accuracy_score(true_label, predicted)
