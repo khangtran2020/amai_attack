@@ -35,8 +35,10 @@ def run(args, target, device):
         AMIADatasetCelebA(args=args, target=target, transform=transform, dataroot=args.data_path, mode='valid', imgroot=None, multiplier=args.valid_multiplier),
         shuffle=False,
         num_workers=0, batch_size=200000)
+    print("Sensitivity: {}, Number of features: {}, epsilon used in training: {}".format(args.sens, args.num_feature,
+                                                                                         args.epsilon))
     model = train(args=args, target=target, device=device, data=(train_loader, valid_loader), model=model)
-    print("Sensitivity: {}, Number of features: {}, epsilon used in training: {}".format(args.sens, args.num_feature, args.epsilon))
+
     exit()
     if args.train_mode == 'target':
         results = {}
