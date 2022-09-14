@@ -98,15 +98,16 @@ def run(args, target, device):
         results['res_of_each_test'] = {}
         true_label = []
         predicted = []
-        data_name = sorted(os.listdir(args.data_path))
-        list_target = []
-        list_target_label = []
-        for i, f in enumerate(target):
-            list_target.append(torch.unsqueeze(torch.load(args.data_path + data_name[f]), 0))
-            list_target_label.append(i)
-        list_target = tuple(list_target)
-        target_data = torch.cat(list_target, 0)
-        target_label = torch.from_numpy(np.array(list_target_label))
+        # data_name = sorted(os.listdir(args.data_path))
+        # list_target = []
+        # list_target_label = []
+        # for i, f in enumerate(target):
+        #     list_target.append(torch.unsqueeze(torch.load(args.data_path + data_name[f]), 0))
+        #     list_target_label.append(i)
+        # list_target = tuple(list_target)
+        # target_data = torch.cat(list_target, 0)
+        # target_label = torch.from_numpy(np.array(list_target_label))
+        noise_scale = args.sens / epsilon_of_point
         for i in range(args.num_test_set):
             sample = np.random.binomial(n=1, p=args.sample_target_rate, size=1).astype(bool)
             true_label.append(int(sample[0]))
@@ -118,8 +119,8 @@ def run(args, target, device):
                 x_test = torch.cat((target_data, x_test), 0)
                 y_test = torch.cat((target_label, y_test), 0)
                 temp_x = x_test.numpy()
-                temp_x[:args.num_target] = temp_x[:args.num_target] + np.random.laplace(0, args.sens * args.num_feature / args.epsilon,
-                                                          temp_x[:args.num_target].shape)
+                noise = np.random.laplace(0,noise_scale,temp_x[:args.num_target].shape)
+                temp_x[:args.num_target] = temp_x[:args.num_target] + noise
                 x_test = torch.from_numpy(temp_x.astype(np.float32))
             criteria = nn.CrossEntropyLoss()
             model.to(device)
