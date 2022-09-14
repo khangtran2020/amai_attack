@@ -36,7 +36,7 @@ def run(args, target, device):
         shuffle=False,
         num_workers=0, batch_size=200000)
     print("Sensitivity: {}, Number of features: {}, epsilon used in training: {}, noise scale: {}".format(args.sens, args.num_feature,
-                                                                                         args.epsilon, args.sens*args.num_feature/
+                                                                                         args.epsilon, args.sens/
                                                                                          args.epsilon))
     model = train(args=args, target=target, device=device, data=(train_loader, valid_loader), model=model)
     if args.train_mode == 'target':
@@ -54,7 +54,7 @@ def run(args, target, device):
         certified = 0
         for i, eps in enumerate(np.linspace(args.min_epsilon, args.max_epsilon, 100)):
             temp_x = target_data.numpy()
-            noise_scale = args.sens * args.num_feature / eps
+            noise_scale = args.sens / eps
             print("Sensitivity: {}, Number of features: {}, epsilon used in certify: {}, noise scale: {}".format(
                 args.sens, args.num_feature,
                 eps, noise_scale))
