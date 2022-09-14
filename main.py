@@ -146,7 +146,7 @@ def run(args, target, device):
                 'precision': precision,
                 'recall': recall
             }
-            pred_ = min(1, sum(pred.cpu().numpy().astype(int)))
+            pred_ = min(1, sum(1 - pred.cpu().numpy().astype(int)))
             if pred_ == 0:
                 # print('Test {}'.format(i))
                 predicted.append(0)
