@@ -69,8 +69,8 @@ def train(args, target, device, data, model):
         model.train()
         fc1, fc2, probs = model(x_train)
 
-        # loss = criteria(probs, y_train) + triplet_loss(fc1[:args.train_multiplier], fc1[torch.randperm(args.train_multiplier)], fc1[args.train_multiplier + torch.randperm(args.train_multiplier)])
-        loss = triplet_loss(fc1[:args.train_multiplier], fc1[torch.randperm(args.train_multiplier)], fc1[args.train_multiplier + torch.randperm(args.train_multiplier)])
+        loss = criteria(probs, y_train)
+        # loss = triplet_loss(fc1[:args.train_multiplier], fc1[torch.randperm(args.train_multiplier)], fc1[args.train_multiplier + torch.randperm(args.train_multiplier)])
         loss_value += loss
         predictions = fc2[:, 0] < 0
         tpr_train, tnr_train, _ = tpr_tnr(predictions, y_train)
