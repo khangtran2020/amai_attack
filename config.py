@@ -38,14 +38,11 @@ def add_model_group(group):
     group.add_argument("--num_steps", type=int, default=2000)
     group.add_argument("--early_stopping", type=int, default=100)
     group.add_argument("--test_ver", type=int, default=1)
-    group.add_argument("--over_samp", type=int, default=100)
+    group.add_argument("--over_samp", type=int, default=10)
 
 
 def add_defense_group(group):
     group.add_argument('--epsilon', type=float, default=1.0, help="epsilon")
-    group.add_argument('--min_eps', type=float, default=1.0, help="epsilon")
-    group.add_argument('--max_eps', type=float, default=4.0, help="epsilon")
-    group.add_argument('--eps_step', type=int, default=100, help="epsilon")
     group.add_argument('--min_epsilon', type=float, default=0.1, help="epsilon")
     group.add_argument('--max_epsilon', type=float, default=20.0, help="epsilon")
     group.add_argument('--fix_epsilon', type=float, default=1.0, help="epsilon")
@@ -56,7 +53,6 @@ def add_defense_group(group):
     group.add_argument('--num_test_set', type=int, default=100, help="number of generated test set")
     group.add_argument('--num_test_point', type=int, default=1, help="number of test point in one test set")
     group.add_argument('--sample_target_rate', type=float, default=0.1, help="rate of target")
-    group.add_argument('--eps_train_step', type=int, default=4, help="rate of target")
 
 
 def parse_args():
