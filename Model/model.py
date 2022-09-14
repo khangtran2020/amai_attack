@@ -40,7 +40,7 @@ def train(args, target, device, data, model):
     else:
         SAVE_NAME = 'CELEBA_multiple_{}_Lap_eps_{}'.format(args.num_target, args.epsilon)
 
-    custom_weight = np.array([1600.0, 200.0])
+    custom_weight = np.array([200.0, 1600.0])
     criteria = nn.CrossEntropyLoss(weight=torch.tensor(custom_weight, dtype=torch.float).to(device))
     triplet_loss = nn.TripletMarginLoss(margin=1.0, p=2)
     model.to(device)
