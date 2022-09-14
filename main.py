@@ -47,20 +47,23 @@ def run(args, target, device):
         for i, f in enumerate(target):
             list_target.append(torch.unsqueeze(torch.load(args.data_path + data_name[f]), 0))
             list_target_label.append(i)
-        print(list_target, list_target_label)
-        exit()
         list_target = tuple(list_target)
         target_data = torch.cat(list_target, 0)
         target_label = torch.from_numpy(np.array(list_target_label))
         epsilon_of_point = args.max_epsilon
         certified = 0
-        # for eps in tqdm(np.linspace(args.min_epsilon, args.max_epsilon, 100)):
         for i, eps in enumerate(np.linspace(args.min_epsilon, args.max_epsilon, 100)):
             temp_x = target_data.numpy()
-            generated_target = np.tile(temp_x, (args.num_draws + 1, 1))
-            generated_target[1:, :] = generated_target[1:, :] + np.random.laplace(0,
-                                                                                  args.sens * args.num_feature / eps,
-                                                                                  generated_target[1:, :].shape)
+            noise_scale = args.sens * args.num_feature / eps
+            print("Sensitivity: {}, Number of features: {}, epsilon used in certify: {}, noise scale: {}".format(
+                args.sens, args.num_feature,
+                eps, noise_scale))
+            generated_target_org = np.tile(temp_x, (args.num_draws + 1, 1))
+            noise = np.random.laplace(0, noise_scale, generated_target_org[1:, :].shape)
+            generated_target = generated_target_org.copy()
+            generated_target[1:, :] = generated_target[1:, :] + noise
+            print('L2 norm of noise: {}', np.linalg.norm(noise, ord=2))
+            print('L2 distance: {}', np.linalg.norm(generated_target - generated_target_org, ord=2))
             temp_x = torch.from_numpy(generated_target.astype(np.float32)).to(device)
             fc1, fc2, out = model(temp_x)
             pred = fc2[:, 0].cpu().detach().numpy()

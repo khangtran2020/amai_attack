@@ -47,7 +47,7 @@ def train(args, target, device, data, model):
     max_correct = 0
     max_tpr = 0.0
     max_tnr = 0.0
-    noise_scale = args.sens * args.num_feature / args.epsilon
+    noise_scale = args.sens / args.epsilon
     print('Start training process with {} epochs'.format(args.num_steps))
     x_train, y_train, imgs_train = next(iter(train_dataloader))
     temp_x = x_train.numpy()
@@ -69,10 +69,8 @@ def train(args, target, device, data, model):
     y_train = y_train.to(device)
     x_valid, y_valid, _ = next(iter(valid_dataloader))
     temp_x = x_valid.numpy()
-    temp_x[1:args.valid_multiplier] = temp_x[1:args.valid_multiplier] + np.random.laplace(0,
-                                                                                          args.sens * args.num_feature / args.epsilon,
-                                                                                          temp_x[
-                                                                                          1:args.valid_multiplier].shape)
+    noise = np.random.laplace(0, noise_scale, temp_x[1:args.valid_multiplier].shape)
+    temp_x[1:args.valid_multiplier] = temp_x[1:args.valid_multiplier] + noise
     x_valid = torch.from_numpy(temp_x)
     x_valid = x_valid.to(device)
     y_valid = y_valid.to(device)
