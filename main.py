@@ -117,15 +117,18 @@ def run(args, target, device):
             pred = fc2[:, 0].cpu().detach().numpy()
             print(pred)
             # exit()
-            same_sign = (pred[1:] * pred[0]) > 0
+            # same_sign = (pred[1:] * pred[0]) > 0
+            larger_than_zero = pred > 0
             # print(same_sign)
-            count_of_same_sign = sum(same_sign.astype(int))
-            count_of_diff_sign = args.num_draws - count_of_same_sign
+            # count_of_same_sign = sum(larger_than_zero.astype(int))
+            # count_of_diff_sign = args.num_draws - count_of_same_sign
+            count_of_larger_than_zero = sum(larger_than_zero.astype(int))
+            count_of_smaller_than_zero = args.num_draws - count_of_larger_than_zero
             print(
-                'For eps {}, # same sign: {}, # diff sign: {}'.format(
-                    eps, count_of_same_sign, count_of_diff_sign))
-            upper_bound = hoeffding_upper_bound(count_of_diff_sign, nobs=args.num_draws, alpha=args.alpha)
-            lower_bound = hoeffding_lower_bound(count_of_same_sign, nobs=args.num_draws, alpha=args.alpha)
+                'For eps {}, # larger than 0: {}, # smaller or equal to 0: {}'.format(
+                    eps, count_of_larger_than_zero, count_of_smaller_than_zero))
+            upper_bound = hoeffding_upper_bound(count_of_smaller_than_zero, nobs=args.num_draws, alpha=args.alpha)
+            lower_bound = hoeffding_lower_bound(count_of_larger_than_zero, nobs=args.num_draws, alpha=args.alpha)
             if (lower_bound > upper_bound):
                 certified = int(1.0)
                 epsilon_of_point = min(epsilon_of_point, eps)
