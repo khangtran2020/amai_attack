@@ -30,11 +30,11 @@ def run(args, target, device):
     train_loader = torch.utils.data.DataLoader(
         CelebA(args=args, target=target, transform=transform, dataroot=args.data_path, mode='train', imgroot=None),
         shuffle=True,
-        num_workers=0, batch_size=args.batch_size)
+        num_workers=0, batch_size=args.batch_size, multiplier=args.train_multiplier)
     valid_loader = torch.utils.data.DataLoader(
         CelebA(args=args, target=target, transform=transform, dataroot=args.data_path, mode='valid', imgroot=None),
         shuffle=True,
-        num_workers=0, batch_size=args.batch_size)
+        num_workers=0, batch_size=args.batch_size, multiplier=args.valid_multiplier)
     model = train(args=args, target=target, device=device, data=(train_loader, valid_loader), model=model)
     exit()
     if args.train_mode == 'target':
