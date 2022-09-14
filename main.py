@@ -112,13 +112,6 @@ def run(args, target, device):
                 num_workers=0, batch_size=args.num_test_point)
             x_test, y_test, file_name = next(iter(test_loader))
             true_label.append(sample[0])
-            # x_test = target_data
-            # y_test = target_label
-            # temp_x = x_test.numpy()
-            # noise = np.random.laplace(0,noise_scale,temp_x[:args.num_target].shape)
-            # temp_x[:args.num_target] = temp_x[:args.num_target] + noise
-            # x_test = torch.from_numpy(temp_x.astype(np.float32))
-            #
             if sample[0]:
                 x_test = torch.cat((target_data, x_test), 0)
                 y_test = torch.cat((target_label, y_test), 0)
@@ -132,10 +125,10 @@ def run(args, target, device):
             y_test = y_test.to(device)
             fc1, fc2, out = model(x_test)
             loss = criteria(out, y_test).item()
-            pred = fc2[:, 0] < 0 # whether it not activated True if its activated, False if it's not activated
+            pred = fc2[:, 0] > 0 # whether it not activated True if its activated, False if it's not activated
             # a = 1 - pred.cpu().numpy().astype(int) # whether it activated / a[i] = True => i is the target
             # sum(a) # if 1 of them is activated -> >= 1, if all ofthem are not activated -> 0
-            print("Test {}".format(i),sample, pred, sum(1 - pred.cpu().numpy().astype(int)), min(1, sum(1 - pred.cpu().numpy().astype(int))))
+            print("Test {}".format(i),sample, pred, sum(pred.cpu().numpy().astype(int)), min(1, sum(pred.cpu().numpy().astype(int))))
             print(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
             acc = accuracy_score(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
             precision = precision_score(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
@@ -146,7 +139,7 @@ def run(args, target, device):
                 'precision': precision,
                 'recall': recall
             }
-            pred_ = min(1, sum(1 - pred.cpu().numpy().astype(int)))
+            pred_ = min(1, sum(pred.cpu().numpy().astype(int)))
             if pred_ == 0:
                 # print('Test {}'.format(i))
                 predicted.append(0)
