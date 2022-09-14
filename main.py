@@ -36,7 +36,7 @@ def run(args, target, device):
         shuffle=False,
         num_workers=0, batch_size=200000)
     model = train(args=args, target=target, device=device, data=(train_loader, valid_loader), model=model)
-    print("Sensitivity: {}, Number of features: {}, epsilon used in training: {}".format(args.sens, args.num_feature, args.epsilon)
+    print("Sensitivity: {}, Number of features: {}, epsilon used in training: {}".format(args.sens, args.num_feature, args.epsilon))
     exit()
     if args.train_mode == 'target':
         results = {}
