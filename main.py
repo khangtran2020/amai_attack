@@ -48,8 +48,8 @@ def run(args, target, device):
     print("Sensitivity: {}, Number of features: {}, epsilon used in training: {}, noise scale: {}".format(args.sens, args.num_feature,
                                                                                          args.epsilon, args.sens/
                                                                                          args.epsilon))
-    model = train_triplet(args=args, target=target, device=device, data=(train_loader, valid_loader), model=model)
-    # exit()
+    model = train_triplet_eval(args=args, target=target, device=device, data=(train_loader, valid_loader), model=model)
+    exit()
     if args.train_mode == 'target':
         results = {}
         data_name = sorted(os.listdir(args.data_path))

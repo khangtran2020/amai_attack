@@ -8,6 +8,7 @@ from Utils.utils import *
 from tqdm import tqdm
 import sklearn
 from Bound.robustness import hoeffding_lower_bound, hoeffding_upper_bound
+from Data.celeba import CelebATriplet
 
 # def eval_model(nodes, num_nodes, hnet, net, criteria, device, split):
 #     curr_results = evaluate(nodes, num_nodes, hnet, net, criteria, device, split=split)
@@ -120,65 +121,97 @@ def evaluate_robust(args, data, model, device='cpu'):
     return results
 
 
-# def evaluate_intrain(args, data, model, device='cpu',):
-#     results = {}
-#     true_label = []
-#     predicted = []
-#     if certified:
-#         noise_scale = args.sens / epsilon_of_point
-#         print("Noise scale fore the attack:", noise_scale)
-#     else:
-#         print("Didn't ceritfied")
-#         exit()
-#     for i in range(args.num_test_set):
-#         sample = np.random.binomial(n=1, p=args.sample_target_rate, size=1).astype(bool)
-#         test_loader = torch.utils.data.DataLoader(
-#             CelebA(args, target, transform, args.data_path, 'test', imgroot=None, include_tar=sample[0]),
-#             shuffle=False,
-#             num_workers=0, batch_size=args.num_test_point)
-#         x_test, y_test, file_name = next(iter(test_loader))
-#         y_test = 1 - y_test
-#         true_label.append(sample[0])
-#         if sample[0]:
-#             x_test = torch.cat((target_data, x_test), 0)
-#             y_test = torch.cat((target_label, y_test), 0)
-#             temp_x = x_test.numpy()
-#             noise = np.random.laplace(0, noise_scale, temp_x[:args.num_target].shape)
-#             temp_x[:args.num_target] = temp_x[:args.num_target] + noise
-#             x_test = torch.from_numpy(temp_x.astype(np.float32))
-#         criteria = nn.CrossEntropyLoss()
-#         model.to(device)
-#         x_test = x_test.to(device)
-#         y_test = y_test.to(device)
-#         fc2, fc3, prob = model(x_test)
-#         loss = criteria(prob, y_test).item()
-#         pred = fc3[:, 0] > 0
-#         print("Test {}".format(i), sample, pred, sum(pred.cpu().numpy().astype(int)),
-#               min(1, sum(pred.cpu().numpy().astype(int))))
-#         print(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
-#         acc = accuracy_score(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
-#         precision = precision_score(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
-#         recall = recall_score(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
-#         results['res_of_each_test']['test_{}'.format(i)] = {
-#             'loss': loss,
-#             'acc': acc,
-#             'precision': precision,
-#             'recall': recall
-#         }
-#         pred_ = sum(pred.cpu().numpy().astype(int))
-#         if pred_ == 0:
-#             # print('Test {}'.format(i))
-#             predicted.append(0)
-#             results['res_of_each_test']['test_{}'.format(i)]['has_target'] = int(sample[0])
-#             # results['res_of_each_test']['test_{}'.format(i)]['has_target'] = 0
-#             results['res_of_each_test']['test_{}'.format(i)]['predict'] = 0
-#         else:
-#             predicted.append(1)
-#             results['res_of_each_test']['test_{}'.format(i)]['has_target'] = int(sample[0])
-#             # results['res_of_each_test']['test_{}'.format(i)]['has_target'] = 0
-#             results['res_of_each_test']['test_{}'.format(i)]['predict'] = 1
-#             # print("Test", i)
-# def user_dp_draw_noise(args, hnet):
-#
-#
-#     pass
+def evaluate_intrain(args, model, certified, target, target_data, target_label, eps_cert, device='cpu'):
+    results = {}
+    true_label = []
+    predicted = []
+    if certified:
+        noise_scale = args.sens / eps_cert
+        print("Noise scale fore the attack:", noise_scale)
+    else:
+        print("Didn't ceritfied")
+        return
+    for i in range(args.num_test_set):
+        sample = np.random.binomial(n=1, p=args.sample_target_rate, size=1).astype(bool)
+        test_loader = torch.utils.data.DataLoader(
+            CelebATriplet(args, target, None, args.data_path, 'test', imgroot=None, include_tar=sample[0]),
+            shuffle=False,
+            num_workers=0, batch_size=args.num_test_point)
+        x_test, y_test, file_name = next(iter(test_loader))
+        y_test = 1 - y_test
+        true_label.append(sample[0])
+        if sample[0]:
+            x_test = torch.cat((target_data, x_test), 0)
+            y_test = torch.cat((target_label, y_test), 0)
+            temp_x = x_test.numpy()
+            noise = np.random.laplace(0, noise_scale, temp_x[:args.num_target].shape)
+            temp_x[:args.num_target] = temp_x[:args.num_target] + noise
+            x_test = torch.from_numpy(temp_x.astype(np.float32))
+        criteria = nn.CrossEntropyLoss()
+        model.to(device)
+        x_test = x_test.to(device)
+        y_test = y_test.to(device)
+        fc2, fc3, prob = model(x_test)
+        loss = criteria(prob, y_test).item()
+        pred = fc3[:, 0] > 0
+        acc = accuracy_score(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
+        precision = precision_score(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
+        recall = recall_score(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
+        results['res_of_each_test']['test_{}'.format(i)] = {
+            'loss': loss,
+            'acc': acc,
+            'precision': precision,
+            'recall': recall
+        }
+        pred_ = sum(pred.cpu().numpy().astype(int))
+        if pred_ == 0:
+            # print('Test {}'.format(i))
+            predicted.append(0)
+            results['res_of_each_test']['test_{}'.format(i)]['has_target'] = int(sample[0])
+            results['res_of_each_test']['test_{}'.format(i)]['predict'] = 0
+        else:
+            predicted.append(1)
+            results['res_of_each_test']['test_{}'.format(i)]['has_target'] = int(sample[0])
+            results['res_of_each_test']['test_{}'.format(i)]['predict'] = 1
+            # print("Test", i)
+        acc = accuracy_score(true_label, predicted)
+        precision = precision_score(true_label, predicted)
+        recall = recall_score(true_label, predicted)
+        results['test_result'] = {
+            'acc': acc,
+            'precision': precision,
+            'recall': recall,
+        }
+    return results
+
+def cert_intrain(args, model, target_data, device='cpu'):
+    results = {}
+    epsilon_of_point = args.max_epsilon
+    certified = 0
+    for i, eps in enumerate(np.linspace(args.min_epsilon, args.max_epsilon, 100)):
+        temp_x = target_data.numpy()
+        noise_scale = args.sens / eps
+        generated_target_org = np.tile(temp_x, (args.num_draws + 1, 1))
+        noise = np.random.laplace(0, noise_scale, generated_target_org[1:, :].shape)
+        generated_target = generated_target_org.copy()
+        generated_target[1:, :] = generated_target[1:, :] + noise
+        temp_x = torch.from_numpy(generated_target.astype(np.float32)).to(device)
+        fc1, fc2, out = model(temp_x)
+        pred = fc2[:, 0].cpu().detach().numpy()
+        larger_than_zero = pred > 0
+        count_of_larger_than_zero = sum(larger_than_zero.astype(int))
+        count_of_smaller_than_zero = args.num_draws - count_of_larger_than_zero
+        upper_bound = hoeffding_upper_bound(count_of_smaller_than_zero, nobs=args.num_draws, alpha=args.alpha)
+        lower_bound = hoeffding_lower_bound(count_of_larger_than_zero, nobs=args.num_draws, alpha=args.alpha)
+        if (lower_bound > upper_bound):
+            certified = int(1.0)
+            epsilon_of_point = min(epsilon_of_point, eps)
+        # print("Done for eps: {}".format(eps))
+    results['certified_for_target'] = {
+        'search_range_min': args.min_epsilon,
+        'search_range_max': args.max_epsilon,
+        'certified': certified,
+        'eps_min': epsilon_of_point,
+        'confidence': 1 - args.alpha
+    }
+    return results, epsilon_of_point, certified
