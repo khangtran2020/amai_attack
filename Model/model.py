@@ -175,8 +175,8 @@ def train_triplet(args, target, device, data, model):
         del (pre3)
         del (probs2)
         del (probs3)
-        loss = criteria(probs1, y_train) + args.reg*triplet_loss(f1, f2, f3)
-        # loss = criteria(probs1, y_train) + triplet_loss(f1, f2, f3)
+        # loss = criteria(probs1, y_train) + args.reg*triplet_loss(f1, f2, f3)
+        loss = triplet_loss(f1, f2, f3)
         loss_value += loss
         predictions = pre1[:, 0] < 0
         tpr_train, tnr_train, _ = tpr_tnr(predictions, y_train)
