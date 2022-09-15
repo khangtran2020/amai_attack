@@ -49,7 +49,7 @@ def run(args, target, device):
                                                                                          args.epsilon, args.sens/
                                                                                          args.epsilon))
     model = train_triplet(args=args, target=target, device=device, data=(train_loader, valid_loader), model=model)
-    exit()
+    # exit()
     if args.train_mode == 'target':
         results = {}
         data_name = sorted(os.listdir(args.data_path))
