@@ -103,8 +103,8 @@ def run(args, target, device):
             'eps_min': epsilon_of_point,
             'confidence': 1 - args.alpha
         }
-        print(results)
-        exit()
+        # print(results)
+        # exit()
         results['number_of_test_set'] = args.num_test_set
         results['sample_target_rate'] = args.sample_target_rate
         results['res_of_each_test'] = {}
