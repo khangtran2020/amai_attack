@@ -207,27 +207,14 @@ class CelebATriplet(Dataset):
                     return img_tensor1, img_tensor2, img_tensor3, class_id, filename1
         elif self.mode == 'valid':
             if idx / self.target_multiplier < len(self.target):
-                filename1 = self.data_name[self.target[int(idx / self.target_multiplier)]]
-                id2 = np.random.choice(a=np.arange(int(0.6 * self.num_file), int(0.8 * self.num_file)), size=1, replace=False)[0]
-                filename2 = self.data_name[self.non_target[self.valid_data[id2]]]
+                filename = self.data_name[self.target[int(idx / self.target_multiplier)]]
+                # img_loc = os.path.join(self.dataroot, self.data_name[self.target[idx]])
                 class_id = torch.tensor(int(idx / self.target_multiplier))
-                img_tensor1 = torch.load(self.dataroot + filename1)
-                img_tensor2 = torch.load(self.dataroot + filename2)
-                temp_x = img_tensor1.numpy()
-                noise = np.random.laplace(0, self.noise_scale, temp_x.shape)
-                temp_x = temp_x + noise
-                img_tensor3 = torch.from_numpy(temp_x)
-                return img_tensor1, img_tensor3, img_tensor2, class_id, filename1
             else:
-                if idx / self.target_multiplier < len(self.target):
-                    filename = self.data_name[self.target[int(idx / self.target_multiplier)]]
-                    # img_loc = os.path.join(self.dataroot, self.data_name[self.target[idx]])
-                    class_id = torch.tensor(int(idx / self.target_multiplier))
-                else:
-                    idx -= len(self.target) * self.target_multiplier
-                    filename = self.data_name[self.non_target[self.valid_data[idx]]]
-                    # img_loc = os.path.join(self.dataroot, self.data_name[self.valid_data[idx]])
-                    class_id = torch.tensor(len(self.target))
+                idx -= len(self.target) * self.target_multiplier
+                filename = self.data_name[self.non_target[self.valid_data[idx]]]
+                # img_loc = os.path.join(self.dataroot, self.data_name[self.valid_data[idx]])
+                class_id = torch.tensor(len(self.target))
         else:
             filename = self.data_name[self.non_target[self.test_data[idx]]]
             class_id = torch.tensor(len(self.target))
