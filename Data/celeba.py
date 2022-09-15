@@ -185,7 +185,7 @@ class CelebATriplet(Dataset):
                 noise = np.random.laplace(0, self.noise_scale, temp_x.shape)
                 temp_x = temp_x + noise
                 img_tensor3 = torch.from_numpy(temp_x.astype(np.float32))
-                sample = np.random.binomial(1, args.sample_rate, 1)[0]
+                sample = np.random.binomial(1, self.args.sample_rate, 1)[0]
                 if sample:
                     return img_tensor1, img_tensor2, img_tensor3, class_id, filename1
                 else:
