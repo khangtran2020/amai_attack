@@ -139,7 +139,7 @@ def train_triplet(args, target, device, data, model):
     results = defaultdict(list)
 
     if args.debug:
-        SAVE_NAME = 'debugging_eps_{}.pt'.format(args.epsilon)
+        SAVE_NAME = 'debugging_eps_{}_reg_{}.pt'.format(args.epsilon,args.reg)
     else:
         if args.num_target == 1:
             SAVE_NAME = 'CELEBA_single_Laplace_eps_{}.pt'.format(args.epsilon)
