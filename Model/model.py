@@ -36,7 +36,7 @@ class ClassifierTriplet(nn.Module):
         self.fc1 = nn.Linear(n_inputs, self.kernel_size)
         self.fc2 = nn.Linear(self.kernel_size, self.kernel_size)
         self.fc3 = nn.Linear(self.kernel_size, int(self.kernel_size/2))
-        self.fc4 = nn.Linear(self.kernel_size, n_outputs)
+        self.fc4 = nn.Linear(int(self.kernel_size/2), n_outputs)
 
     def forward(self, x):
         fc1 = self.fc1(x)
