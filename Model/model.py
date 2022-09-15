@@ -206,7 +206,7 @@ def train_triplet(args, target, device, data, model):
             }
 
             max_tpr = (tpr + tnr) / 2
-            torch.save(state, args.save_path+SAVE_NAME)
+            torch.save(model, args.save_path+SAVE_NAME)
         if step % 10 == 0:
             # print(f'Loss: {loss_value.item()} | Acc: {num_correct}/{num_samples} | Epoch: {i}')
             print(
