@@ -123,6 +123,7 @@ def evaluate_robust(args, data, model, device='cpu'):
 
 def evaluate_intrain(args, model, certified, target, target_data, target_label, eps_cert, device='cpu'):
     results = {}
+    results['res_of_each_test'] = {}
     true_label = []
     predicted = []
     if certified:
