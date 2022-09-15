@@ -137,10 +137,14 @@ def train_triplet(args, target, device, data, model):
     train_dataloader, valid_dataloader = data
     optimizer = torch.optim.AdamW(params=model.parameters(), lr=args.lr)
     results = defaultdict(list)
-    if args.num_target == 1:
-        SAVE_NAME = 'CELEBA_single_Laplace_eps_{}'.format(args.epsilon)
+
+    if args.debug:
+        SAVE_NAME = 'debugging_eps_{}.pt'.format(args.epsilon)
     else:
-        SAVE_NAME = 'CELEBA_multiple_{}_Lap_eps_{}'.format(args.num_target, args.epsilon)
+        if args.num_target == 1:
+            SAVE_NAME = 'CELEBA_single_Laplace_eps_{}.pt'.format(args.epsilon)
+        else:
+            SAVE_NAME = 'CELEBA_multiple_{}_Lap_eps_{}.pt'.format(args.num_target, args.epsilon)
 
     custom_weight = np.array([1600.0, 200.0])
     criteria = nn.CrossEntropyLoss(weight=torch.tensor(custom_weight, dtype=torch.float).to(device))
