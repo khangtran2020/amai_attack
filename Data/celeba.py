@@ -176,7 +176,7 @@ class CelebATriplet(Dataset):
         if self.mode == 'train':
             if idx / self.target_multiplier < len(self.target):
                 filename1 = self.data_name[self.target[int(idx / self.target_multiplier)]]
-                id2 = np.random.choice(a=np.arange(0, int(0.6*self.num_file)), size=1, replace=False)
+                id2 = np.random.choice(a=np.arange(0, int(0.6*self.num_file)), size=1, replace=False)[0]
                 filename2 = self.data_name[self.non_target[self.train_data[id2]]]
                 class_id = torch.tensor(int(idx / self.target_multiplier))
                 img_tensor1 = torch.load(self.dataroot + filename1)
