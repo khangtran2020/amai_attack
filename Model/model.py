@@ -154,7 +154,7 @@ def train_triplet(args, target, device, data, model):
     img3 = img3.to(device)
     y_train = 1 - y_train
     y_train = y_train.to(device)
-    x_valid, y_valid, imgs_valid = next(iter(train_dataloader))
+    x_valid, y_valid, imgs_valid = next(iter(valid_dataloader))
     temp_x = x_valid.numpy()
     noise = np.random.laplace(0, noise_scale, temp_x[1:args.valid_multiplier].shape)
     temp_x[1:args.valid_multiplier] = temp_x[1:args.valid_multiplier] + noise
