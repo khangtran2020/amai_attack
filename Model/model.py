@@ -158,7 +158,7 @@ def train_triplet(args, target, device, data, model):
     temp_x = x_valid.numpy()
     noise = np.random.laplace(0, noise_scale, temp_x[1:args.valid_multiplier].shape)
     temp_x[1:args.valid_multiplier] = temp_x[1:args.valid_multiplier] + noise
-    x_valid = torch.from_numpy(temp_x)
+    x_valid = torch.from_numpy(temp_x.astype(np.float32))
     x_valid = x_valid.to(device)
     y_valid = 1 - y_valid
     y_valid = y_valid.to(device)
