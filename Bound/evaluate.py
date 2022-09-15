@@ -119,6 +119,65 @@ def evaluate_robust(args, data, model, device='cpu'):
         }
     return results
 
+
+# def evaluate_intrain(args, data, model, device='cpu',):
+#     results = {}
+#     true_label = []
+#     predicted = []
+#     if certified:
+#         noise_scale = args.sens / epsilon_of_point
+#         print("Noise scale fore the attack:", noise_scale)
+#     else:
+#         print("Didn't ceritfied")
+#         exit()
+#     for i in range(args.num_test_set):
+#         sample = np.random.binomial(n=1, p=args.sample_target_rate, size=1).astype(bool)
+#         test_loader = torch.utils.data.DataLoader(
+#             CelebA(args, target, transform, args.data_path, 'test', imgroot=None, include_tar=sample[0]),
+#             shuffle=False,
+#             num_workers=0, batch_size=args.num_test_point)
+#         x_test, y_test, file_name = next(iter(test_loader))
+#         y_test = 1 - y_test
+#         true_label.append(sample[0])
+#         if sample[0]:
+#             x_test = torch.cat((target_data, x_test), 0)
+#             y_test = torch.cat((target_label, y_test), 0)
+#             temp_x = x_test.numpy()
+#             noise = np.random.laplace(0, noise_scale, temp_x[:args.num_target].shape)
+#             temp_x[:args.num_target] = temp_x[:args.num_target] + noise
+#             x_test = torch.from_numpy(temp_x.astype(np.float32))
+#         criteria = nn.CrossEntropyLoss()
+#         model.to(device)
+#         x_test = x_test.to(device)
+#         y_test = y_test.to(device)
+#         fc2, fc3, prob = model(x_test)
+#         loss = criteria(prob, y_test).item()
+#         pred = fc3[:, 0] > 0
+#         print("Test {}".format(i), sample, pred, sum(pred.cpu().numpy().astype(int)),
+#               min(1, sum(pred.cpu().numpy().astype(int))))
+#         print(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
+#         acc = accuracy_score(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
+#         precision = precision_score(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
+#         recall = recall_score(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
+#         results['res_of_each_test']['test_{}'.format(i)] = {
+#             'loss': loss,
+#             'acc': acc,
+#             'precision': precision,
+#             'recall': recall
+#         }
+#         pred_ = sum(pred.cpu().numpy().astype(int))
+#         if pred_ == 0:
+#             # print('Test {}'.format(i))
+#             predicted.append(0)
+#             results['res_of_each_test']['test_{}'.format(i)]['has_target'] = int(sample[0])
+#             # results['res_of_each_test']['test_{}'.format(i)]['has_target'] = 0
+#             results['res_of_each_test']['test_{}'.format(i)]['predict'] = 0
+#         else:
+#             predicted.append(1)
+#             results['res_of_each_test']['test_{}'.format(i)]['has_target'] = int(sample[0])
+#             # results['res_of_each_test']['test_{}'.format(i)]['has_target'] = 0
+#             results['res_of_each_test']['test_{}'.format(i)]['predict'] = 1
+#             # print("Test", i)
 # def user_dp_draw_noise(args, hnet):
 #
 #
