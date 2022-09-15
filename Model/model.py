@@ -35,16 +35,19 @@ class ClassifierTriplet(nn.Module):
         self.kernel_size = args.embed_dim
         self.fc1 = nn.Linear(n_inputs, self.kernel_size)
         self.fc2 = nn.Linear(self.kernel_size, self.kernel_size)
-        self.fc3 = nn.Linear(self.kernel_size, n_outputs)
+        self.fc3 = nn.Linear(self.kernel_size, int(self.kernel_size/2))
+        self.fc4 = nn.Linear(self.kernel_size, n_outputs)
 
     def forward(self, x):
         fc1 = self.fc1(x)
         fc1 = F.relu(fc1)
         fc2 = self.fc2(fc1)
         fc2 = F.relu(fc2)
-        fc3 = self.fc3(fc1)
-        prob = torch.softmax(fc3, dim=1)
-        return fc2, fc3, prob
+        fc3 = self.fc3(fc2)
+        fc3 = F.relu(fc3)
+        fc4 = self.fc4(fc3)
+        prob = torch.softmax(fc4, dim=1)
+        return fc2, fc4, prob
 
 
 # (args=args, device=device, data=data_loader, model=model)
