@@ -57,7 +57,7 @@ def run(args, target, device):
         list_target_label = []
         for i, f in enumerate(target):
             list_target.append(torch.unsqueeze(torch.load(args.data_path + data_name[f]), 0))
-            list_target_label.append(i)
+            list_target_label.append(1)
         list_target = tuple(list_target)
         target_data = torch.cat(list_target, 0)
         target_label = torch.from_numpy(np.array(list_target_label))
@@ -111,7 +111,7 @@ def run(args, target, device):
         true_label = []
         predicted = []
         if certified:
-            noise_scale = args.sens / (epsilon_of_point * 200)
+            noise_scale = args.sens / epsilon_of_point
             print("Noise scale fore the attack:", noise_scale)
         else:
             print("Didn't ceritfied")
@@ -123,6 +123,7 @@ def run(args, target, device):
                 shuffle=False,
                 num_workers=0, batch_size=args.num_test_point)
             x_test, y_test, file_name = next(iter(test_loader))
+            y_test = 1 - y_test
             true_label.append(sample[0])
             if sample[0]:
                 x_test = torch.cat((target_data, x_test), 0)
@@ -135,11 +136,9 @@ def run(args, target, device):
             model.to(device)
             x_test = x_test.to(device)
             y_test = y_test.to(device)
-            fc1, fc2, out = model(x_test)
-            loss = criteria(out, y_test).item()
-            pred = fc2[:, 0] > 0 # whether it not activated True if its activated, False if it's not activated
-            # a = 1 - pred.cpu().numpy().astype(int) # whether it activated / a[i] = True => i is the target
-            # sum(a) # if 1 of them is activated -> >= 1, if all ofthem are not activated -> 0
+            fc2, fc3, prob = model(x_test)
+            loss = criteria(prob, y_test).item()
+            pred = fc3[:, 0] > 0
             print("Test {}".format(i),sample, pred, sum(pred.cpu().numpy().astype(int)), min(1, sum(pred.cpu().numpy().astype(int))))
             print(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
             acc = accuracy_score(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
@@ -151,7 +150,7 @@ def run(args, target, device):
                 'precision': precision,
                 'recall': recall
             }
-            pred_ = min(1, sum(pred.cpu().numpy().astype(int)))
+            pred_ = sum(pred.cpu().numpy().astype(int))
             if pred_ == 0:
                 # print('Test {}'.format(i))
                 predicted.append(0)
