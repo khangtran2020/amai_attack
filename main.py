@@ -36,12 +36,12 @@ def run(args, target, device):
     #     shuffle=False,
     #     num_workers=0, batch_size=args.batch_size)
     train_loader = torch.utils.data.DataLoader(
-        CelebATriplet(args=args, target=target, transform=transform, dataroot=args.data_path, mode='train',
+        CelebATripletFull(args=args, target=target, transform=transform, dataroot=args.data_path, mode='train',
                           imgroot=None, multiplier=args.train_multiplier),
         shuffle=False,
         num_workers=0, batch_size=args.batch_size)
     valid_loader = torch.utils.data.DataLoader(
-        CelebATriplet(args=args, target=target, transform=transform, dataroot=args.data_path, mode='valid',
+        CelebATripletFull(args=args, target=target, transform=transform, dataroot=args.data_path, mode='valid',
                           imgroot=None, multiplier=args.valid_multiplier),
         shuffle=False,
         num_workers=0, batch_size=args.batch_size)
