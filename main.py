@@ -52,7 +52,7 @@ def run(args, target, device):
         model = train_triplet(args=args, target=target, device=device, data=(train_loader, valid_loader), model=model)
     else:
         model = train_triplet_eval(args=args, target=target, device=device, data=(train_loader, valid_loader), model=model)
-    # exit()
+    exit()
     if args.train_mode == 'target':
         results = {}
         data_name = sorted(os.listdir(args.data_path))
@@ -204,4 +204,5 @@ if __name__ == '__main__':
     set_seed(args.seed)
     device = get_device(gpus=args.gpu)
     target = [int(i) for i in args.target.split('-')]
+    train_eps = [float(i) for i in args.list_epsilon.split('-')]
     run(args=args, target=target, device=device)
