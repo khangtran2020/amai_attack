@@ -239,24 +239,24 @@ def train_triplet_full(args, target, device, data, model):
     max_tnr = 0.0
     noise_scale = args.sens / args.epsilon
     print('Start training process with {} epochs'.format(args.num_steps))
-    anchor, pos1, pos2, neg1, neg2, y_train, imgs_train = next(iter(train_dataloader))
-    anchor = anchor.to(device)
-    pos1 = pos1.to(device)
-    pos2 = pos2.to(device)
-    neg1 = neg1.to(device)
-    neg2 = neg2.to(device)
-    y_train = 1 - y_train
-    y_train = y_train.to(device)
-    x_valid, y_valid, imgs_valid = next(iter(valid_dataloader))
-    temp_x = x_valid.numpy()
-    noise = np.random.laplace(0, noise_scale, temp_x[1:].shape)
-    temp_x[1:] = temp_x[1:] + noise
-    x_valid = torch.from_numpy(temp_x.astype(np.float32))
-    x_valid = x_valid.to(device)
-    y_valid = 1 - y_valid
-    y_valid = y_valid.to(device)
-    print(torch.bincount(y_train), torch.bincount(y_valid))
     for step in range(args.num_steps):
+        anchor, pos1, pos2, neg1, neg2, y_train, imgs_train = next(iter(train_dataloader))
+        anchor = anchor.to(device)
+        pos1 = pos1.to(device)
+        pos2 = pos2.to(device)
+        neg1 = neg1.to(device)
+        neg2 = neg2.to(device)
+        y_train = 1 - y_train
+        y_train = y_train.to(device)
+        x_valid, y_valid, imgs_valid = next(iter(valid_dataloader))
+        temp_x = x_valid.numpy()
+        noise = np.random.laplace(0, noise_scale, temp_x[1:].shape)
+        temp_x[1:] = temp_x[1:] + noise
+        x_valid = torch.from_numpy(temp_x.astype(np.float32))
+        x_valid = x_valid.to(device)
+        y_valid = 1 - y_valid
+        y_valid = y_valid.to(device)
+        print(torch.bincount(y_train), torch.bincount(y_valid))
         num_correct = 0
         num_samples = 0
         loss_value = 0
