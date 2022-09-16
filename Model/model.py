@@ -257,8 +257,6 @@ def train_triplet_full(args, target, device, data, model):
         y_valid = 1 - y_valid
         y_valid = y_valid.to(device)
         print(torch.bincount(y_train), torch.bincount(y_valid))
-        num_correct = 0
-        num_samples = 0
         loss_value = 0
         model.train()
         f1, pre1, probs1 = model(anchor)
