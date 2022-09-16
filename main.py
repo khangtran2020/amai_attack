@@ -49,7 +49,7 @@ def run(args, target, device):
                                                                                          args.epsilon, args.sens/
                                                                                          args.epsilon))
     if args.val_mode == 'normal':
-        model = train_triplet(args=args, target=target, device=device, data=(train_loader, valid_loader), model=model)
+        model = train_triplet_full(args=args, target=target, device=device, data=(train_loader, valid_loader), model=model)
     else:
         model = train_triplet_eval(args=args, target=target, device=device, data=(train_loader, valid_loader), model=model)
     exit()
