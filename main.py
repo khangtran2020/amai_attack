@@ -80,9 +80,9 @@ def run(args, target, device):
             print('L2 norm of noise: {}', np.linalg.norm(noise, ord=2))
             print('L2 distance: {}', np.linalg.norm(generated_target - generated_target_org, ord=2))
             temp_x = torch.from_numpy(generated_target.astype(np.float32)).to(device)
-            fc1, fc2, out = model(temp_x)
-            pred = fc2[:, 1].cpu().detach().numpy()
-            print(pred)
+            fc2, fc3, prob = model(temp_x)
+            pred = fc3[:, 1].cpu().detach().numpy()
+            # print(pred)
             # exit()
             # same_sign = (pred[1:] * pred[0]) > 0
             larger_than_zero = pred > 0
@@ -142,7 +142,7 @@ def run(args, target, device):
             y_test = y_test.to(device)
             fc2, fc3, prob = model(x_test)
             loss = criteria(prob, y_test).item()
-            pred = fc3[:, 0] > 0
+            pred = fc3[:, 1] > 0
             print("Test {}".format(i),sample, pred, sum(pred.cpu().numpy().astype(int)), min(1, sum(pred.cpu().numpy().astype(int))))
             print(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
             acc = accuracy_score(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
