@@ -81,7 +81,7 @@ def run(args, target, device):
             print('L2 distance: {}', np.linalg.norm(generated_target - generated_target_org, ord=2))
             temp_x = torch.from_numpy(generated_target.astype(np.float32)).to(device)
             fc1, fc2, out = model(temp_x)
-            pred = fc2[:, 0].cpu().detach().numpy()
+            pred = fc2[:, 1].cpu().detach().numpy()
             print(pred)
             # exit()
             # same_sign = (pred[1:] * pred[0]) > 0
