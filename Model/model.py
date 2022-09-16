@@ -157,10 +157,10 @@ def train_triplet(args, target, device, data, model):
     max_tnr = 0.0
     noise_scale = args.sens / args.epsilon
     print('Start training process with {} epochs'.format(args.num_steps))
-    img1, img2, img3, y_train, imgs_train = next(iter(train_dataloader))
-    img1 = img1.to(device)
-    img2 = img2.to(device)
-    img3 = img3.to(device)
+    anchor, pos, neg, y_train, imgs_train = next(iter(train_dataloader))
+    anchor = anchor.to(device)
+    pos = pos.to(device)
+    neg = neg.to(device)
     y_train = 1 - y_train
     y_train = y_train.to(device)
     x_valid, y_valid, imgs_valid = next(iter(valid_dataloader))
@@ -177,9 +177,9 @@ def train_triplet(args, target, device, data, model):
         num_samples = 0
         loss_value = 0
         model.train()
-        f1, pre1, probs1 = model(img1)
-        f2, pre2, probs2 = model(img2)
-        f3, pre3, probs3 = model(img3)
+        f1, pre1, probs1 = model(anchor)
+        f2, pre2, probs2 = model(pos)
+        f3, pre3, probs3 = model(neg)
         del (pre2)
         del (pre3)
         del (probs2)
