@@ -150,24 +150,25 @@ class CelebATriplet(Dataset):
         if shuffle:
             random.shuffle(self.non_target)
         self.num_file = len(self.non_target)
+        self.dataroot = dataroot
+        self.imgroot = imgroot
+        self.data_name = sorted(os.listdir(dataroot))
+        self.mode = mode
+        self.noise_scale = args.sens / args.epsilon
 
         if mode == 'train':
             self.train_data = np.arange(int(0.6 * self.num_file))
-            self.length = len(self.train_data)
+            self.length = len(self.train_data) + len(target)*multiplier
         elif mode == 'valid':
             self.valid_data = np.arange(int(0.6 * self.num_file), int(0.8 * self.num_file))
-            self.length = len(self.valid_data)
+            self.length = len(self.valid_data) + len(target)*multiplier
         else:
             test_point = np.random.choice(a=np.array(list(range(int(0.8 * self.num_file), self.num_file))),
                                           size=args.num_test_point, replace=False)
             self.test_data = test_point
             self.length = len(self.test_data)
 
-        self.dataroot = dataroot
-        self.imgroot = imgroot
-        self.data_name = sorted(os.listdir(dataroot))
-        self.mode = mode
-        self.noise_scale = args.sens / args.epsilon
+
 
     def __len__(self):
         return self.length
@@ -187,13 +188,13 @@ class CelebATriplet(Dataset):
                 img_tensor3 = torch.from_numpy(temp_x.astype(np.float32))
                 sample = np.random.binomial(1, self.args.sample_rate, 1)[0]
                 if sample:
-                    return img_tensor1, img_tensor2, img_tensor3, class_id, filename1
+                    return img_tensor1, img_tensor3, img_tensor2, class_id, filename1
                 else:
                     temp_x = img_tensor1.numpy()
                     noise = np.random.laplace(0, self.noise_scale, temp_x.shape)
                     temp_x = temp_x + noise
                     img_tensor1 = torch.from_numpy(temp_x.astype(np.float32))
-                    return img_tensor1, img_tensor2, img_tensor3, class_id, filename1
+                    return img_tensor1, img_tensor3, img_tensor2, class_id, filename1
             else:
                 idx -= len(self.target) * self.target_multiplier
                 filename1 = self.data_name[self.non_target[self.train_data[idx]]]

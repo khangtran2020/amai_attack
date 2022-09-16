@@ -66,13 +66,14 @@ def run(args, target, device):
         target_label = torch.from_numpy(np.array(list_target_label))
         epsilon_of_point = args.max_epsilon
         certified = 0
+        print(target_data, target_label)
         for i, eps in enumerate(np.linspace(args.min_epsilon, args.max_epsilon, 100)):
             temp_x = target_data.numpy()
             noise_scale = args.sens / eps
             print("Sensitivity: {}, Number of features: {}, epsilon used in certify: {}, noise scale: {}".format(
                 args.sens, args.num_feature,
                 eps, noise_scale))
-            generated_target_org = np.tile(temp_x, (args.num_draws + 1, 1))
+            generated_target_org = np.tile(temp_x, (args.num_draws, 1))
             noise = np.random.laplace(0, noise_scale, generated_target_org[1:, :].shape)
             generated_target = generated_target_org.copy()
             generated_target[1:, :] = generated_target[1:, :] + noise
