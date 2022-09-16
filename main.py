@@ -82,7 +82,7 @@ def run(args, target, device):
             temp_x = torch.from_numpy(generated_target.astype(np.float32)).to(device)
             fc2, fc3, prob = model(temp_x)
             pred = fc3[:, 1].cpu().detach().numpy()
-            # print(pred)
+            print(pred)
             # exit()
             # same_sign = (pred[1:] * pred[0]) > 0
             larger_than_zero = pred > 0
