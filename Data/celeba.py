@@ -176,53 +176,51 @@ class CelebATriplet(Dataset):
     def __getitem__(self, idx):
         if self.mode == 'train':
             if idx / self.target_multiplier < len(self.target):
-                filename1 = self.data_name[self.target[int(idx / self.target_multiplier)]]
+                anchor_name = self.data_name[self.target[int(idx / self.target_multiplier)]]
                 id2 = np.random.choice(a=np.arange(0, int(0.6*self.num_file)), size=1, replace=False)[0]
-                filename2 = self.data_name[self.non_target[self.train_data[id2]]]
+                negative_name = self.data_name[self.non_target[self.train_data[id2]]]
                 class_id = torch.tensor(int(idx / self.target_multiplier))
-                img_tensor1 = torch.load(self.dataroot + filename1)
-                img_tensor2 = torch.load(self.dataroot + filename2)
-                temp_x = img_tensor1.numpy()
+                anchor = torch.load(self.dataroot + anchor_name)
+                negative = torch.load(self.dataroot + negative_name)
+                temp_x = anchor.numpy()
                 noise = np.random.laplace(0, self.noise_scale, temp_x.shape)
                 temp_x = temp_x + noise
-                img_tensor3 = torch.from_numpy(temp_x.astype(np.float32))
+                positive = torch.from_numpy(temp_x.astype(np.float32))
                 sample = np.random.binomial(1, self.args.sample_rate, 1)[0]
                 if sample:
-                    return img_tensor1, img_tensor3, img_tensor2, class_id, filename1
+                    return anchor, positive, negative, class_id, anchor_name
                 else:
-                    temp_x = img_tensor1.numpy()
+                    temp_x = anchor.numpy()
                     noise = np.random.laplace(0, self.noise_scale, temp_x.shape)
                     temp_x = temp_x + noise
-                    img_tensor1 = torch.from_numpy(temp_x.astype(np.float32))
-                    return img_tensor1, img_tensor3, img_tensor2, class_id, filename1
+                    anchor = torch.from_numpy(temp_x.astype(np.float32))
+                    return anchor, positive, negative, class_id, anchor_name
             else:
                 idx -= len(self.target) * self.target_multiplier
-                filename1 = self.data_name[self.non_target[self.train_data[idx]]]
+                anchor_name = self.data_name[self.non_target[self.train_data[idx]]]
                 id2 = np.random.choice(a=np.arange(0, int(0.6 * self.num_file)), size=1, replace=False)[0]
-                filename2 = self.data_name[self.non_target[self.train_data[id2]]]
-                filename3 = self.data_name[self.target[0]]
+                positive_name = self.data_name[self.non_target[self.train_data[id2]]]
+                negative_name = self.data_name[self.target[0]]
                 class_id = torch.tensor(len(self.target))
-                img_tensor1 = torch.load(self.dataroot + filename1)
-                img_tensor2 = torch.load(self.dataroot + filename2)
-                img_tensor3 = torch.load(self.dataroot + filename3)
+                anchor = torch.load(self.dataroot + anchor_name)
+                positive = torch.load(self.dataroot + positive_name)
+                negative = torch.load(self.dataroot + negative_name)
                 sample = np.random.binomial(1, 0.5, 1)[0]
                 if sample:
-                    return img_tensor1, img_tensor2, img_tensor3, class_id, filename1
+                    return anchor, positive, negative, class_id, anchor_name
                 else:
-                    temp_x = img_tensor3.numpy()
+                    temp_x = negative.numpy()
                     noise = np.random.laplace(0, self.noise_scale, temp_x.shape)
                     temp_x = temp_x + noise
-                    img_tensor3 = torch.from_numpy(temp_x.astype(np.float32))
-                    return img_tensor1, img_tensor2, img_tensor3, class_id, filename1
+                    negative = torch.from_numpy(temp_x.astype(np.float32))
+                    return anchor, positive, negative, class_id, anchor_name
         elif self.mode == 'valid':
             if idx / self.target_multiplier < len(self.target):
                 filename = self.data_name[self.target[int(idx / self.target_multiplier)]]
-                # img_loc = os.path.join(self.dataroot, self.data_name[self.target[idx]])
                 class_id = torch.tensor(int(idx / self.target_multiplier))
             else:
                 idx -= len(self.target) * self.target_multiplier
                 filename = self.data_name[self.non_target[self.valid_data[idx]]]
-                # img_loc = os.path.join(self.dataroot, self.data_name[self.valid_data[idx]])
                 class_id = torch.tensor(len(self.target))
         else:
             filename = self.data_name[self.non_target[self.test_data[idx]]]
