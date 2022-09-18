@@ -22,7 +22,7 @@ os.environ['TORCH_HOME'] = "./Model/pretrain_model"
 
 
 def run(args, target, device):
-    target_data, target_label = init_target_data(args)
+    target_data, target_label = init_target_data(args=args, target=target)
     if args.train_mode == 'normal':
         pass
     elif args.train_mode == 'triplet':
