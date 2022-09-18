@@ -230,7 +230,7 @@ class CelebATriplet(Dataset):
 
 
 class CelebATripletFull(Dataset):
-    def __init__(self, args, target, transform, dataroot, mode='train', imgroot=None, include_tar=True,
+    def __init__(self, args, target, dataroot, mode='train', imgroot=None, include_tar=True,
                  shuffle=True, multiplier = 100):
         self.args = args
         self.target = target
@@ -239,7 +239,6 @@ class CelebATripletFull(Dataset):
         self.non_target = list(range(self.num_file_org))
         for i in self.target:
             self.non_target.remove(i)
-        self.transform = transform
         self.include = include_tar
         if shuffle:
             random.shuffle(self.non_target)
