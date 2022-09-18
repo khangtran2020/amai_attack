@@ -6,7 +6,7 @@ import torch
 import logging
 import random
 from sklearn.metrics import accuracy_score, precision_score, recall_score
-
+import os
 
 def unpacking_apply_along_axis(all_args):
     (func1d, axis, arr, args, kwargs) = all_args
@@ -248,3 +248,16 @@ def tpr_tnr(prediction, truth):
     # print(true_negatives, false_negatives, true_positives, false_positives)
     return true_positives / (true_positives + false_negatives), true_negatives / (true_negatives + false_positives), (
                 true_positives + true_negatives) / (true_negatives + false_negatives + true_positives + false_positives)
+
+
+def init_target_data(args, target):
+    data_name = sorted(os.listdir(args.data_path))
+    list_target = []
+    list_target_label = []
+    for i, f in enumerate(args.target):
+        list_target.append(torch.unsqueeze(torch.load(args.data_path + data_name[f]), 0))
+        list_target_label.append(1)
+    list_target = tuple(list_target)
+    target_data = torch.cat(list_target, 0)
+    target_label = torch.from_numpy(np.array(list_target_label))
+    return target_data, target_label
