@@ -244,6 +244,8 @@ def train_triplet_full(args, target, device, data, model):
     y_valid = y_valid.to(device)
     for step in range(args.num_steps):
         loss_value = 0
+        train_pred = []
+        train_label = []
         for i, batch in enumerate(train_dataloader):
             anchor, pos1, pos2, neg1, neg2, y_train, imgs_train = batch
             anchor = anchor.to(device)
@@ -262,22 +264,27 @@ def train_triplet_full(args, target, device, data, model):
             del (pre3)
             del (probs2)
             del (probs3)
+            train_pred = train_pred + (pre1[:, 1] > 0).cpu().detach().numpy().astype('int8').tolist()
+            train_label = train_label + (y_train).cpu().detach().numpy().astype('int8').tolist()
             loss = criteria(probs1, y_train) + args.reg * triplet_loss(f1, f2, f4) + args.reg * triplet_loss(f1, f3, f5)
             loss_value += loss.item()
             loss.backward()
             optimizer.step()  # make the updates for each parameter
             optimizer.zero_grad()  # a clean up step for PyTorch
         if step % 10 == 0:
-            loss, acc, tpr, tnr = evaluate(x = x_valid, y = y_valid, model = model, criteria=criteria, device=device)
-            if (tpr + tnr) / 2 > max_tpr:
+            acc_train, tpr_train, tnr_train = tpr_tnr(torch.Tensor(train_pred), torch.Tensor(train_label))
+            loss_val, acc_val, tpr_val, tnr_val = evaluate(x = x_valid, y = y_valid, model = model, criteria=criteria)
+            print(
+                f'Train - Loss: {loss_value}, TPR: {tpr_train}, TNR: {tnr_train} || Valid - TPR = {tpr_val}, TNR = {tnr_val}, ACC = {acc_val} | Epoch: {step}')
+            if (tpr_val + tnr_val) / 2 > max_tpr:
                 state = {
                     'net': model.state_dict(),
-                    'test': (tpr, tnr),
-                    'acc': acc,
+                    'test': (tpr_val, tnr_val),
+                    'acc': acc_val,
                     'lr': args.lr
                 }
                 torch.save(model, args.save_path + args.save_name)
-            max_tpr = (tpr + tnr) / 2
+            max_tpr = (tpr_val + tnr_val) / 2
     model = torch.load(args.save_path + args.save_name)
     return model
 

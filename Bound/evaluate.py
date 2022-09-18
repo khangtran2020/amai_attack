@@ -12,7 +12,7 @@ from Data.celeba import CelebATriplet
 
 
 @torch.no_grad()
-def evaluate(x, y, model, criteria, device):
+def evaluate(x, y, model, criteria):
     model.eval()
     fc1, fc2, probs = model(x)
     loss = criteria(probs, y).item()
