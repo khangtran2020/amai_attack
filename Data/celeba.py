@@ -335,8 +335,8 @@ def init_target_data(args, target):
     data_name = sorted(os.listdir(args.data_path))
     list_target = []
     list_target_label = []
-    for i, f in enumerate(args.target):
-        list_target.append(torch.unsqueeze(torch.load(args.data_path + data_name[f]), 0))
+    for i, f in enumerate(target):
+        list_target.append(torch.unsqueeze(torch.load(args.data_path + data_name[i]), 0))
         list_target_label.append(1)
     list_target = tuple(list_target)
     target_data = torch.cat(list_target, 0)
