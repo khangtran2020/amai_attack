@@ -219,19 +219,14 @@ def train_triplet(args, target, device, data, model):
 
 def train_triplet_full(args, target, device, data, model):
     train_dataloader, valid_dataloader = data
-    optimizer = torch.optim.AdamW(params=model.parameters(), lr=args.lr)
-    results = defaultdict(list)
-
-    if args.debug:
-        SAVE_NAME = 'debugging_eps_{}_reg_{}.pt'.format(args.epsilon, args.reg)
-    else:
-        if args.num_target == 1:
-            SAVE_NAME = 'CELEBA_single_Laplace_eps_{}.pt'.format(args.epsilon)
-        else:
-            SAVE_NAME = 'CELEBA_multiple_{}_Lap_eps_{}.pt'.format(args.num_target, args.epsilon)
-
-    custom_weight = np.array([1600.0, 200.0])
-    criteria = nn.CrossEntropyLoss(weight=torch.tensor(custom_weight, dtype=torch.float).to(device))
+    model.train()
+    if args.optimizer == 'adamw':
+        optimizer = torch.optim.AdamW(params=model.parameters(), lr=args.lr)
+    elif args.optimizer == 'adam':
+        optimizer = torch.optim.Adam(params=model.parameters(), lr=args.lr)
+    elif args.optimizer == 'rmsprop':
+        optimizer = torch.optim.RMSprop(params=model.parameters(), lr=args.lr)
+    criteria = nn.CrossEntropyLoss()
     triplet_loss = nn.TripletMarginLoss(margin=1.0, p=2)
     model.to(device)
     max_correct = 0
@@ -239,67 +234,52 @@ def train_triplet_full(args, target, device, data, model):
     max_tnr = 0.0
     noise_scale = args.sens / args.epsilon
     print('Start training process with {} epochs'.format(args.num_steps))
+    x_valid, y_valid, imgs_valid = next(iter(valid_dataloader))
+    temp_x = x_valid.numpy()
+    noise = np.random.laplace(0, noise_scale, temp_x[1:].shape)
+    temp_x[1:] = temp_x[1:] + noise
+    x_valid = torch.from_numpy(temp_x.astype(np.float32))
+    y_valid = 1 - y_valid
+    x_valid = x_valid.to(device)
+    y_valid = y_valid.to(device)
     for step in range(args.num_steps):
-        anchor, pos1, pos2, neg1, neg2, y_train, imgs_train = next(iter(train_dataloader))
-        anchor = anchor.to(device)
-        pos1 = pos1.to(device)
-        pos2 = pos2.to(device)
-        neg1 = neg1.to(device)
-        neg2 = neg2.to(device)
-        y_train = 1 - y_train
-        y_train = y_train.to(device)
-        x_valid, y_valid, imgs_valid = next(iter(valid_dataloader))
-        temp_x = x_valid.numpy()
-        noise = np.random.laplace(0, noise_scale, temp_x[1:].shape)
-        temp_x[1:] = temp_x[1:] + noise
-        x_valid = torch.from_numpy(temp_x.astype(np.float32))
-        x_valid = x_valid.to(device)
-        y_valid = 1 - y_valid
-        y_valid = y_valid.to(device)
-        print(torch.bincount(y_train), torch.bincount(y_valid))
         loss_value = 0
-        model.train()
-        f1, pre1, probs1 = model(anchor)
-        f2, pre2, probs2 = model(pos1)
-        f3, pre3, probs3 = model(pos2)
-        f4, pre2, probs2 = model(neg1)
-        f5, pre3, probs3 = model(neg2)
-        del (pre2)
-        del (pre3)
-        del (probs2)
-        del (probs3)
-        loss = criteria(probs1, y_train) + args.reg * triplet_loss(f1, f2, f4) + args.reg * triplet_loss(f1, f3, f5)
-        # loss = triplet_loss(f1, f2, f3)
-        loss_value += loss
-        predictions = pre1[:, 0] < 0
-        tpr_train, tnr_train, _ = tpr_tnr(predictions, y_train)
-
-        loss.backward()
-        optimizer.step()  # make the updates for each parameter
-        optimizer.zero_grad()  # a clean up step for PyTorch
-
-        # Test acc
-        fc1, fc2, probs = model(x_valid)
-        predictions = fc2[:, 0] < 0
-        tpr, tnr, acc = tpr_tnr(predictions, y_valid)
-        if (tpr + tnr) / 2 > max_tpr:
-            state = {
-                'net': model.state_dict(),
-                'test': (tpr, tnr),
-                'train': (tpr_train, tnr_train),
-                'acc': acc,
-                'lr': args.lr
-            }
-
-            max_tpr = (tpr + tnr) / 2
-            torch.save(model, args.save_path + SAVE_NAME)
+        for i, batch in enumerate(train_dataloader):
+            anchor, pos1, pos2, neg1, neg2, y_train, imgs_train = batch
+            anchor = anchor.to(device)
+            pos1 = pos1.to(device)
+            pos2 = pos2.to(device)
+            neg1 = neg1.to(device)
+            neg2 = neg2.to(device)
+            y_train = 1 - y_train
+            y_train = y_train.to(device)
+            f1, pre1, probs1 = model(anchor)
+            f2, pre2, probs2 = model(pos1)
+            f3, pre3, probs3 = model(pos2)
+            f4, pre2, probs2 = model(neg1)
+            f5, pre3, probs3 = model(neg2)
+            del (pre2)
+            del (pre3)
+            del (probs2)
+            del (probs3)
+            loss = criteria(probs1, y_train) + args.reg * triplet_loss(f1, f2, f4) + args.reg * triplet_loss(f1, f3, f5)
+            loss_value += loss.item()
+            loss.backward()
+            optimizer.step()  # make the updates for each parameter
+            optimizer.zero_grad()  # a clean up step for PyTorch
         if step % 10 == 0:
-            # print(f'Loss: {loss_value.item()} | Acc: {num_correct}/{num_samples} | Epoch: {i}')
-            print(
-                f'Loss: {loss_value.item()} | Train_TPR = {tpr_train}, Train_TNR = {tnr_train:.5f} | TPR = {tpr}, TNR = {tnr}, ACC = {acc} | Epoch: {step}')
-
+            loss, acc, tpr, tnr = evaluate(x = x_valid, y = y_valid, model = model, criteria=criteria, device=device)
+            if (tpr + tnr) / 2 > max_tpr:
+                state = {
+                    'net': model.state_dict(),
+                    'test': (tpr, tnr),
+                    'acc': acc,
+                    'lr': args.lr
+                }
+                torch.save(model, args.save_path + args.save_name)
+            max_tpr = (tpr + tnr) / 2
+    model = torch.load(args.save_path + args.save_name)
     return model
-    # print('Finish one step in ', time.time() - start_time)
 
 
 def train_triplet_eval(args, target, device, data, model):
@@ -396,3 +376,5 @@ def train_triplet_eval(args, target, device, data, model):
                 print('Certifed at epsilon {}, with performace: acc {}, precision {}, recal {}'.format(eps_cer, res['test_result']['acc'], res['test_result']['precision'], res['test_result']['recall']))
 
     return model
+
+

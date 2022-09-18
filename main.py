@@ -46,12 +46,12 @@ def run(args, target, device):
                               multiplier=args.valid_multiplier),
             shuffle=False,
             num_workers=0,
-            batch_size=args.batch_size
+            batch_size=args.val_batch_size
         )
         model = train_triplet_full(args=args, target=target, device=device, data=(train_loader, valid_loader),
                                    model=model)
-        results, certified_eps, certified = cert_intrain(args=args, model=model, target_data=target_data,device=device)
-        res = evaluate_intrain(args=args, model=model,certified=certified, target=target,target_data=target_data, target_label=target_label, eps_cert=certified_eps,device=device)
+        results, certified_eps, certified = cert(args=args, model=model, target_data=target_data,device=device)
+        res = evaluate_test(args=args, model=model,certified=certified, target=target,target_data=target_data, target_label=target_label, eps_cert=certified_eps,device=device)
         for key, value in res.items():
             results[key] = value
         json_object = json.dumps(results, indent=4)
@@ -66,6 +66,13 @@ if __name__ == '__main__':
     args.sens = 2 * max_
     args.num_label = args.num_target + 1
     assert args.gpu <= torch.cuda.device_count(), f"--gpu flag should be in range [0,{torch.cuda.device_count() - 1}]"
+    if args.debug:
+        args.save_name = 'debugging_eps_{}_reg_{}.pt'.format(args.epsilon, args.reg)
+    else:
+        if args.num_target == 1:
+            args.save_name = 'CELEBA_single_Laplace_eps_{}.pt'.format(args.epsilon)
+        else:
+            args.save_name = 'CELEBA_multiple_{}_Lap_eps_{}.pt'.format(args.num_target, args.epsilon)
     set_logger()
     set_seed(args.seed)
     device = get_device(gpus=args.gpu)
