@@ -7,11 +7,11 @@ import time
 import numpy as np
 from torch.utils.data import Dataset, DataLoader
 from collections import OrderedDict, defaultdict
-from Bound.evaluate import evaluate, evaluate_intrain, cert_intrain
+from Bound.evaluate import evaluate, evaluate_test, cert, tpr_tnr
 import logging
 import pandas as pd
 from sklearn.metrics import accuracy_score, f1_score, average_precision_score
-from Utils.utils import tpr_tnr
+
 
 
 class Classifier(nn.Module):
@@ -369,9 +369,9 @@ def train_triplet_eval(args, target, device, data, model):
             print(
                 f'Loss: {loss_value.item()} | Train_TPR = {tpr_train}, Train_TNR = {tnr_train:.5f} | TPR = {tpr}, TNR = {tnr}, ACC = {acc} | Epoch: {step}')
         if step % 100 == 0:
-            results, eps_cer, certi = cert_intrain(args=args, model=model, target_data=target_data, device=device)
+            results, eps_cer, certi = cert(args=args, model=model, target_data=target_data, device=device)
             if certi:
-                res = evaluate_intrain(args=args, model=model, certified=certi, target=target, target_data=target_data,
+                res = evaluate_test(args=args, model=model, certified=certi, target=target, target_data=target_data,
                                        target_label=target_label, eps_cert=eps_cer, device=device)
                 print('Certifed at epsilon {}, with performace: acc {}, precision {}, recal {}'.format(eps_cer, res['test_result']['acc'], res['test_result']['precision'], res['test_result']['recall']))
 
