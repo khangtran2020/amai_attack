@@ -26,6 +26,7 @@ def run(args, target, device):
     if args.train_mode == 'normal':
         pass
     elif args.train_mode == 'triplet_full':
+        print("Train triplet with randomize each round")
         model = ClassifierTriplet(args=args, n_inputs=args.num_feature, n_outputs=args.num_target + 1)
         train_loader = torch.utils.data.DataLoader(
             CelebATripletFull(args=args,
@@ -59,6 +60,7 @@ def run(args, target, device):
         with open(args.save_path + SAVE_NAME, "w") as outfile:
             outfile.write(json_object)
     elif args.train_mode == 'triplet':
+        print("Train triplet without randomize each round")
         model = ClassifierTriplet(args=args, n_inputs=args.num_feature, n_outputs=args.num_target + 1)
         train_loader = torch.utils.data.DataLoader(
             CelebATriplet(args=args,
