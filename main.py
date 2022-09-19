@@ -86,13 +86,16 @@ def run(args, target, device):
         model = train_triplet(args=args, target=target, device=device, data=(train_loader, valid_loader),
                                    model=model)
         results, certified_eps, certified = cert(args=args, model=model, target_data=target_data,device=device)
-        res = evaluate_test(args=args, model=model,certified=certified, target=target,target_data=target_data, target_label=target_label, eps_cert=certified_eps,device=device)
-        for key, value in res.items():
-            results[key] = value
-        json_object = json.dumps(results, indent=4)
-        SAVE_NAME = args.save_name
-        with open(args.save_path + SAVE_NAME, "w") as outfile:
-            outfile.write(json_object)
+        if certified:
+            res = evaluate_test(args=args, model=model,certified=certified, target=target,target_data=target_data, target_label=target_label, eps_cert=certified_eps,device=device)
+            for key, value in res.items():
+                results[key] = value
+            json_object = json.dumps(results, indent=4)
+            SAVE_NAME = args.save_name
+            with open(args.save_path + SAVE_NAME, "w") as outfile:
+                outfile.write(json_object)
+        else:
+            print("Didn't certified")
 
 
 if __name__ == '__main__':
