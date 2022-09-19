@@ -185,10 +185,6 @@ class CelebATriplet(Dataset):
                 noise = np.random.laplace(0, self.noise_scale, temp_x.shape)
                 temp_x = temp_x + noise
                 positive = torch.from_numpy(temp_x.astype(np.float32))
-                temp_x = negative.numpy()
-                noise = np.random.laplace(0, self.noise_scale, temp_x.shape)
-                temp_x = temp_x + noise
-                negative = torch.from_numpy(temp_x.astype(np.float32))
                 sample = np.random.binomial(1, self.args.sample_rate, 1)[0]
                 if sample:
                     return anchor, positive, negative, class_id, anchor_name
@@ -208,14 +204,6 @@ class CelebATriplet(Dataset):
                 anchor = torch.load(self.dataroot + anchor_name)
                 positive = torch.load(self.dataroot + positive_name)
                 negative = torch.load(self.dataroot + negative_name)
-                temp_x = anchor.numpy()
-                noise = np.random.laplace(0, self.noise_scale, temp_x.shape)
-                temp_x = temp_x + noise
-                anchor = torch.from_numpy(temp_x.astype(np.float32))
-                temp_x = positive.numpy()
-                noise = np.random.laplace(0, self.noise_scale, temp_x.shape)
-                temp_x = temp_x + noise
-                positive = torch.from_numpy(temp_x.astype(np.float32))
                 sample = np.random.binomial(1, 0.5, 1)[0]
                 if sample:
                     return anchor, positive, negative, class_id, anchor_name
