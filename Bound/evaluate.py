@@ -93,10 +93,10 @@ def cert(args, model, target_data, device='cpu'):
     for i, eps in enumerate(np.linspace(args.min_epsilon, args.max_epsilon, 100)):
         temp_x = target_data.numpy()
         noise_scale = args.sens / eps
-        generated_target_org = np.tile(temp_x, (args.num_draws + 1, 1))
-        noise = np.random.laplace(0, noise_scale, generated_target_org[1:, :].shape)
+        generated_target_org = np.tile(temp_x, (args.num_draws, 1))
+        noise = np.random.laplace(0, noise_scale, generated_target_org.shape)
         generated_target = generated_target_org.copy()
-        generated_target[1:, :] = generated_target[1:, :] + noise
+        generated_target = generated_target + noise
         temp_x = torch.from_numpy(generated_target.astype(np.float32)).to(device)
         fc1, fc2, out = model(temp_x)
         pred = fc2[:, 1].cpu().detach().numpy()
