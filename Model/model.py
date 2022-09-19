@@ -187,7 +187,7 @@ def train_triplet(args, target, device, data, model):
         loss = criteria(probs1, y_train) + args.reg * triplet_loss(f1, f2, f3)
         # loss = triplet_loss(f1, f2, f3)
         loss_value += loss
-        predictions = pre1[:, 0] < 0
+        predictions = pre1[:, 1] > 0
         tpr_train, tnr_train, _ = tpr_tnr(predictions, y_train)
 
         loss.backward()
