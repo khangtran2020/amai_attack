@@ -103,6 +103,7 @@ def cert(args, model, target_data, device='cpu'):
         larger_than_zero = pred > 0
         count_of_larger_than_zero = sum(larger_than_zero.astype(int))
         count_of_smaller_than_zero = args.num_draws - count_of_larger_than_zero
+        print('For eps = {}, larger: {}, smaller: {}'.format(eps,count_of_larger_than_zero,count_of_smaller_than_zero))
         upper_bound = hoeffding_upper_bound(count_of_smaller_than_zero, nobs=args.num_draws, alpha=args.alpha)
         lower_bound = hoeffding_lower_bound(count_of_larger_than_zero, nobs=args.num_draws, alpha=args.alpha)
         if (lower_bound > upper_bound):
