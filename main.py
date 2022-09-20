@@ -173,10 +173,10 @@ def run(args, target, device):
         if sample[0]:
             x_test = torch.cat((target_data, x_test), 0)
             y_test = torch.cat((target_label, y_test), 0)
-            temp_x = x_test.numpy()
-            noise = np.random.laplace(0,noise_scale,temp_x[:args.num_target].shape)
-            temp_x[:args.num_target] = temp_x[:args.num_target] + noise
-            x_test = torch.from_numpy(temp_x.astype(np.float32))
+            # temp_x = x_test.numpy()
+            # noise = np.random.laplace(0,noise_scale,temp_x.shape)
+            # temp_x = temp_x + noise
+            x_test = x_test + torch.distributions.laplace.Laplace(loc=0.0, scale=noise_scale).rsample(x_test.size())
         criteria = nn.CrossEntropyLoss()
         model.to(device)
         x_test = x_test.to(device)
