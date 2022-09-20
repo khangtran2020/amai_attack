@@ -45,12 +45,8 @@ def run(args, target, device):
                                                                                                               args.epsilon,
                                                                                                               args.sens /
                                                                                                               args.epsilon))
-        if args.val_mode == 'normal':
-            model = train_triplet(args=args, target=target, device=device, data=(train_loader, valid_loader),
-                                  model=model)
-        else:
-            model = train_triplet_eval(args=args, target=target, device=device, data=(train_loader, valid_loader),
-                                       model=model)
+        model = train_triplet(args=args, target=target, device=device, data=(train_loader, valid_loader),
+                              model=model)
 
     elif args.train_mode == 'triplet-full':
         print('Train with mode triplet full')
@@ -70,12 +66,8 @@ def run(args, target, device):
                                                                                                               args.epsilon,
                                                                                                               args.sens /
                                                                                                               args.epsilon))
-        if args.val_mode == 'normal':
-            model = train_triplet_full(args=args, target=target, device=device, data=(train_loader, valid_loader),
-                                       model=model)
-        else:
-            model = train_triplet_eval(args=args, target=target, device=device, data=(train_loader, valid_loader),
-                                       model=model)
+        model = train_triplet_full(args=args, target=target, device=device, data=(train_loader, valid_loader),
+                                   model=model)
     elif args.train_mode == 'triplet-fun':
         print('Train with mode triplet full')
         model = ClassifierTriplet(args=args, n_inputs=args.num_feature, n_outputs=args.num_target + 1)
@@ -94,12 +86,8 @@ def run(args, target, device):
                                                                                                               args.epsilon,
                                                                                                               args.sens /
                                                                                                               args.epsilon))
-        if args.val_mode == 'normal':
-            model = train_triplet_fun(args=args, target=target, device=device, data=(train_loader, valid_loader),
-                                      model=model)
-        else:
-            model = train_triplet_eval(args=args, target=target, device=device, data=(train_loader, valid_loader),
-                                       model=model)
+        model = train_triplet_fun(args=args, target=target, device=device, data=(train_loader, valid_loader),
+                                  model=model)
     results = {}
     target_data, target_label = init_target_data(args, target)
     list_of_cert_eps = cert(args=args, model=model, target_data=target_data, device=device)
