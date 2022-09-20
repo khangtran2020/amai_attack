@@ -261,7 +261,7 @@ def perform_attack(args, results, target, target_data, target_label, list_of_eps
     return results
 
 def perform_attack_parallel(eps, args, results, target, target_data, target_label, model, device = 'cpu'):
-    print(next(model.parameters()).device)
+    # print(next(model.parameters()).device)
     true_label = []
     predicted = []
     for i in range(args.num_test_set):
