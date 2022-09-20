@@ -89,12 +89,12 @@ def run(args, target, device):
                                                                                                               args.epsilon))
         model = train_triplet_fun(args=args, target=target, device=device, data=(train_loader, valid_loader),
                                   model=model)
-    model.to('cpu')
     target_data, target_label = init_target_data(args, target)
     list_of_cert_eps = cert(args=args, model=model, target_data=target_data, device=device)
     if len(list_of_cert_eps) == 0:
         print("Didn't ceritfied")
         exit()
+    model.to('cpu')
     manager = multiprocessing.Manager()
     results = manager.dict()
     results['certified_for_target'] = {
