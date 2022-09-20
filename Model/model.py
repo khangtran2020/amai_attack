@@ -273,7 +273,7 @@ def train_triplet_full(args, target, device, data, model):
         # loss = triplet_loss(f1, f2, f3)
         loss_value += loss
         predictions = pre1[:, 1] > 0
-        tpr_train, tnr_train, _ = tpr_tnr(predictions, y_train)
+        tpr_train, tnr_train, train_acc = tpr_tnr(predictions, y_train)
 
         loss.backward()
         optimizer.step()  # make the updates for each parameter
@@ -297,7 +297,7 @@ def train_triplet_full(args, target, device, data, model):
         if step % 10 == 0:
             # print(f'Loss: {loss_value.item()} | Acc: {num_correct}/{num_samples} | Epoch: {i}')
             print(
-                f'Loss: {loss_value.item()} | Train_TPR = {tpr_train}, Train_TNR = {tnr_train:.5f} | TPR = {tpr}, TNR = {tnr}, ACC = {acc} | Epoch: {step}')
+                f'Loss: {loss_value.item()} | Train_TPR = {tpr_train}, Train_TNR = {tnr_train:.5f}, Train_ACC = {train_acc}| TPR = {tpr}, TNR = {tnr}, ACC = {acc} | Epoch: {step}')
 
     return model
     # print('Finish one step in ', time.time() - start_time)
