@@ -338,7 +338,7 @@ def train_triplet_fun(args, target, device, data, model):
         x_valid[1:args.valid_multiplier] = x_valid[1:args.valid_multiplier] + torch.distributions.laplace.Laplace(
             loc=0.0, scale=args.sens / args.epsilon).rsample(x_valid[1:args.valid_multiplier].size())
         x_valid[args.valid_multiplier:] = x_valid[args.valid_multiplier:] + torch.distributions.laplace.Laplace(
-            loc=0.0, scale=args.sens / (args.epsilon/10)).rsample(x_valid[args.valid_multiplier:].size())
+            loc=0.0, scale=args.sens / (args.epsilon*10)).rsample(x_valid[args.valid_multiplier:].size())
         x_valid = x_valid.to(device)
         y_valid = 1 - y_valid
         y_valid = y_valid.to(device)
