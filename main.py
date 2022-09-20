@@ -22,6 +22,7 @@ os.environ['TORCH_HOME'] = "./Model/pretrain_model"
 
 def run(args, target, device):
     if args.train_mode == 'triplet':
+        print('Train with mode triplet')
         model = ClassifierTriplet(args=args, n_inputs=args.num_feature, n_outputs=args.num_target + 1)
         transform = transforms.Compose([
             transforms.Resize(64),
@@ -47,6 +48,7 @@ def run(args, target, device):
             model = train_triplet_eval(args=args, target=target, device=device, data=(train_loader, valid_loader), model=model)
 
     elif args.train_mode == 'triplet-full':
+        print('Train with mode triplet full')
         model = ClassifierTriplet(args=args, n_inputs=args.num_feature, n_outputs=args.num_target + 1)
         train_loader = torch.utils.data.DataLoader(
             CelebATripletFull(args=args, target=target, dataroot=args.data_path, mode='train',
