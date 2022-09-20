@@ -11,6 +11,7 @@ from config import parse_args
 import os
 import json
 import warnings
+
 warnings.filterwarnings('ignore')
 from sklearn.metrics import accuracy_score, precision_score, recall_score
 
@@ -31,33 +32,37 @@ def run(args, target, device):
         ])
         train_loader = torch.utils.data.DataLoader(
             CelebATriplet(args=args, target=target, transform=transform, dataroot=args.data_path, mode='train',
-                              imgroot=None, multiplier=args.train_multiplier),
+                          imgroot=None, multiplier=args.train_multiplier),
             shuffle=False,
             num_workers=0, batch_size=args.batch_size)
         valid_loader = torch.utils.data.DataLoader(
             CelebATriplet(args=args, target=target, transform=transform, dataroot=args.data_path, mode='valid',
-                              imgroot=None, multiplier=args.valid_multiplier),
+                          imgroot=None, multiplier=args.valid_multiplier),
             shuffle=False,
             num_workers=0, batch_size=args.batch_size)
-        print("Sensitivity: {}, Number of features: {}, epsilon used in training: {}, noise scale: {}".format(args.sens, args.num_feature,
-                                                                                             args.epsilon, args.sens/
-                                                                                             args.epsilon))
+        print("Sensitivity: {}, Number of features: {}, epsilon used in training: {}, noise scale: {}".format(args.sens,
+                                                                                                              args.num_feature,
+                                                                                                              args.epsilon,
+                                                                                                              args.sens /
+                                                                                                              args.epsilon))
         if args.val_mode == 'normal':
-            model = train_triplet(args=args, target=target, device=device, data=(train_loader, valid_loader), model=model)
+            model = train_triplet(args=args, target=target, device=device, data=(train_loader, valid_loader),
+                                  model=model)
         else:
-            model = train_triplet_eval(args=args, target=target, device=device, data=(train_loader, valid_loader), model=model)
+            model = train_triplet_eval(args=args, target=target, device=device, data=(train_loader, valid_loader),
+                                       model=model)
 
     elif args.train_mode == 'triplet-full':
         print('Train with mode triplet full')
         model = ClassifierTriplet(args=args, n_inputs=args.num_feature, n_outputs=args.num_target + 1)
         train_loader = torch.utils.data.DataLoader(
             CelebATripletFull(args=args, target=target, dataroot=args.data_path, mode='train',
-                          imgroot=None, multiplier=args.train_multiplier),
+                              imgroot=None, multiplier=args.train_multiplier),
             shuffle=False,
             num_workers=0, batch_size=args.batch_size)
         valid_loader = torch.utils.data.DataLoader(
             CelebATripletFull(args=args, target=target, dataroot=args.data_path, mode='valid',
-                          imgroot=None, multiplier=args.valid_multiplier),
+                              imgroot=None, multiplier=args.valid_multiplier),
             shuffle=False,
             num_workers=0, batch_size=args.batch_size)
         print("Sensitivity: {}, Number of features: {}, epsilon used in training: {}, noise scale: {}".format(args.sens,
@@ -67,7 +72,7 @@ def run(args, target, device):
                                                                                                               args.epsilon))
         if args.val_mode == 'normal':
             model = train_triplet_full(args=args, target=target, device=device, data=(train_loader, valid_loader),
-                                  model=model)
+                                       model=model)
         else:
             model = train_triplet_eval(args=args, target=target, device=device, data=(train_loader, valid_loader),
                                        model=model)
@@ -76,12 +81,12 @@ def run(args, target, device):
         model = ClassifierTriplet(args=args, n_inputs=args.num_feature, n_outputs=args.num_target + 1)
         train_loader = torch.utils.data.DataLoader(
             CelebATripletFun(args=args, target=target, dataroot=args.data_path, mode='train',
-                          imgroot=None, multiplier=args.train_multiplier),
+                             imgroot=None, multiplier=args.train_multiplier),
             shuffle=False,
             num_workers=0, batch_size=args.batch_size)
         valid_loader = torch.utils.data.DataLoader(
             CelebATripletFun(args=args, target=target, dataroot=args.data_path, mode='valid',
-                          imgroot=None, multiplier=args.valid_multiplier),
+                             imgroot=None, multiplier=args.valid_multiplier),
             shuffle=False,
             num_workers=0, batch_size=args.batch_size)
         print("Sensitivity: {}, Number of features: {}, epsilon used in training: {}, noise scale: {}".format(args.sens,
@@ -91,137 +96,30 @@ def run(args, target, device):
                                                                                                               args.epsilon))
         if args.val_mode == 'normal':
             model = train_triplet_fun(args=args, target=target, device=device, data=(train_loader, valid_loader),
-                                  model=model)
+                                      model=model)
         else:
             model = train_triplet_eval(args=args, target=target, device=device, data=(train_loader, valid_loader),
                                        model=model)
     results = {}
-    data_name = sorted(os.listdir(args.data_path))
-    list_target = []
-    list_target_label = []
-    for i, f in enumerate(target):
-        list_target.append(torch.unsqueeze(torch.load(args.data_path + data_name[f]), 0))
-        list_target_label.append(1)
-    list_target = tuple(list_target)
-    target_data = torch.cat(list_target, 0)
-    target_label = torch.from_numpy(np.array(list_target_label))
-    epsilon_of_point = args.max_epsilon
-    certified = 0
-    print(target_data, target_label)
-    for i, eps in enumerate(np.linspace(args.min_epsilon, args.max_epsilon, 100)):
-        temp_x = target_data.numpy()
-        noise_scale = args.sens / eps
-        print("Sensitivity: {}, Number of features: {}, epsilon used in certify: {}, noise scale: {}".format(
-            args.sens, args.num_feature,
-            eps, noise_scale))
-        generated_target_org = np.tile(temp_x, (args.num_draws, 1))
-        noise = np.random.laplace(0, noise_scale, generated_target_org[1:, :].shape)
-        generated_target = generated_target_org.copy()
-        generated_target[1:, :] = generated_target[1:, :] + noise
-        print('L2 norm of noise: {}', np.linalg.norm(noise, ord=2))
-        print('L2 distance: {}', np.linalg.norm(generated_target - generated_target_org, ord=2))
-        temp_x = torch.from_numpy(generated_target.astype(np.float32)).to(device)
-        fc2, fc3, prob = model(temp_x)
-        pred = fc3[:, 1].cpu().detach().numpy()
-        print(pred)
-        # exit()
-        # same_sign = (pred[1:] * pred[0]) > 0
-        larger_than_zero = pred > 0
-        # print(same_sign)
-        # count_of_same_sign = sum(larger_than_zero.astype(int))
-        # count_of_diff_sign = args.num_draws - count_of_same_sign
-        count_of_larger_than_zero = sum(larger_than_zero.astype(int))
-        count_of_smaller_than_zero = args.num_draws - count_of_larger_than_zero
-        print(
-            'For eps {}, # larger than 0: {}, # smaller or equal to 0: {}'.format(
-                eps, count_of_larger_than_zero, count_of_smaller_than_zero))
-        upper_bound = hoeffding_upper_bound(count_of_smaller_than_zero, nobs=args.num_draws, alpha=args.alpha)
-        lower_bound = hoeffding_lower_bound(count_of_larger_than_zero, nobs=args.num_draws, alpha=args.alpha)
-        if (lower_bound > upper_bound):
-            certified = int(1.0)
-            epsilon_of_point = min(epsilon_of_point, eps)
-        # print("Done for eps: {}".format(eps))
+    target_data, target_label = init_target_data(args, target)
+    list_of_cert_eps = cert(args=args, model=model, target_data=target_data, device=device)
+    if len(list_of_cert_eps) == 0:
+        print("Didn't ceritfied")
+        exit()
     results['certified_for_target'] = {
         'search_range_min': args.min_epsilon,
         'search_range_max': args.max_epsilon,
-        'certified': certified,
-        'eps_min': epsilon_of_point,
+        'certified': 'yes',
+        'list of eps': list_of_cert_eps,
         'confidence': 1 - args.alpha
     }
-    # print(results)
-    # exit()
-    results['number_of_test_set'] = args.num_test_set
-    results['sample_target_rate'] = args.sample_target_rate
-    results['res_of_each_test'] = {}
-    true_label = []
-    predicted = []
-    if certified:
-        noise_scale = args.sens / epsilon_of_point
-        print("Noise scale fore the attack:", noise_scale)
-    else:
-        print("Didn't ceritfied")
-        exit()
-    for i in range(args.num_test_set):
-        sample = np.random.binomial(n=1, p=args.sample_target_rate, size=1).astype(bool)
-        test_loader = torch.utils.data.DataLoader(
-            CelebATripletFull(args=args, target=target,dataroot=args.data_path, mode='test', imgroot=None, include_tar=sample[0]),
-            shuffle=False,
-            num_workers=0, batch_size=args.num_test_point)
-        x_test, y_test, file_name = next(iter(test_loader))
-        y_test = 1 - y_test
-        true_label.append(sample[0])
-        if sample[0]:
-            x_test = torch.cat((target_data, x_test), 0)
-            y_test = torch.cat((target_label, y_test), 0)
-        x_test = x_test + torch.distributions.laplace.Laplace(loc=0.0, scale=noise_scale).rsample(x_test.size())
-        criteria = nn.CrossEntropyLoss()
-        model.to(device)
-        x_test = x_test.to(device)
-        y_test = y_test.to(device)
-        fc2, fc3, prob = model(x_test)
-        loss = criteria(prob, y_test).item()
-        pred = fc3[:, 1] > 0
-        print("Test {}".format(i),sample, pred, sum(pred.cpu().numpy().astype(int)), min(1, sum(pred.cpu().numpy().astype(int))))
-        print(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
-        acc = accuracy_score(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
-        precision = precision_score(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
-        recall = recall_score(y_test.cpu().detach().numpy(), pred.cpu().numpy().astype(int))
-        results['res_of_each_test']['test_{}'.format(i)] = {
-            'loss': loss,
-            'acc': acc,
-            'precision': precision,
-            'recall': recall
-        }
-        pred_ = sum(pred.cpu().numpy().astype(int))
-        if pred_ == 0:
-            # print('Test {}'.format(i))
-            predicted.append(0)
-            results['res_of_each_test']['test_{}'.format(i)]['has_target'] = int(sample[0])
-            # results['res_of_each_test']['test_{}'.format(i)]['has_target'] = 0
-            results['res_of_each_test']['test_{}'.format(i)]['predict'] = 0
-        else:
-            predicted.append(1)
-            results['res_of_each_test']['test_{}'.format(i)]['has_target'] = int(sample[0])
-            # results['res_of_each_test']['test_{}'.format(i)]['has_target'] = 0
-            results['res_of_each_test']['test_{}'.format(i)]['predict'] = 1
-            # print("Test", i)
-    acc = accuracy_score(true_label, predicted)
-    precision = precision_score(true_label, predicted)
-    recall = recall_score(true_label, predicted)
-    results['test_result'] = {
-        'acc': acc,
-        'precision': precision,
-        'recall': recall,
-    }
+    results = perform_attack(args=args, results=results, target=target, target_data=target_data,
+                             target_label=target_label, list_of_eps=list_of_cert_eps, model=model, device=device)
 
     print(results)
     json_object = json.dumps(results, indent=4)
-    # SAVE_NAME = 'CELEBA_train_eps_{}_sample_rate_{}_num_step.json'.format(args.epsilon ,
-    #                                                                                args.sample_target_rate,
-    #                                                                                args.num_steps)
-    SAVE_NAME = 'test_{}.json'.format(args.test_ver)
     # Writing to sample.json
-    with open(args.save_path + SAVE_NAME, "w") as outfile:
+    with open(args.save_path + args.save_result_name, "w") as outfile:
         outfile.write(json_object)
     exit()
 
@@ -231,10 +129,20 @@ if __name__ == '__main__':
     max_ = 16 + 8 + 4 + 2 + 1 + 0.5 + 0.25 + 0.125 + 0.0625
     args.sens = 2 * max_
     args.num_label = args.num_target + 1
-    args.noise_scale = args.sens/args.epsilon
+    args.noise_scale = args.sens / args.epsilon
     assert args.gpu <= torch.cuda.device_count(), f"--gpu flag should be in range [0,{torch.cuda.device_count() - 1}]"
     set_logger()
     set_seed(args.seed)
     device = get_device(gpus=args.gpu)
     target = [int(i) for i in args.target.split('-')]
+    if args.debug:
+        args.save_model_name = 'debugging_eps_{}_reg_{}.pt'.format(args.epsilon, args.reg)
+        args.save_result_name = 'debugging_eps_{}_reg_{}_ver_{}.json'.format(args.epsilon, args.reg, args.test_ver)
+    else:
+        if args.num_target == 1:
+            args.save_model_name = 'CELEBA_single_Laplace_eps_{}.pt'.format(args.epsilon)
+            args.save_result_name = 'CELEBA_single_Laplace_eps_{}.json'.format(args.epsilon)
+        else:
+            args.save_model_name = 'CELEBA_multiple_{}_Lap_eps_{}.pt'.format(args.num_target, args.epsilon)
+            args.save_result_name = 'CELEBA_multiple_{}_Lap_eps_{}.json'.format(args.num_target, args.epsilon)
     run(args=args, target=target, device=device)

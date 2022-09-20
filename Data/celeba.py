@@ -66,7 +66,6 @@ class CelebA(Dataset):
         img_tensor = torch.load(self.dataroot + filename)
         return img_tensor, class_id, filename
 
-
 class AMIADatasetCelebA(Dataset):
     def __init__(self, args, target, transform, dataroot, mode='train', imgroot=None, multiplier=100):
         self.target = target
@@ -132,7 +131,6 @@ class AMIADatasetCelebA(Dataset):
         # img_tensor = img_tensor + s1.astype(np.float32)
 
         return img_tensor, class_id, filename
-
 
 class CelebATriplet(Dataset):
     def __init__(self, args, target, transform, dataroot, mode='train', imgroot=None, include_tar=True,
@@ -224,7 +222,6 @@ class CelebATriplet(Dataset):
             class_id = torch.tensor(len(self.target))
         img_tensor = torch.load(self.dataroot + filename)
         return img_tensor, class_id, filename
-
 
 class CelebATripletFull(Dataset):
     def __init__(self, args, target, dataroot, mode='train', imgroot=None, include_tar=True,
@@ -400,3 +397,15 @@ class CelebATripletFun(Dataset):
             class_id = torch.tensor(len(self.target))
         img_tensor = torch.load(self.dataroot + filename)
         return img_tensor, class_id, filename
+
+def init_target_data(args, target):
+    data_name = sorted(os.listdir(args.data_path))
+    list_target = []
+    list_target_label = []
+    for i, f in enumerate(target):
+        list_target.append(torch.unsqueeze(torch.load(args.data_path + data_name[f]), 0))
+        list_target_label.append(1)
+    list_target = tuple(list_target)
+    target_data = torch.cat(list_target, 0)
+    target_label = torch.from_numpy(np.array(list_target_label))
+    return target_data, target_label

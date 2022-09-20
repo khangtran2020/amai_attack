@@ -1,5 +1,6 @@
 import os
 import sys
+
 path = "/".join([x for x in os.path.realpath(__file__).split('/')[:-2]])
 sys.path.insert(0, path)
 import torch.utils.data
@@ -8,7 +9,8 @@ from Utils.utils import *
 from tqdm import tqdm
 import sklearn
 from Bound.robustness import hoeffding_lower_bound, hoeffding_upper_bound
-from Data.celeba import CelebATriplet
+from Data.celeba import CelebATriplet, CelebATripletFull
+
 
 # def eval_model(nodes, num_nodes, hnet, net, criteria, device, split):
 #     curr_results = evaluate(nodes, num_nodes, hnet, net, criteria, device, split=split)
@@ -41,6 +43,7 @@ def evaluate(x, y, model, criteria, device):
     results['tnr'] = tnr
     return results
 
+
 @torch.no_grad()
 def evaluate_robust(args, data, model, device='cpu'):
     model.to(device)
@@ -60,27 +63,28 @@ def evaluate_robust(args, data, model, device='cpu'):
     num_of_test_point = len(x_test)
     out, probs, fc2 = model(x_test)
     original_prediction = fc2[:, 0].cpu().numpy()
-    print("Original shape",original_prediction.shape)
+    print("Original shape", original_prediction.shape)
     if args.eval_mode == 'eps':
         epsilon_of_point = args.max_epsilon
         certified = 0
         # x_test = x_test.repeat(args.num_draws, 1)
         for eps in tqdm(np.linspace(args.min_epsilon, args.max_epsilon, 100)):
             temp_x = x_test.cpu().numpy()
-            temp_x[1:args.num_draws] = temp_x[1:args.num_draws] + np.random.laplace(0, args.sens * args.num_feature / eps,
-                                                temp_x[1:args.num_draws].shape)
+            temp_x[1:args.num_draws] = temp_x[1:args.num_draws] + np.random.laplace(0,
+                                                                                    args.sens * args.num_feature / eps,
+                                                                                    temp_x[1:args.num_draws].shape)
             temp_x = torch.from_numpy(temp_x[:args.num_draws].astype(np.float32)).to(device)
             out, probs, fc2 = model(temp_x)
             pred = fc2[:, 0].cpu().numpy()
             print(pred.shape)
-            count_of_sign = np.zeros(shape=(1,2))
+            count_of_sign = np.zeros(shape=(1, 2))
             print("Start drawing")
             # for t in range(args.num_draws):
-            same_sign = (pred*original_prediction[:args.num_draws]) > 0
-            count_of_sign[0,0] += np.sum(np.logical_not(same_sign).astype('int8'))
-            count_of_sign[0,1] += np.sum(same_sign.astype('int8'))
-            upper_bound = hoeffding_upper_bound(count_of_sign[0,0],nobs=args.num_draws,alpha=args.alpha)
-            lower_bound = hoeffding_lower_bound(count_of_sign[0,1], nobs=args.num_draws, alpha=args.alpha)
+            same_sign = (pred * original_prediction[:args.num_draws]) > 0
+            count_of_sign[0, 0] += np.sum(np.logical_not(same_sign).astype('int8'))
+            count_of_sign[0, 1] += np.sum(same_sign.astype('int8'))
+            upper_bound = hoeffding_upper_bound(count_of_sign[0, 0], nobs=args.num_draws, alpha=args.alpha)
+            lower_bound = hoeffding_lower_bound(count_of_sign[0, 1], nobs=args.num_draws, alpha=args.alpha)
             if (lower_bound > upper_bound):
                 certified = int(1.0)
                 epsilon_of_point = min(epsilon_of_point, eps)
@@ -95,7 +99,8 @@ def evaluate_robust(args, data, model, device='cpu'):
         certified = 0.0
         # x_test = x_test.repeat(args.num_draws, 1)
         temp_x = x_test.cpu().numpy()
-        temp_x[1:args.num_draws] = temp_x[1:args.num_draws] + np.random.laplace(0, args.sens * args.num_feature / args.fix_epsilon,
+        temp_x[1:args.num_draws] = temp_x[1:args.num_draws] + np.random.laplace(0,
+                                                                                args.sens * args.num_feature / args.fix_epsilon,
                                                                                 temp_x[1:args.num_draws].shape)
         temp_x = torch.from_numpy(temp_x[:args.num_draws].astype(np.float32)).to(device)
         out, probs, fc2 = model(temp_x)
@@ -111,7 +116,7 @@ def evaluate_robust(args, data, model, device='cpu'):
             upper_bound = hoeffding_upper_bound(count_of_sign[0, 0], nobs=args.num_draws, alpha=alp)
             lower_bound = hoeffding_lower_bound(count_of_sign[0, 1], nobs=args.num_draws, alpha=alp)
             if lower_bound > upper_bound:
-                alpha_of_point = max(1-alp, alpha_of_point)
+                alpha_of_point = max(1 - alp, alpha_of_point)
                 certified = 1.0
         results['certified_for_target'] = {
             'certified': bool(certified),
@@ -185,34 +190,72 @@ def evaluate_intrain(args, model, certified, target, target_data, target_label, 
         }
     return results
 
-def cert_intrain(args, model, target_data, device='cpu'):
-    results = {}
-    epsilon_of_point = args.max_epsilon
-    certified = 0
+
+def cert(args, model, target_data, device='cpu'):
+    list_of_eps_can_cert = []
     for i, eps in enumerate(np.linspace(args.min_epsilon, args.max_epsilon, 100)):
         temp_x = target_data.numpy()
         noise_scale = args.sens / eps
-        generated_target_org = np.tile(temp_x, (args.num_draws + 1, 1))
+        generated_target_org = np.tile(temp_x, (args.num_draws, 1))
         noise = np.random.laplace(0, noise_scale, generated_target_org[1:, :].shape)
         generated_target = generated_target_org.copy()
         generated_target[1:, :] = generated_target[1:, :] + noise
         temp_x = torch.from_numpy(generated_target.astype(np.float32)).to(device)
-        fc1, fc2, out = model(temp_x)
-        pred = fc2[:, 0].cpu().detach().numpy()
+        fc2, fc3, prob = model(temp_x)
+        pred = fc3[:, 1].cpu().detach().numpy()
         larger_than_zero = pred > 0
         count_of_larger_than_zero = sum(larger_than_zero.astype(int))
         count_of_smaller_than_zero = args.num_draws - count_of_larger_than_zero
+        print(
+            'For eps {}, # larger than 0: {}, # smaller or equal to 0: {}'.format(
+                eps, count_of_larger_than_zero, count_of_smaller_than_zero))
         upper_bound = hoeffding_upper_bound(count_of_smaller_than_zero, nobs=args.num_draws, alpha=args.alpha)
         lower_bound = hoeffding_lower_bound(count_of_larger_than_zero, nobs=args.num_draws, alpha=args.alpha)
         if (lower_bound > upper_bound):
-            certified = int(1.0)
-            epsilon_of_point = min(epsilon_of_point, eps)
-        # print("Done for eps: {}".format(eps))
-    results['certified_for_target'] = {
-        'search_range_min': args.min_epsilon,
-        'search_range_max': args.max_epsilon,
-        'certified': certified,
-        'eps_min': epsilon_of_point,
-        'confidence': 1 - args.alpha
-    }
-    return results, epsilon_of_point, certified
+            list_of_eps_can_cert.append(eps)
+    return list_of_eps_can_cert
+
+
+def perform_attack(args, results, target, target_data, target_label, list_of_eps, model, device):
+    results['number_of_test_set'] = args.num_test_set
+    results['sample_target_rate'] = args.sample_target_rate
+    results['result_of_eps'] = {}
+    model.to(device)
+    for eps in tqdm(list_of_eps):
+        true_label = []
+        predicted = []
+        for i in range(args.num_test_set):
+            noise_scale = args.sens / eps
+            sample = np.random.binomial(n=1, p=args.sample_target_rate, size=1).astype(bool)
+            test_loader = torch.utils.data.DataLoader(
+                CelebATripletFull(args=args, target=target, dataroot=args.data_path, mode='test', imgroot=None,
+                                  include_tar=sample[0]),
+                shuffle=False,
+                num_workers=0, batch_size=args.num_test_point)
+            x_test, y_test, file_name = next(iter(test_loader))
+            y_test = 1 - y_test
+            true_label.append(sample[0])
+            if sample[0]:
+                x_test = torch.cat((target_data, x_test), 0)
+                y_test = torch.cat((target_label, y_test), 0)
+            x_test = x_test + torch.distributions.laplace.Laplace(loc=0.0, scale=noise_scale).rsample(x_test.size())
+            criteria = nn.CrossEntropyLoss()
+            x_test = x_test.to(device)
+            y_test = y_test.to(device)
+            fc2, fc3, prob = model(x_test)
+            loss = criteria(prob, y_test).item()
+            pred = fc3[:, 1] > 0
+            pred_ = sum(pred.cpu().numpy().astype(int))
+            if pred_ == 0:
+                predicted.append(0)
+            else:
+                predicted.append(1)
+        acc = accuracy_score(true_label, predicted)
+        precision = precision_score(true_label, predicted)
+        recall = recall_score(true_label, predicted)
+        results['result_of_eps']['Eps = {0:.3f}'.format(eps)] = {
+            'acc': acc,
+            'precision': precision,
+            'recall': recall,
+        }
+    return results

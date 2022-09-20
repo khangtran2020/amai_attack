@@ -57,13 +57,6 @@ def train(args, target, device, data, model):
     train_dataloader, valid_dataloader = data
     optimizer = torch.optim.AdamW(params=model.parameters(), lr=args.lr)
     results = defaultdict(list)
-    if args.debug:
-        SAVE_NAME = 'debugging_eps_{}'.format(args.epsilon)
-    else:
-        if args.num_target == 1:
-            SAVE_NAME = 'CELEBA_single_Laplace_eps_{}'.format(args.epsilon)
-        else:
-            SAVE_NAME = 'CELEBA_multiple_{}_Lap_eps_{}'.format(args.num_target, args.epsilon)
 
     # custom_weight = np.array([, 200.0])
     criteria = nn.CrossEntropyLoss()
@@ -129,7 +122,7 @@ def train(args, target, device, data, model):
             }
 
             max_tpr = (tpr + tnr) / 2
-            torch.save(model, args.save_path + SAVE_NAME)
+            torch.save(model, args.save_path + args.save_model_name)
         if step % 10 == 0:
             # print(f'Loss: {loss_value.item()} | Acc: {num_correct}/{num_samples} | Epoch: {i}')
             print(
@@ -143,14 +136,6 @@ def train_triplet(args, target, device, data, model):
     train_dataloader, valid_dataloader = data
     optimizer = torch.optim.AdamW(params=model.parameters(), lr=args.lr)
     results = defaultdict(list)
-
-    if args.debug:
-        SAVE_NAME = 'debugging_eps_{}_reg_{}.pt'.format(args.epsilon, args.reg)
-    else:
-        if args.num_target == 1:
-            SAVE_NAME = 'CELEBA_single_Laplace_eps_{}.pt'.format(args.epsilon)
-        else:
-            SAVE_NAME = 'CELEBA_multiple_{}_Lap_eps_{}.pt'.format(args.num_target, args.epsilon)
 
     custom_weight = np.array([1600.0, 200.0])
     criteria = nn.CrossEntropyLoss(weight=torch.tensor(custom_weight, dtype=torch.float).to(device))
@@ -212,7 +197,7 @@ def train_triplet(args, target, device, data, model):
             }
 
             max_tpr = (tpr + tnr) / 2
-            torch.save(model, args.save_path + SAVE_NAME)
+            torch.save(model, args.save_path + args.save_model_name)
         if step % 10 == 0:
             # print(f'Loss: {loss_value.item()} | Acc: {num_correct}/{num_samples} | Epoch: {i}')
             print(
@@ -226,14 +211,6 @@ def train_triplet_full(args, target, device, data, model):
     train_dataloader, valid_dataloader = data
     optimizer = torch.optim.AdamW(params=model.parameters(), lr=args.lr)
     results = defaultdict(list)
-
-    if args.debug:
-        SAVE_NAME = 'debugging_eps_{}_reg_{}.pt'.format(args.epsilon, args.reg)
-    else:
-        if args.num_target == 1:
-            SAVE_NAME = 'CELEBA_single_Laplace_eps_{}.pt'.format(args.epsilon)
-        else:
-            SAVE_NAME = 'CELEBA_multiple_{}_Lap_eps_{}.pt'.format(args.num_target, args.epsilon)
 
     custom_weight = np.array([200.0, 1600.0])
     criteria = nn.CrossEntropyLoss(weight=torch.tensor(custom_weight, dtype=torch.float).to(device))
@@ -295,7 +272,7 @@ def train_triplet_full(args, target, device, data, model):
             }
 
             max_tpr = (tpr + tnr) / 2
-            torch.save(model, args.save_path + SAVE_NAME)
+            torch.save(model, args.save_path + args.save_model_name)
         if step % 10 == 0:
             # print(f'Loss: {loss_value.item()} | Acc: {num_correct}/{num_samples} | Epoch: {i}')
             print(
@@ -309,15 +286,6 @@ def train_triplet_fun(args, target, device, data, model):
     train_dataloader, valid_dataloader = data
     optimizer = torch.optim.AdamW(params=model.parameters(), lr=args.lr)
     results = defaultdict(list)
-
-    if args.debug:
-        SAVE_NAME = 'debugging_eps_{}_reg_{}.pt'.format(args.epsilon, args.reg)
-    else:
-        if args.num_target == 1:
-            SAVE_NAME = 'CELEBA_single_Laplace_eps_{}.pt'.format(args.epsilon)
-        else:
-            SAVE_NAME = 'CELEBA_multiple_{}_Lap_eps_{}.pt'.format(args.num_target, args.epsilon)
-
     custom_weight = np.array([200.0, 1600.0])
     criteria = nn.CrossEntropyLoss(weight=torch.tensor(custom_weight, dtype=torch.float).to(device))
     triplet_loss = nn.TripletMarginLoss(margin=1.0, p=2)
@@ -380,7 +348,7 @@ def train_triplet_fun(args, target, device, data, model):
             }
 
             max_tpr = (tpr + tnr) / 2
-            torch.save(model, args.save_path + SAVE_NAME)
+            torch.save(model, args.save_path + args.save_model_name)
         if step % 10 == 0:
             # print(f'Loss: {loss_value.item()} | Acc: {num_correct}/{num_samples} | Epoch: {i}')
             print(
@@ -403,13 +371,6 @@ def train_triplet_eval(args, target, device, data, model):
     list_target = tuple(list_target)
     target_data = torch.cat(list_target, 0)
     target_label = torch.from_numpy(np.array(list_target_label))
-    if args.debug:
-        SAVE_NAME = 'debugging_eps_{}_reg_{}.pt'.format(args.epsilon, args.reg)
-    else:
-        if args.num_target == 1:
-            SAVE_NAME = 'CELEBA_single_Laplace_eps_{}.pt'.format(args.epsilon)
-        else:
-            SAVE_NAME = 'CELEBA_multiple_{}_Lap_eps_{}.pt'.format(args.num_target, args.epsilon)
 
     custom_weight = np.array([1600.0, 200.0])
     criteria = nn.CrossEntropyLoss(weight=torch.tensor(custom_weight, dtype=torch.float).to(device))
@@ -471,7 +432,7 @@ def train_triplet_eval(args, target, device, data, model):
             }
 
             max_tpr = (tpr + tnr) / 2
-            torch.save(model, args.save_path + SAVE_NAME)
+            torch.save(model, args.save_path + args.save_model_name)
         if step % 10 == 0:
             # print(f'Loss: {loss_value.item()} | Acc: {num_correct}/{num_samples} | Epoch: {i}')
             print(
