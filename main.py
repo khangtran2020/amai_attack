@@ -89,7 +89,7 @@ def run(args, target, device):
                                                                                                               args.epsilon))
         model = train_triplet_fun(args=args, target=target, device=device, data=(train_loader, valid_loader),
                                   model=model)
-    results = {}
+    model.to('cpu')
     target_data, target_label = init_target_data(args, target)
     list_of_cert_eps = cert(args=args, model=model, target_data=target_data, device=device)
     if len(list_of_cert_eps) == 0:
