@@ -249,10 +249,10 @@ def tpr_tnr(prediction, truth):
     #   nan   where prediction and truth are 0 (True Positive)
     #   0     where prediction is 0 and truth is 1 (False Positive)
 
-    true_negatives = torch.sum(confusion_vector == 1).item()
-    false_negatives = torch.sum(confusion_vector == float('inf')).item()
-    true_positives = torch.sum(torch.isnan(confusion_vector)).item()
-    false_positives = torch.sum(confusion_vector == 0).item()
+    true_negatives = torch.sum(torch.isnan(confusion_vector)).item()
+    false_negatives = torch.sum(confusion_vector == 0).item()
+    true_positives = torch.sum(confusion_vector == 1).item()
+    false_positives = torch.sum(confusion_vector == float('inf')).item()
 
     # print(true_negatives, false_negatives, true_positives, false_positives)
     return true_positives / (true_positives + false_negatives), true_negatives / (true_negatives + false_positives), (
