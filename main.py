@@ -27,14 +27,6 @@ def run(args, target, device):
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
-    # train_loader = torch.utils.data.DataLoader(
-    #     AMIADatasetCelebA(args=args, target=target, transform=transform, dataroot=args.data_path, mode='train', imgroot=None, multiplier=args.train_multiplier),
-    #     shuffle=False,
-    #     num_workers=0, batch_size=args.batch_size)
-    # valid_loader = torch.utils.data.DataLoader(
-    #     AMIADatasetCelebA(args=args, target=target, transform=transform, dataroot=args.data_path, mode='valid', imgroot=None, multiplier=args.valid_multiplier),
-    #     shuffle=False,
-    #     num_workers=0, batch_size=args.batch_size)
     train_loader = torch.utils.data.DataLoader(
         CelebATriplet(args=args, target=target, transform=transform, dataroot=args.data_path, mode='train',
                           imgroot=None, multiplier=args.train_multiplier),
