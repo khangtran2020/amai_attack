@@ -280,8 +280,8 @@ def train_triplet_full(args, target, device, data, model):
         optimizer.zero_grad()  # a clean up step for PyTorch
 
         # Test acc
-        fc1, fc2, probs = model(x_valid)
-        predictions = fc2[:, 0] < 0
+        f1, pre1, probs1 = model(x_valid)
+        predictions = pre1[:, 1] > 0
         tpr, tnr, acc = tpr_tnr(predictions, y_valid)
         if (tpr + tnr) / 2 > max_tpr:
             state = {
