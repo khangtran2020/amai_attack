@@ -5,8 +5,17 @@ import matplotlib.pyplot as plt
 import torch
 import logging
 import random
+import time
 from sklearn.metrics import accuracy_score, precision_score, recall_score
 
+from contextlib import contextmanager
+@contextmanager
+def timeit(logger, task):
+    logger.info('Started task %s ...', task)
+    t0 = time.time()
+    yield
+    t1 = time.time()
+    logger.info('Completed task %s - %.3f sec.', task, t1-t0)
 
 def unpacking_apply_along_axis(all_args):
     (func1d, axis, arr, args, kwargs) = all_args
