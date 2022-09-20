@@ -312,3 +312,91 @@ class CelebATripletFull(Dataset):
             class_id = torch.tensor(len(self.target))
         img_tensor = torch.load(self.dataroot + filename)
         return img_tensor, class_id, filename
+
+class CelebATripletFun(Dataset):
+    def __init__(self, args, target, dataroot, mode='train', imgroot=None, include_tar=True,
+                 shuffle=True, multiplier=100):
+        self.args = args
+        self.target = target
+        self.target_multiplier = multiplier
+        self.num_file_org = len(os.listdir(dataroot))
+        self.non_target = list(range(self.num_file_org))
+        for i in self.target:
+            self.non_target.remove(i)
+        self.include = include_tar
+        if shuffle:
+            random.shuffle(self.non_target)
+        self.num_file = len(self.non_target)
+        self.dataroot = dataroot
+        self.imgroot = imgroot
+        self.data_name = sorted(os.listdir(dataroot))
+        self.mode = mode
+        self.noise_scale_target = args.sens/args.epsilon
+        self.noise_scale_non_target = args.sens / (args.epsilon*10)
+        self.noise_tensor_non_target = torch.distributions.laplace.Laplace(loc=0, scale=self.noise_scale_non_target).rsample(
+            (self.num_file, args.num_feature))
+
+        if mode == 'train':
+            self.train_data = np.arange(int(0.6 * self.num_file))
+            self.length = len(self.train_data) + len(target) * multiplier
+        elif mode == 'valid':
+            self.valid_data = np.arange(int(0.6 * self.num_file), int(0.8 * self.num_file))
+            self.length = len(self.valid_data) + len(target) * multiplier
+        else:
+            test_point = np.random.choice(a=np.array(list(range(int(0.8 * self.num_file), self.num_file))),
+                                          size=args.num_test_point, replace=False)
+            self.test_data = test_point
+            self.length = len(self.test_data)
+
+    def __len__(self):
+        return self.length
+
+    def __getitem__(self, idx):
+        if self.mode == 'train':
+            if idx / self.target_multiplier < len(self.target):
+                anchor_name = self.data_name[self.target[int(idx / self.target_multiplier)]]
+                id2 = np.random.choice(a=np.arange(0, int(0.6 * self.num_file)), size=1, replace=False)[0]
+                noise_2 = self.noise_tensor_non_target[id2]
+                negative_name = self.data_name[self.non_target[self.train_data[id2]]]
+                class_id = torch.tensor(int(idx / self.target_multiplier))
+                anchor = torch.load(self.dataroot + anchor_name)
+                negative = torch.load(self.dataroot + negative_name) + noise_2
+                positive = anchor + torch.distributions.laplace.Laplace(loc=0, scale=self.noise_scale_target).rsample(
+                    anchor.size())
+                sample = np.random.binomial(1, self.args.sample_rate, 1)[0]
+                if sample:
+                    return anchor, positive, negative, class_id, anchor_name
+                else:
+                    anchor = anchor + torch.distributions.laplace.Laplace(loc=0, scale=self.noise_scale_target).rsample(
+                    anchor.size())
+                    return anchor, positive, negative, class_id, anchor_name
+            else:
+                idx -= len(self.target) * self.target_multiplier
+                anchor_name = self.data_name[self.non_target[self.train_data[idx]]]
+                id2 = np.random.choice(a=np.arange(0, int(0.6 * self.num_file)), size=1, replace=False)[0]
+                positive_name = self.data_name[self.non_target[self.train_data[id2]]]
+                negative_name = self.data_name[self.target[0]]
+                class_id = torch.tensor(len(self.target))
+                anchor = torch.load(self.dataroot + anchor_name) + self.noise_tensor_non_target[idx]
+                positive = torch.load(self.dataroot + positive_name) + self.noise_tensor_non_target[id2]
+                negative = torch.load(self.dataroot + negative_name)
+                sample = np.random.binomial(1, 0.5, 1)[0]
+                if sample:
+                    return anchor, positive, negative, class_id, anchor_name
+                else:
+                    negative = negative + torch.distributions.laplace.Laplace(loc=0, scale=self.noise_scale_target).rsample(
+                    negative.size())
+                    return anchor, positive, negative, class_id, anchor_name
+        elif self.mode == 'valid':
+            if idx / self.target_multiplier < len(self.target):
+                filename = self.data_name[self.target[int(idx / self.target_multiplier)]]
+                class_id = torch.tensor(int(idx / self.target_multiplier))
+            else:
+                idx -= len(self.target) * self.target_multiplier
+                filename = self.data_name[self.non_target[self.valid_data[idx]]]
+                class_id = torch.tensor(len(self.target))
+        else:
+            filename = self.data_name[self.non_target[self.test_data[idx]]]
+            class_id = torch.tensor(len(self.target))
+        img_tensor = torch.load(self.dataroot + filename)
+        return img_tensor, class_id, filename

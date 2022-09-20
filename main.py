@@ -71,6 +71,30 @@ def run(args, target, device):
         else:
             model = train_triplet_eval(args=args, target=target, device=device, data=(train_loader, valid_loader),
                                        model=model)
+    elif args.train_mode == 'triplet-fun':
+        print('Train with mode triplet full')
+        model = ClassifierTriplet(args=args, n_inputs=args.num_feature, n_outputs=args.num_target + 1)
+        train_loader = torch.utils.data.DataLoader(
+            CelebATripletFun(args=args, target=target, dataroot=args.data_path, mode='train',
+                          imgroot=None, multiplier=args.train_multiplier),
+            shuffle=False,
+            num_workers=0, batch_size=args.batch_size)
+        valid_loader = torch.utils.data.DataLoader(
+            CelebATripletFun(args=args, target=target, dataroot=args.data_path, mode='valid',
+                          imgroot=None, multiplier=args.valid_multiplier),
+            shuffle=False,
+            num_workers=0, batch_size=args.batch_size)
+        print("Sensitivity: {}, Number of features: {}, epsilon used in training: {}, noise scale: {}".format(args.sens,
+                                                                                                              args.num_feature,
+                                                                                                              args.epsilon,
+                                                                                                              args.sens /
+                                                                                                              args.epsilon))
+        if args.val_mode == 'normal':
+            model = train_triplet_fun(args=args, target=target, device=device, data=(train_loader, valid_loader),
+                                  model=model)
+        else:
+            model = train_triplet_eval(args=args, target=target, device=device, data=(train_loader, valid_loader),
+                                       model=model)
     results = {}
     data_name = sorted(os.listdir(args.data_path))
     list_target = []
