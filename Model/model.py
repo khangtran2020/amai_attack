@@ -256,6 +256,7 @@ def train_triplet_full(args, target, device, data, model):
         y_valid = 1 - y_valid
         y_valid = y_valid.to(device)
     print(torch.bincount(y_train), torch.bincount(y_valid))
+    print("Begin training full triplet")
     for step in range(args.num_steps):
         num_correct = 0
         num_samples = 0
