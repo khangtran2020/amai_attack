@@ -11,6 +11,7 @@ from config import parse_args
 import os
 import json
 import warnings
+from multiprocessing import Process
 
 warnings.filterwarnings('ignore')
 from sklearn.metrics import accuracy_score, precision_score, recall_score
@@ -94,6 +95,8 @@ def run(args, target, device):
     if len(list_of_cert_eps) == 0:
         print("Didn't ceritfied")
         exit()
+    manager = multiprocessing.Manager()
+    results = manager.dict()
     results['certified_for_target'] = {
         'search_range_min': args.min_epsilon,
         'search_range_max': args.max_epsilon,
@@ -101,9 +104,18 @@ def run(args, target, device):
         'list of eps': list_of_cert_eps,
         'confidence': 1 - args.alpha
     }
-    results = perform_attack(args=args, results=results, target=target, target_data=target_data,
-                             target_label=target_label, list_of_eps=list_of_cert_eps, model=model, device=device)
+    results['number_of_test_set'] = args.num_test_set
+    results['sample_target_rate'] = args.sample_target_rate
+    results['result_of_eps'] = {}
+    jobs = []
+    for eps in list_of_cert_eps:
+        # (eps, args, results, target, target_data, target_label, model, device)
+        p = multiprocessing.Process(target=perform_attack_parallel, args=(eps, args, results, target, target_data, target_label, model))
+        jobs.append(p)
+        p.start()
 
+    for proc in jobs:
+        proc.join()
     print(results)
     json_object = json.dumps(results, indent=4)
     # Writing to sample.json
