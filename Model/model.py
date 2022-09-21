@@ -285,9 +285,9 @@ def train_triplet_full(args, target, device, data, model):
 def train_triplet_fun(args, target, device, data, model):
     train_dataloader, valid_dataloader = data
     optimizer = torch.optim.AdamW(params=model.parameters(), lr=args.lr)
-    # custom_weight = np.array([200.0, 1600.0])
-    # criteria = nn.CrossEntropyLoss(weight=torch.tensor(custom_weight, dtype=torch.float).to(device))
-    criteria = nn.CrossEntropyLoss()
+    custom_weight = np.array([50000.0, 121558.0])
+    criteria = nn.CrossEntropyLoss(weight=torch.tensor(custom_weight, dtype=torch.float).to(device))
+    # criteria = nn.CrossEntropyLoss()
     triplet_loss = nn.TripletMarginLoss(margin=1.0, p=2)
     model.to(device)
     max_correct = 0
