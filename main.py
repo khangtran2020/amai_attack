@@ -97,7 +97,7 @@ def run(args, target, device, logger):
     if len(list_of_cert_eps) == 0:
         print("Didn't ceritfied")
         exit()
-    results ={}
+    results = {}
     results['certified_for_target'] = {
             'search_range_min': args.min_epsilon,
             'search_range_max': args.max_epsilon,
@@ -105,7 +105,7 @@ def run(args, target, device, logger):
             'list of eps': list_of_cert_eps,
             'confidence': 1 - args.alpha
         }
-    results = perform_attack_test(args=args, results=results, target_data=target_data, target_label=target_label, list_of_eps=list_of_cert_eps, model=model, device=device)
+    results = perform_attack_test(args=args, results=results, target=target, target_data=target_data, target_label=target_label, list_of_eps=list_of_cert_eps, model=model, device=device)
     print(results)
     exit()
     # model.to('cpu')
