@@ -23,73 +23,75 @@ os.environ['TORCH_HOME'] = "./Model/pretrain_model"
 
 
 def run(args, target, device, logger):
-    # if args.train_mode == 'triplet':
-    #     print('Train with mode triplet')
-    #     model = ClassifierTriplet(args=args, n_inputs=args.num_feature, n_outputs=args.num_target + 1)
-    #     transform = transforms.Compose([
-    #         transforms.Resize(64),
-    #         transforms.ToTensor(),
-    #         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-    #     ])
-    #     train_loader = torch.utils.data.DataLoader(
-    #         CelebATriplet(args=args, target=target, transform=transform, dataroot=args.data_path, mode='train',
-    #                       imgroot=None, multiplier=args.train_multiplier),
-    #         shuffle=False,
-    #         num_workers=0, batch_size=args.batch_size)
-    #     valid_loader = torch.utils.data.DataLoader(
-    #         CelebATriplet(args=args, target=target, transform=transform, dataroot=args.data_path, mode='valid',
-    #                       imgroot=None, multiplier=args.valid_multiplier),
-    #         shuffle=False,
-    #         num_workers=0, batch_size=args.batch_size)
-    #     print("Sensitivity: {}, Number of features: {}, epsilon used in training: {}, noise scale: {}".format(args.sens,
-    #                                                                                                           args.num_feature,
-    #                                                                                                           args.epsilon,
-    #                                                                                                           args.sens /
-    #                                                                                                           args.epsilon))
-    #     model = train_triplet(args=args, target=target, device=device, data=(train_loader, valid_loader),
-    #                           model=model)
-    #
-    # elif args.train_mode == 'triplet-full':
-    #     print('Train with mode triplet full')
-    #     model = ClassifierTriplet(args=args, n_inputs=args.num_feature, n_outputs=args.num_target + 1)
-    #     train_loader = torch.utils.data.DataLoader(
-    #         CelebATripletFull(args=args, target=target, dataroot=args.data_path, mode='train',
-    #                           imgroot=None, multiplier=args.train_multiplier),
-    #         shuffle=False,
-    #         num_workers=0, batch_size=args.batch_size)
-    #     valid_loader = torch.utils.data.DataLoader(
-    #         CelebATripletFull(args=args, target=target, dataroot=args.data_path, mode='valid',
-    #                           imgroot=None, multiplier=args.valid_multiplier),
-    #         shuffle=False,
-    #         num_workers=0, batch_size=args.batch_size)
-    #     print("Sensitivity: {}, Number of features: {}, epsilon used in training: {}, noise scale: {}".format(args.sens,
-    #                                                                                                           args.num_feature,
-    #                                                                                                           args.epsilon,
-    #                                                                                                           args.sens /
-    #                                                                                                           args.epsilon))
-    #     model = train_triplet_full(args=args, target=target, device=device, data=(train_loader, valid_loader),
-    #                                model=model)
-    # elif args.train_mode == 'triplet-fun':
-    #     print('Train with mode triplet fun')
-    #     model = ClassifierTriplet(args=args, n_inputs=args.num_feature, n_outputs=args.num_target + 1)
-    #     train_loader = torch.utils.data.DataLoader(
-    #         CelebATripletFun(args=args, target=target, dataroot=args.data_path, mode='train',
-    #                          imgroot=None, multiplier=args.train_multiplier),
-    #         shuffle=False,
-    #         num_workers=0, batch_size=args.batch_size)
-    #     valid_loader = torch.utils.data.DataLoader(
-    #         CelebATripletFun(args=args, target=target, dataroot=args.data_path, mode='valid',
-    #                          imgroot=None, multiplier=args.valid_multiplier),
-    #         shuffle=False,
-    #         num_workers=0, batch_size=args.batch_size)
-    #     print("Sensitivity: {}, Number of features: {}, epsilon used in training: {}, noise scale: {}".format(args.sens,
-    #                                                                                                           args.num_feature,
-    #                                                                                                           args.epsilon,
-    #                                                                                                           args.sens /
-    #                                                                                                           args.epsilon))
-    #     model = train_triplet_fun(args=args, target=target, device=device, data=(train_loader, valid_loader),
-    #                               model=model)
-    model = torch.load(args.save_path + args.save_model_name)
+    if args.main_mode == 'train':
+        if args.train_mode == 'triplet':
+            print('Train with mode triplet')
+            model = ClassifierTriplet(args=args, n_inputs=args.num_feature, n_outputs=args.num_target + 1)
+            transform = transforms.Compose([
+                transforms.Resize(64),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+            ])
+            train_loader = torch.utils.data.DataLoader(
+                CelebATriplet(args=args, target=target, transform=transform, dataroot=args.data_path, mode='train',
+                              imgroot=None, multiplier=args.train_multiplier),
+                shuffle=False,
+                num_workers=0, batch_size=args.batch_size)
+            valid_loader = torch.utils.data.DataLoader(
+                CelebATriplet(args=args, target=target, transform=transform, dataroot=args.data_path, mode='valid',
+                              imgroot=None, multiplier=args.valid_multiplier),
+                shuffle=False,
+                num_workers=0, batch_size=args.batch_size)
+            print("Sensitivity: {}, Number of features: {}, epsilon used in training: {}, noise scale: {}".format(args.sens,
+                                                                                                                  args.num_feature,
+                                                                                                                  args.epsilon,
+                                                                                                                  args.sens /
+                                                                                                                  args.epsilon))
+            model = train_triplet(args=args, target=target, device=device, data=(train_loader, valid_loader),
+                                  model=model)
+
+        elif args.train_mode == 'triplet-full':
+            print('Train with mode triplet full')
+            model = ClassifierTriplet(args=args, n_inputs=args.num_feature, n_outputs=args.num_target + 1)
+            train_loader = torch.utils.data.DataLoader(
+                CelebATripletFull(args=args, target=target, dataroot=args.data_path, mode='train',
+                                  imgroot=None, multiplier=args.train_multiplier),
+                shuffle=False,
+                num_workers=0, batch_size=args.batch_size)
+            valid_loader = torch.utils.data.DataLoader(
+                CelebATripletFull(args=args, target=target, dataroot=args.data_path, mode='valid',
+                                  imgroot=None, multiplier=args.valid_multiplier),
+                shuffle=False,
+                num_workers=0, batch_size=args.batch_size)
+            print("Sensitivity: {}, Number of features: {}, epsilon used in training: {}, noise scale: {}".format(args.sens,
+                                                                                                                  args.num_feature,
+                                                                                                                  args.epsilon,
+                                                                                                                  args.sens /
+                                                                                                                  args.epsilon))
+            model = train_triplet_full(args=args, target=target, device=device, data=(train_loader, valid_loader),
+                                       model=model)
+        elif args.train_mode == 'triplet-fun':
+            print('Train with mode triplet fun')
+            model = ClassifierTriplet(args=args, n_inputs=args.num_feature, n_outputs=args.num_target + 1)
+            train_loader = torch.utils.data.DataLoader(
+                CelebATripletFun(args=args, target=target, dataroot=args.data_path, mode='train',
+                                 imgroot=None, multiplier=args.train_multiplier),
+                shuffle=False,
+                num_workers=0, batch_size=args.batch_size)
+            valid_loader = torch.utils.data.DataLoader(
+                CelebATripletFun(args=args, target=target, dataroot=args.data_path, mode='valid',
+                                 imgroot=None, multiplier=args.valid_multiplier),
+                shuffle=False,
+                num_workers=0, batch_size=args.batch_size)
+            print("Sensitivity: {}, Number of features: {}, epsilon used in training: {}, noise scale: {}".format(args.sens,
+                                                                                                                  args.num_feature,
+                                                                                                                  args.epsilon,
+                                                                                                                  args.sens /
+                                                                                                                  args.epsilon))
+            model = train_triplet_fun(args=args, target=target, device=device, data=(train_loader, valid_loader),
+                                      model=model)
+    else:
+        model = torch.load(args.save_path + args.save_model_name)
     target_data, target_label = init_target_data(args, target)
     list_of_cert_eps = cert(args=args, model=model, target_data=target_data, device=device)
     if len(list_of_cert_eps) == 0:
