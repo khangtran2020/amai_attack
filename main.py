@@ -105,9 +105,9 @@ def run(args, target, device, logger):
             'list of eps': list_of_cert_eps,
             'confidence': 1 - args.alpha
         }
-    results['number_of_test_set'] = args.num_test_set
-    results['sample_target_rate'] = args.sample_target_rate
-    results['result_of_eps'] = {}
+    # results['number_of_test_set'] = args.num_test_set
+    # results['sample_target_rate'] = args.sample_target_rate
+    # results['result_of_eps'] = {}
     results = perform_attack_test(args=args, results=results, target=target, target_data=target_data, target_label=target_label, list_of_eps=list_of_cert_eps, model=model, device=device)
     # # print(results)
     # # exit()
