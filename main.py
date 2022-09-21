@@ -91,6 +91,7 @@ def run(args, target, device, logger):
             model = train_triplet_fun(args=args, target=target, device=device, data=(train_loader, valid_loader),
                                       model=model)
     else:
+        print("Model name:", args.save_path + args.save_model_name)
         model = torch.load(args.save_path + args.save_model_name)
     target_data, target_label = init_target_data(args, target)
     list_of_cert_eps = cert(args=args, model=model, target_data=target_data, device=device)
