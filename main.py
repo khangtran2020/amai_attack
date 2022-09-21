@@ -108,10 +108,10 @@ def run(args, target, device, logger):
     results['number_of_test_set'] = args.num_test_set
     results['sample_target_rate'] = args.sample_target_rate
     results['result_of_eps'] = {}
+    model.to('cpu')
     # results = perform_attack_test(args=args, results=results, target=target, target_data=target_data, target_label=target_label, list_of_eps=list_of_cert_eps, model=model, device=device)
     # # print(results)
     # # exit()
-    model.to('cpu')
     # # manager = multiprocessing.Manager()
     # # # results = manager.dict()
     # results['certified_for_target'] = {
@@ -134,7 +134,7 @@ def run(args, target, device, logger):
         res = list(p.apply_async(perform_attack_test_parallel, args=(temp_args, eps)) for eps in list_of_cert_eps)
         res = [r.get() for r in res]
     for i, eps in enumerate(list_of_cert_eps):
-        results['result_of_eps']['eps {}'.eps] = res[i]
+        results['result_of_eps']['eps {}'.format(eps)] = res[i]
     print(results)
     json_object = json.dumps(results, indent=4)
     # Writing to sample.json
