@@ -192,6 +192,7 @@ def evaluate_intrain(args, model, certified, target, target_data, target_label, 
 
 
 def cert(args, model, target_data, device='cpu'):
+    model.to(device)
     list_of_eps_can_cert = []
     for i, eps in enumerate(np.linspace(args.min_epsilon, args.max_epsilon, 10)):
         temp_x = target_data.numpy()
