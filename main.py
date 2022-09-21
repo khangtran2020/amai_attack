@@ -11,7 +11,7 @@ from config import parse_args
 import os
 import json
 import warnings
-from multiprocessing import Process
+from multiprocessing import Pool
 
 warnings.filterwarnings('ignore')
 from sklearn.metrics import accuracy_score, precision_score, recall_score
@@ -107,15 +107,13 @@ def run(args, target, device):
     results['number_of_test_set'] = args.num_test_set
     results['sample_target_rate'] = args.sample_target_rate
     results['result_of_eps'] = {}
-    jobs = []
+    # args, results, target, target_data, target_label, model, device
+    temp_args = (args, results, target, target_data, target_label, model, device)
+    items = []
     for eps in list_of_cert_eps:
-        # (eps, args, results, target, target_data, target_label, model, device)
-        p = multiprocessing.Process(target=perform_attack_parallel, args=(eps, args, results, target, target_data, target_label, model))
-        jobs.append(p)
-        p.start()
-
-    for proc in jobs:
-        proc.join()
+        items.append((temp_args, eps))
+    with Pool(8) as p:
+        p.starmap_async(perform_attack_parallel, items)
     print(results)
     json_object = json.dumps(results, indent=4)
     # Writing to sample.json
