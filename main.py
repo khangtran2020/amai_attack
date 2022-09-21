@@ -97,33 +97,44 @@ def run(args, target, device, logger):
     if len(list_of_cert_eps) == 0:
         print("Didn't ceritfied")
         exit()
-    model.to('cpu')
-    manager = multiprocessing.Manager()
-    results = manager.dict()
+    results ={}
     results['certified_for_target'] = {
-        'search_range_min': args.min_epsilon,
-        'search_range_max': args.max_epsilon,
-        'certified': 'yes',
-        'list of eps': list_of_cert_eps,
-        'confidence': 1 - args.alpha
-    }
-    results['number_of_test_set'] = args.num_test_set
-    results['sample_target_rate'] = args.sample_target_rate
-    results['result_of_eps'] = {}
-    # args, results, target, target_data, target_label, model, device
-    print("Start multiprocessing")
-    temp_args = (args, results, target, target_data, target_label, model, 'cpu', logger)
-    items = []
-    for eps in list_of_cert_eps:
-        items.append((temp_args, eps))
-    with Pool(8) as p:
-        p.starmap_async(perform_attack_parallel, items).get()
+            'search_range_min': args.min_epsilon,
+            'search_range_max': args.max_epsilon,
+            'certified': 'yes',
+            'list of eps': list_of_cert_eps,
+            'confidence': 1 - args.alpha
+        }
+    results = perform_attack_test(args=args, results=results, target_data=target_data, target_label=target_label, list_of_eps=list_of_cert_eps, model=model, device=device)
     print(results)
-    json_object = json.dumps(results, indent=4)
-    # Writing to sample.json
-    with open(args.save_path + args.save_result_name, "w") as outfile:
-        outfile.write(json_object)
     exit()
+    # model.to('cpu')
+    # manager = multiprocessing.Manager()
+    # results = manager.dict()
+    # results['certified_for_target'] = {
+    #     'search_range_min': args.min_epsilon,
+    #     'search_range_max': args.max_epsilon,
+    #     'certified': 'yes',
+    #     'list of eps': list_of_cert_eps,
+    #     'confidence': 1 - args.alpha
+    # }
+    # results['number_of_test_set'] = args.num_test_set
+    # results['sample_target_rate'] = args.sample_target_rate
+    # results['result_of_eps'] = {}
+    # # args, results, target, target_data, target_label, model, device
+    # print("Start multiprocessing")
+    # temp_args = (args, results, target, target_data, target_label, model, 'cpu', logger)
+    # items = []
+    # for eps in list_of_cert_eps:
+    #     items.append((temp_args, eps))
+    # with Pool(8) as p:
+    #     p.starmap_async(perform_attack_parallel, items).get()
+    # print(results)
+    # json_object = json.dumps(results, indent=4)
+    # # Writing to sample.json
+    # with open(args.save_path + args.save_result_name, "w") as outfile:
+    #     outfile.write(json_object)
+    # exit()
 
 
 if __name__ == '__main__':
