@@ -135,6 +135,9 @@ if __name__ == '__main__':
     set_seed(args.seed)
     device = get_device(gpus=args.gpu)
     target = [int(i) for i in args.target.split('-')]
+    logging.basicConfig(format='%(asctime)s | %(levelname)s | %(name)s | %(message)s')
+    logger = logging.getLogger('exp')
+    logger.setLevel(logging.INFO)
     if args.debug:
         args.save_model_name = 'debugging_eps_{}_reg_{}.pt'.format(args.epsilon, args.reg)
         args.save_result_name = 'debugging_eps_{}_reg_{}_ver_{}.json'.format(args.epsilon, args.reg, args.test_ver)
