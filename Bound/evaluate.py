@@ -377,8 +377,8 @@ def perform_attack_test_parallel(arg, eps):
             x_test[:args.num_target] = x_test[:args.num_target] + noise_target
             x_test[args.num_target:] = x_test[args.num_target:] + noise_non_target
             criteria = nn.CrossEntropyLoss()
-            x_test = x_test.to(device)
-            y_test = y_test.to(device)
+            # x_test = x_test.to(device)
+            # y_test = y_test.to(device)
             fc2, fc3, prob = model(x_test)
             loss = criteria(prob, y_test).item()
             pred = fc3[:, 1] > 0
