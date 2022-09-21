@@ -135,7 +135,7 @@ def run(args, target, device, logger):
         res = list(p.apply_async(perform_attack_test_parallel, args=(temp_args, eps)) for eps in list_of_cert_eps)
         res = [r.get() for r in res]
     for i, eps in enumerate(list_of_cert_eps):
-        results['result_of_eps']['eps {}'.format(eps)] = res[i]
+        results['result_of_eps']['eps {:.2f}'.format(eps)] = res[i]
     print(results)
     json_object = json.dumps(results, indent=4)
     # Writing to sample.json
