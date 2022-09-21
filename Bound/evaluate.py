@@ -390,10 +390,10 @@ def perform_attack_test_parallel(arg, eps):
     acc = accuracy_score(true_label, predicted)
     precision = precision_score(true_label, predicted)
     recall = recall_score(true_label, predicted)
-    print('For eps = {0:.3f}, acc: {}, precision: {}, recall {}'.format(eps, acc, precision, recall))
-    results['result_of_eps']['Eps = {0:.3f}'.format(eps)] = {
+    print('For eps = {}, acc: {}, precision: {}, recall {}'.format(eps, acc, precision, recall))
+    results['result_of_eps']['Eps = {}'.format(eps)] = {
         'acc': acc,
         'precision': precision,
         'recall': recall,
     }
-    return 'For eps = {0:.3f}, acc: {}, precision: {}, recall {}'.format(eps, acc, precision, recall)
+    return 'For eps = {}, acc: {}, precision: {}, recall {}'.format(eps, acc, precision, recall)
