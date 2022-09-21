@@ -131,8 +131,9 @@ def run(args, target, device, logger):
     for eps in list_of_cert_eps:
         items.append((temp_args, eps))
     with Pool(10) as p:
-        p.starmap_async(perform_attack_parallel, items).get()
-    print(results)
+        res = list(p.apply_async(perform_attack_test_parallel, args=(temp_args, eps)) for eps in list_of_cert_eps)
+        res = [r.get() for r in res]
+    print(res)
     # json_object = json.dumps(results, indent=4)
     # # Writing to sample.json
     # with open(args.save_path + args.save_result_name, "w") as outfile:

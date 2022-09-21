@@ -396,4 +396,4 @@ def perform_attack_test_parallel(arg, eps):
         'precision': precision,
         'recall': recall,
     }
-    return results
+    return 'For eps = {0:.3f}, acc: {}, precision: {}, recall {}'.format(eps, acc, precision, recall)
