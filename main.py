@@ -105,35 +105,35 @@ def run(args, target, device, logger):
             'list of eps': list_of_cert_eps,
             'confidence': 1 - args.alpha
         }
-    # results['number_of_test_set'] = args.num_test_set
-    # results['sample_target_rate'] = args.sample_target_rate
-    # results['result_of_eps'] = {}
-    results = perform_attack_test(args=args, results=results, target=target, target_data=target_data, target_label=target_label, list_of_eps=list_of_cert_eps, model=model, device=device)
+    results['number_of_test_set'] = args.num_test_set
+    results['sample_target_rate'] = args.sample_target_rate
+    results['result_of_eps'] = {}
+    # results = perform_attack_test(args=args, results=results, target=target, target_data=target_data, target_label=target_label, list_of_eps=list_of_cert_eps, model=model, device=device)
     # # print(results)
     # # exit()
     # model.to('cpu')
     # # manager = multiprocessing.Manager()
-    # # results = manager.dict()
-    # # results['certified_for_target'] = {
-    # #     'search_range_min': args.min_epsilon,
-    # #     'search_range_max': args.max_epsilon,
-    # #     'certified': 'yes',
-    # #     'list of eps': list_of_cert_eps,
-    # #     'confidence': 1 - args.alpha
-    # # }
+    # # # results = manager.dict()
+    # results['certified_for_target'] = {
+    #     'search_range_min': args.min_epsilon,
+    #     'search_range_max': args.max_epsilon,
+    #     'certified': 'yes',
+    #     'list of eps': list_of_cert_eps,
+    #     'confidence': 1 - args.alpha
+    # }
     # # results['number_of_test_set'] = args.num_test_set
     # # results['sample_target_rate'] = args.sample_target_rate
     # # results['result_of_eps'] = {}
     # # # args, results, target, target_data, target_label, model, device
-    # print("Start multiprocessing")
-    # temp_args = (args, results, target, target_data, target_label, model, 'cpu', logger)
-    # items = []
-    # for eps in list_of_cert_eps:
-    #     items.append((temp_args, eps))
-    # with Pool(10) as p:
-    #     res = list(p.apply_async(perform_attack_test_parallel, args=(temp_args, eps)) for eps in list_of_cert_eps)
-    #     res = [r.get() for r in res]
-    # print(res)
+    print("Start multiprocessing")
+    temp_args = (args, results, target, target_data, target_label, model, 'cpu', logger)
+    items = []
+    for eps in list_of_cert_eps:
+        items.append((temp_args, eps))
+    with Pool(10) as p:
+        res = list(p.apply_async(perform_attack_test_parallel, args=(temp_args, eps)) for eps in list_of_cert_eps)
+        res = [r.get() for r in res]
+    print(res)
     print(results)
     # json_object = json.dumps(results, indent=4)
     # # Writing to sample.json
