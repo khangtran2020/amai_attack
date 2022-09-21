@@ -359,6 +359,7 @@ def perform_attack_test_parallel(arg, eps):
         for i in range(args.num_test_set):
             noise_scale_target = args.sens / eps
             noise_scale_non_target = args.sens / (args.epsilon * 10)
+            print('Noise scale target: {:.2f} | Noise scale non-target: {:.2f}'.format(noise_scale_target,noise_scale_non_target))
             sample = np.random.binomial(n=1, p=args.sample_target_rate, size=1).astype(bool)
             test_loader = torch.utils.data.DataLoader(
                 CelebATripletFull(args=args, target=target, dataroot=args.data_path, mode='test', imgroot=None,
