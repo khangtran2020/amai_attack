@@ -109,7 +109,8 @@ def run(args, target, device):
     results['sample_target_rate'] = args.sample_target_rate
     results['result_of_eps'] = {}
     # args, results, target, target_data, target_label, model, device
-    temp_args = (args, results, target, target_data, target_label, model, device)
+    print("Start multiprocessing")
+    temp_args = (args, results, target, target_data, target_label, model, 'cpu')
     items = []
     for eps in list_of_cert_eps:
         items.append((temp_args, eps))
