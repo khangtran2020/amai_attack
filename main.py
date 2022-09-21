@@ -133,12 +133,13 @@ def run(args, target, device, logger):
     with Pool(10) as p:
         res = list(p.apply_async(perform_attack_test_parallel, args=(temp_args, eps)) for eps in list_of_cert_eps)
         res = [r.get() for r in res]
-    print(res)
+    for i, eps in enumerate(list_of_cert_eps):
+        results['result_of_eps']['eps {}'.eps] = res[i]
     print(results)
-    # json_object = json.dumps(results, indent=4)
-    # # Writing to sample.json
-    # with open(args.save_path + args.save_result_name, "w") as outfile:
-    #     outfile.write(json_object)
+    json_object = json.dumps(results, indent=4)
+    # Writing to sample.json
+    with open(args.save_path + args.save_result_name, "w") as outfile:
+        outfile.write(json_object)
     exit()
 
 
