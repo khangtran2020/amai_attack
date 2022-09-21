@@ -330,6 +330,7 @@ class CelebATripletFun(Dataset):
         self.mode = mode
         self.noise_scale_target = args.sens/args.epsilon
         self.noise_scale_non_target = args.sens / (args.epsilon*10)
+        print('Noise scale for target: {} | Noise scale for non-target: {}'.format(self.noise_scale_target, self.noise_scale_non_target))
         self.noise_tensor_non_target = torch.distributions.laplace.Laplace(loc=0, scale=self.noise_scale_non_target).rsample(
             (self.num_file, args.num_feature))
 
