@@ -22,7 +22,7 @@ os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
 os.environ['TORCH_HOME'] = "./Model/pretrain_model"
 
 
-def run(args, target, device):
+def run(args, target, device, logger):
     # if args.train_mode == 'triplet':
     #     print('Train with mode triplet')
     #     model = ClassifierTriplet(args=args, n_inputs=args.num_feature, n_outputs=args.num_target + 1)
@@ -110,7 +110,7 @@ def run(args, target, device):
     results['result_of_eps'] = {}
     # args, results, target, target_data, target_label, model, device
     print("Start multiprocessing")
-    temp_args = (args, results, target, target_data, target_label, model, 'cpu')
+    temp_args = (args, results, target, target_data, target_label, model, 'cpu', logger)
     items = []
     for eps in list_of_cert_eps:
         items.append((temp_args, eps))
@@ -148,4 +148,4 @@ if __name__ == '__main__':
         else:
             args.save_model_name = 'CELEBA_multiple_{}_Lap_eps_{}.pt'.format(args.num_target, args.epsilon)
             args.save_result_name = 'CELEBA_multiple_{}_Lap_eps_{}.json'.format(args.num_target, args.epsilon)
-    run(args=args, target=target, device=device)
+    run(args=args, target=target, device=device, logger=logger)

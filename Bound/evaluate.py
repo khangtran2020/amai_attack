@@ -261,7 +261,7 @@ def perform_attack(args, results, target, target_data, target_label, list_of_eps
     return results
 
 def perform_attack_parallel(arg, eps):
-    args, results, target, target_data, target_label, model, device = arg
+    args, results, target, target_data, target_label, model, device, logger = arg
     true_label = []
     predicted = []
     with timeit(logger, 'evaluating-test'):
