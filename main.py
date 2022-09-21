@@ -42,11 +42,6 @@ def run(args, target, device, logger):
                               imgroot=None, multiplier=args.valid_multiplier),
                 shuffle=False,
                 num_workers=0, batch_size=args.batch_size)
-            print("Sensitivity: {}, Number of features: {}, epsilon used in training: {}, noise scale: {}".format(args.sens,
-                                                                                                                  args.num_feature,
-                                                                                                                  args.epsilon,
-                                                                                                                  args.sens /
-                                                                                                                  args.epsilon))
             model = train_triplet(args=args, target=target, device=device, data=(train_loader, valid_loader),
                                   model=model)
 
@@ -63,11 +58,6 @@ def run(args, target, device, logger):
                                   imgroot=None, multiplier=args.valid_multiplier),
                 shuffle=False,
                 num_workers=0, batch_size=args.batch_size)
-            print("Sensitivity: {}, Number of features: {}, epsilon used in training: {}, noise scale: {}".format(args.sens,
-                                                                                                                  args.num_feature,
-                                                                                                                  args.epsilon,
-                                                                                                                  args.sens /
-                                                                                                                  args.epsilon))
             model = train_triplet_full(args=args, target=target, device=device, data=(train_loader, valid_loader),
                                        model=model)
         elif args.train_mode == 'triplet-fun':
@@ -83,11 +73,6 @@ def run(args, target, device, logger):
                                  imgroot=None, multiplier=args.valid_multiplier),
                 shuffle=False,
                 num_workers=0, batch_size=args.batch_size)
-            print("Sensitivity: {}, Number of features: {}, epsilon used in training: {}, noise scale: {}".format(args.sens,
-                                                                                                                  args.num_feature,
-                                                                                                                  args.epsilon,
-                                                                                                                  args.sens /
-                                                                                                                  args.epsilon))
             model = train_triplet_fun(args=args, target=target, device=device, data=(train_loader, valid_loader),
                                       model=model)
     else:
