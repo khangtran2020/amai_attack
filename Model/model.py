@@ -353,7 +353,7 @@ def train_triplet_fun(args, target, device, data, model):
             # print(f'Loss: {loss_value.item()} | Acc: {num_correct}/{num_samples} | Epoch: {i}')
             print(
                 f'Loss: {loss_value.item()} | Train_TPR = {tpr_train}, Train_TNR = {tnr_train:.5f}, Train_ACC = {train_acc}| TPR = {tpr}, TNR = {tnr}, ACC = {acc} | Epoch: {step}')
-
+    model = torch.load(args.save_path + args.save_model_name)
     return model
     # print('Finish one step in ', time.time() - start_time)
 
