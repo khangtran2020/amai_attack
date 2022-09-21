@@ -111,7 +111,7 @@ def run(args, target, device, logger):
     # results = perform_attack_test(args=args, results=results, target=target, target_data=target_data, target_label=target_label, list_of_eps=list_of_cert_eps, model=model, device=device)
     # print(results)
     # exit()
-    # model.to('cpu')
+    model.to('cpu')
     # manager = multiprocessing.Manager()
     # results = manager.dict()
     # results['certified_for_target'] = {

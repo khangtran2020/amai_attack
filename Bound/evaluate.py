@@ -353,7 +353,6 @@ def perform_attack_test(args, results, target, target_data, target_label, list_o
 
 def perform_attack_test_parallel(arg, eps):
     args, results, target, target_data, target_label, model, device, logger = arg
-    model.to(device)
     true_label = []
     predicted = []
     with timeit(logger, 'evaluating-test'):
