@@ -383,7 +383,6 @@ def perform_attack_test_parallel(arg, eps):
             fc2, fc3, prob = model(x_test)
             loss = criteria(prob, y_test).item()
             pred = fc3[:, 1] > 0
-            print(pred,y_test)
             pred_ = sum(pred.cpu().numpy().astype(int))
             if pred_ == 0:
                 predicted.append(0)
