@@ -232,6 +232,7 @@ def cert_2side(args, model, target_data, target, device='cpu'):
     gc.collect()
     target_data = target_data.repeat((args.num_draws, 1))
     test_data = torch.cat((target_data, x_test), dim=0)
+    test_data = test_data.to(device)
     for i, eps in enumerate(np.linspace(args.min_epsilon, args.max_epsilon, 100)):
         noise_scale = args.sens / eps
         temp_x = test_data + torch.distributions.laplace.Laplace(loc=0, scale=noise_scale).rsample(test_data.size())
