@@ -80,18 +80,18 @@ def run(args, target, device, logger):
         model = torch.load(args.save_path + args.save_model_name)
     target_data, target_label = init_target_data(args, target)
     # list_of_cert_eps = cert(args=args, model=model, target_data=target_data, device=device)
-    list_of_cert_eps = cert_2side(args=args,model=model,target_data=target_data,target=target,device=device)
+    list_of_cert_eps = cert_2side(args=args, model=model, target_data=target_data, target=target, device=device)
     if len(list_of_cert_eps) == 0:
         print("Didn't ceritfied")
         exit()
     results = {}
     results['certified_for_target'] = {
-            'search_range_min': args.min_epsilon,
-            'search_range_max': args.max_epsilon,
-            'certified': 'yes',
-            'list of eps': list_of_cert_eps,
-            'confidence': 1 - args.alpha
-        }
+        'search_range_min': args.min_epsilon,
+        'search_range_max': args.max_epsilon,
+        'certified': 'yes',
+        'list of eps': list_of_cert_eps,
+        'confidence': 1 - args.alpha
+    }
     # results = perform_attack_test(args=args, results=results, target=target, target_data=target_data, target_label=target_label,list_of_eps=list_of_cert_eps, model=model, device=device)
     # print(results)
     results['number_of_test_set'] = args.num_test_set
@@ -131,8 +131,12 @@ if __name__ == '__main__':
     logger = logging.getLogger('exp')
     logger.setLevel(logging.INFO)
     if args.debug:
-        args.save_model_name = 'debugging_eps_{}_max_eps_{}_epochs_{}_samplerate_{}_lr_{}.pt'.format(args.epsilon, args.max_epsilon, args.num_steps,args.sample_rate,args.lr)
-        args.save_result_name = 'debugging_eps_{}_max_eps_{}_epochs_{}_samplerate_{}_lr_{}.json'.format(args.epsilon, args.max_epsilon, args.num_steps,args.sample_rate,args.lr)
+        args.save_model_name = 'debugging_eps_{}_max_eps_{}_epochs_{}_samplerate_{}_lr_{}_trmul_{}_ver_{}.pt'.format(
+            args.epsilon, args.max_epsilon, args.num_steps, args.sample_rate, args.lr, args.train_multiplier,
+            args.test_ver)
+        args.save_result_name = 'debugging_eps_{}_max_eps_{}_epochs_{}_samplerate_{}_lr_{}_trmul_{}_ver_{}.json'.format(
+            args.epsilon, args.max_epsilon, args.num_steps, args.sample_rate, args.lr, args.train_multiplier,
+            args.test_ver)
     else:
         if args.num_target == 1:
             args.save_model_name = 'CELEBA_single_Laplace_eps_{}.pt'.format(args.epsilon)
