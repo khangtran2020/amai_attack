@@ -91,28 +91,28 @@ def run(args, target, device, logger):
             'list of eps': list_of_cert_eps,
             'confidence': 1 - args.alpha
         }
-    results = perform_attack_test(args=args, results=results, target=target, target_data=target_data, target_label=target_label,list_of_eps=list_of_cert_eps, model=model, device=device)
-    print(results)
-    # results['number_of_test_set'] = args.num_test_set
-    # results['sample_target_rate'] = args.sample_target_rate
-    # results['result_of_eps'] = {}
-    # model.to('cpu')
-    # print("Start multiprocessing")
-    # temp_args = (args, results, target, target_data, target_label, model, 'cpu', logger)
-    # items = []
-    # for eps in list_of_cert_eps:
-    #     items.append((temp_args, eps))
-    # with Pool(10) as p:
-    #     res = list(p.apply_async(perform_attack_test_parallel, args=(temp_args, eps)) for eps in list_of_cert_eps)
-    #     res = [r.get() for r in res]
-    # for i, eps in enumerate(list_of_cert_eps):
-    #     results['result_of_eps']['eps {:.2f}'.format(eps)] = res[i]
+    # results = perform_attack_test(args=args, results=results, target=target, target_data=target_data, target_label=target_label,list_of_eps=list_of_cert_eps, model=model, device=device)
     # print(results)
-    # json_object = json.dumps(results, indent=4)
-    # # Writing to sample.json
-    # with open(args.save_path + args.save_result_name, "w") as outfile:
-    #     outfile.write(json_object)
-    # exit()
+    results['number_of_test_set'] = args.num_test_set
+    results['sample_target_rate'] = args.sample_target_rate
+    results['result_of_eps'] = {}
+    model.to('cpu')
+    print("Start multiprocessing")
+    temp_args = (args, results, target, target_data, target_label, model, 'cpu', logger)
+    items = []
+    for eps in list_of_cert_eps:
+        items.append((temp_args, eps))
+    with Pool(10) as p:
+        res = list(p.apply_async(perform_attack_test_parallel, args=(temp_args, eps)) for eps in list_of_cert_eps)
+        res = [r.get() for r in res]
+    for i, eps in enumerate(list_of_cert_eps):
+        results['result_of_eps']['eps {:.2f}'.format(eps)] = res[i]
+    print(results)
+    json_object = json.dumps(results, indent=4)
+    # Writing to sample.json
+    with open(args.save_path + args.save_result_name, "w") as outfile:
+        outfile.write(json_object)
+    exit()
 
 
 if __name__ == '__main__':
