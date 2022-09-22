@@ -130,8 +130,8 @@ if __name__ == '__main__':
     logger = logging.getLogger('exp')
     logger.setLevel(logging.INFO)
     if args.debug:
-        args.save_model_name = 'debugging_eps_{}_reg_{}.pt'.format(args.epsilon, args.reg)
-        args.save_result_name = 'debugging_eps_{}_reg_{}_ver_{}.json'.format(args.epsilon, args.reg, args.test_ver)
+        args.save_model_name = 'debugging_eps_{}_max_eps_{}_epochs_{}_samplerate_{}_lr_{}.pt'.format(args.epsilon, args.max_epsilon, args.num_steps,args.sample_rate,args.lr)
+        args.save_result_name = 'debugging_eps_{}_max_eps_{}_epochs_{}_samplerate_{}_lr_{}.json'.format(args.epsilon, args.max_epsilon, args.num_steps,args.sample_rate,args.lr)
     else:
         if args.num_target == 1:
             args.save_model_name = 'CELEBA_single_Laplace_eps_{}.pt'.format(args.epsilon)
