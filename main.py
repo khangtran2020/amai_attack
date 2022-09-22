@@ -79,7 +79,8 @@ def run(args, target, device, logger):
         print("Model name:", args.save_path + args.save_model_name)
         model = torch.load(args.save_path + args.save_model_name)
     target_data, target_label = init_target_data(args, target)
-    list_of_cert_eps = cert(args=args, model=model, target_data=target_data, device=device)
+    # list_of_cert_eps = cert(args=args, model=model, target_data=target_data, device=device)
+    list_of_cert_eps = cert_2side(args=args,model=model,target_data=target_data,target=target,device=device)
     if len(list_of_cert_eps) == 0:
         print("Didn't ceritfied")
         exit()
