@@ -224,7 +224,7 @@ class CelebATriplet(Dataset):
         return img_tensor, class_id, filename
 
 class CelebATripletFull(Dataset):
-    def __init__(self, args, target, dataroot, mode='train', imgroot=None, include_tar=True,
+    def __init__(self, args, target, dataroot, mode='train', task='eval', imgroot=None, include_tar=True,
                  shuffle=True, multiplier=100):
         self.args = args
         self.target = target
@@ -252,10 +252,16 @@ class CelebATripletFull(Dataset):
             self.valid_data = np.arange(int(0.6 * self.num_file), int(0.8 * self.num_file))
             self.length = len(self.valid_data) + len(target) * multiplier
         else:
-            test_point = np.random.choice(a=np.array(list(range(int(0.8 * self.num_file), self.num_file))),
-                                          size=args.num_test_point, replace=False)
-            self.test_data = test_point
-            self.length = len(self.test_data)
+            if task == 'eval':
+                test_point = np.random.choice(a=np.array(list(range(int(0.8 * self.num_file), self.num_file))),
+                                              size=args.num_test_point, replace=False)
+                self.test_data = test_point
+                self.length = len(self.test_data)
+            else:
+                test_point = np.random.choice(a=np.array(list(range(int(0.8 * self.num_file), self.num_file))),
+                                              size=args.num_draws, replace=False)
+                self.test_data = test_point
+                self.length = len(self.test_data)
 
     def __len__(self):
         return self.length
