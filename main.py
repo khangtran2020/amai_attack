@@ -103,11 +103,18 @@ def run(args, target, device, logger):
     items = []
     for eps in list_of_cert_eps:
         items.append((temp_args, eps))
-    with Pool(10) as p:
-        res = list(p.apply_async(perform_attack_test_parallel, args=(temp_args, eps)) for eps in list_of_cert_eps)
-        res = [r.get() for r in res]
-    for i, eps in enumerate(list_of_cert_eps):
-        results['result_of_eps']['eps {:.2f}'.format(eps)] = res[i]
+    if args.val_mode == 'test':
+        with Pool(10) as p:
+            res = list(p.apply_async(perform_attack_test_parallel, args=(temp_args, eps)) for eps in list_of_cert_eps)
+            res = [r.get() for r in res]
+        for i, eps in enumerate(list_of_cert_eps):
+            results['result_of_eps']['eps {:.2f}'.format(eps)] = res[i]
+    else:
+        with Pool(10) as p:
+            res = list(p.apply_async(perform_attack_test_parallel_same, args=(temp_args, eps)) for eps in list_of_cert_eps)
+            res = [r.get() for r in res]
+        for i, eps in enumerate(list_of_cert_eps):
+            results['result_of_eps']['eps {:.2f}'.format(eps)] = res[i]
     print(results)
     json_object = json.dumps(results, indent=4)
     # Writing to sample.json

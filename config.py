@@ -8,7 +8,7 @@ def add_general_group(group):
     group.add_argument("--seed", type=int, default=1, help="seed value")
     group.add_argument("--mode", type=str, default='train', help="Mode of running")
     group.add_argument("--train_mode", type=str, default='clean', help="Mode of training [clean, dp, target]")
-    group.add_argument("--val_mode", type=str, default='normal', help="Mode of training [clean, dp, target]")
+    group.add_argument("--val_mode", type=str, default='test', help="Mode of training [clean, dp, target]")
     group.add_argument("--main_mode", type=str, default='train', help="with or withour robustness inference")
 
 

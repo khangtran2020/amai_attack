@@ -448,3 +448,44 @@ def perform_attack_test_parallel(arg, eps):
         'recall': recall,
     }
     return 'For eps = {:.2f}, acc: {}, precision: {}, recall {}'.format(eps, acc, precision, recall)
+
+def perform_attack_test_parallel_same(arg, eps):
+    args, results, target, target_data, target_label, model, device, logger = arg
+    true_label = []
+    predicted = []
+    with timeit(logger, 'evaluating-test-same-cert-eps'):
+        for i in range(args.num_test_set):
+            noise_scale_target = args.sens / eps
+            sample = np.random.binomial(n=1, p=args.sample_target_rate, size=1).astype(bool)
+            test_loader = torch.utils.data.DataLoader(
+                CelebATripletFull(args=args, target=target, dataroot=args.data_path, mode='test', imgroot=None,
+                                  include_tar=sample[0]),
+                shuffle=False,
+                num_workers=0, batch_size=args.num_test_point)
+            x_test, y_test, file_name = next(iter(test_loader))
+            y_test = 1 - y_test
+            true_label.append(sample[0])
+            if sample[0]:
+                x_test = torch.cat((target_data, x_test), 0)
+                y_test = torch.cat((target_label, y_test), 0)
+            x_test = x_test + torch.distributions.laplace.Laplace(loc=0.0, scale=noise_scale_target).rsample(
+            x_test.size())
+            criteria = nn.CrossEntropyLoss()
+            fc2, fc3, prob = model(x_test)
+            loss = criteria(prob, y_test).item()
+            pred = fc3[:, 1] > 0
+            pred_ = sum(pred.cpu().numpy().astype(int))
+            if pred_ == 0:
+                predicted.append(0)
+            else:
+                predicted.append(1)
+    acc = accuracy_score(true_label, predicted)
+    precision = precision_score(true_label, predicted)
+    recall = recall_score(true_label, predicted)
+    print('For eps = {:.2f}, acc: {}, precision: {}, recall {}'.format(eps, acc, precision, recall))
+    results['result_of_eps']['Eps = {}'.format(eps)] = {
+        'acc': acc,
+        'precision': precision,
+        'recall': recall,
+    }
+    return 'For eps = {:.2f}, acc: {}, precision: {}, recall {}'.format(eps, acc, precision, recall)
