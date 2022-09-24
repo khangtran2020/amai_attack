@@ -195,7 +195,7 @@ def evaluate_intrain(args, model, certified, target, target_data, target_label, 
 def cert(args, model, target_data, device='cpu'):
     model.to(device)
     list_of_eps_can_cert = []
-    for i, eps in enumerate(np.linspace(args.min_epsilon, args.max_epsilon, 10)):
+    for i, eps in enumerate(np.linspace(args.min_epsilon, args.max_epsilon, args.eps_step)):
         temp_x = target_data.numpy()
         noise_scale = args.sens / eps
         generated_target_org = np.tile(temp_x, (args.num_draws, 1))
@@ -233,7 +233,7 @@ def cert_2side(args, model, target_data, target, device='cpu'):
     target_data = target_data.repeat((args.num_draws, 1))
     test_data = torch.cat((target_data, x_test), dim=0)
     test_data = test_data.to(device)
-    for i, eps in enumerate(np.linspace(args.min_epsilon, args.max_epsilon, 10)):
+    for i, eps in enumerate(np.linspace(args.min_epsilon, args.max_epsilon, args.eps_step)):
         noise_scale = args.sens / eps
         temp_x = test_data + torch.distributions.laplace.Laplace(loc=0, scale=noise_scale).rsample(test_data.size()).to(device)
         fc2, fc3, prob = model(temp_x)
