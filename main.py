@@ -90,6 +90,7 @@ def run(args, target, device, logger):
             AMIADatasetCelebA(target, transform, args.data_path, True, imgroot=None, multiplier=100), shuffle=False,
             num_workers=0, batch_size=200000)
         x_train, y_train, imgs_train = next(iter(train_loader))
+        print(x_train.size())
         x_train[1:] = x_train[1:] + torch.distributions.laplace.Laplace(loc=0.0,
                                                                         scale=args.sens / args.epsilon).rsample(
             x_train[1:].size())
