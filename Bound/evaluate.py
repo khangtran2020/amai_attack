@@ -230,19 +230,20 @@ def cert_2side(args, model, target_data, target, device='cpu'):
     del (y_test)
     del (file_name)
     gc.collect()
+    num_nontarget = x_test.size(dim=0) - args.train_multiplier
 
     for i, eps in enumerate(np.linspace(args.min_epsilon, args.max_epsilon, args.eps_step)):
         noise_scale = args.sens / eps
-        temp_x = test_data + torch.distributions.laplace.Laplace(loc=0, scale=noise_scale).rsample(test_data.size()).to(
+        temp_x = x_test + torch.distributions.laplace.Laplace(loc=0, scale=noise_scale).rsample(x_test.size()).to(
             device)
         fc2, fc3, prob = model(temp_x)
         pred = fc3[:, 1].cpu().detach().numpy()
-        target_larger_than_zero = pred[:args.num_draws] > 0
+        target_larger_than_zero = pred[:args.train_multiplier] > 0
         count_of_target_larger_than_zero = sum(target_larger_than_zero.astype(int))
-        count_of_target_smaller_than_zero = args.num_draws - count_of_target_larger_than_zero
-        non_target_larger_than_zero = pred[args.num_draws:] > 0
+        count_of_target_smaller_than_zero = args.train_multiplier - count_of_target_larger_than_zero
+        non_target_larger_than_zero = pred[args.train_multiplier:] > 0
         count_of_nontarget_larger_than_zero = sum(non_target_larger_than_zero.astype(int))
-        count_of_nontarget_smaller_than_zero = args.num_draws - count_of_nontarget_larger_than_zero
+        count_of_nontarget_smaller_than_zero = num_nontarget - count_of_nontarget_larger_than_zero
         print(
             'For eps {:.2f}, Target - # larger than 0: {}, # smaller or equal to 0: {} | Non-target: - # larger than 0: {}, # smaller or equal to 0: {}'.format(
                 eps, count_of_target_larger_than_zero, count_of_target_smaller_than_zero,
