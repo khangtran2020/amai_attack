@@ -33,13 +33,25 @@ def run(args, target, device, logger):
                 transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
             ])
             train_loader = torch.utils.data.DataLoader(
-                CelebATriplet(args=args, target=target, transform=transform, dataroot=args.data_path, mode='train',
-                              imgroot=None, multiplier=args.train_multiplier),
+                CelebATriplet(args=args,
+                              target=target,
+                              transform=transform,
+                              dataroot=args.data_path,
+                              mode='train',
+                              imgroot=None,
+                              multiplier=args.train_multiplier
+                ),
                 shuffle=False,
                 num_workers=0, batch_size=args.batch_size)
             valid_loader = torch.utils.data.DataLoader(
-                CelebATriplet(args=args, target=target, transform=transform, dataroot=args.data_path, mode='valid',
-                              imgroot=None, multiplier=args.valid_multiplier),
+                CelebATriplet(args=args,
+                              target=target,
+                              transform=transform,
+                              dataroot=args.data_path,
+                              mode='valid',
+                              imgroot=None,
+                              multiplier=args.valid_multiplier
+                ),
                 shuffle=False,
                 num_workers=0, batch_size=args.batch_size)
             model = train_triplet(args=args, target=target, device=device, data=(train_loader, valid_loader),
@@ -49,13 +61,23 @@ def run(args, target, device, logger):
             print('Train with mode triplet full')
             model = ClassifierTriplet(args=args, n_inputs=args.num_feature, n_outputs=args.num_target + 1)
             train_loader = torch.utils.data.DataLoader(
-                CelebATripletFull(args=args, target=target, dataroot=args.data_path, mode='train',
-                                  imgroot=None, multiplier=args.train_multiplier),
+                CelebATripletFull(args=args,
+                                  target=target,
+                                  dataroot=args.data_path,
+                                  mode='train',
+                                  imgroot=None,
+                                  multiplier=args.train_multiplier
+                ),
                 shuffle=False,
                 num_workers=0, batch_size=args.batch_size)
             valid_loader = torch.utils.data.DataLoader(
-                CelebATripletFull(args=args, target=target, dataroot=args.data_path, mode='valid',
-                                  imgroot=None, multiplier=args.valid_multiplier),
+                CelebATripletFull(args=args,
+                                  target=target,
+                                  dataroot=args.data_path,
+                                  mode='valid',
+                                  imgroot=None,
+                                  multiplier=args.valid_multiplier
+                ),
                 shuffle=False,
                 num_workers=0, batch_size=args.batch_size)
             model = train_triplet_full(args=args, target=target, device=device, data=(train_loader, valid_loader),
@@ -64,105 +86,27 @@ def run(args, target, device, logger):
             print('Train with mode triplet fun')
             model = ClassifierTriplet(args=args, n_inputs=args.num_feature, n_outputs=args.num_target + 1)
             train_loader = torch.utils.data.DataLoader(
-                CelebATripletFun(args=args, target=target, dataroot=args.data_path, mode='train',
-                                 imgroot=None, multiplier=args.train_multiplier),
+                CelebATripletFun(args=args,
+                                 target=target,
+                                 dataroot=args.data_path,
+                                 mode='train',
+                                 imgroot=None,
+                                 multiplier=args.train_multiplier
+                ),
                 shuffle=False,
                 num_workers=0, batch_size=args.batch_size)
             valid_loader = torch.utils.data.DataLoader(
-                CelebATripletFun(args=args, target=target, dataroot=args.data_path, mode='valid',
-                                 imgroot=None, multiplier=args.valid_multiplier),
+                CelebATripletFun(args=args,
+                                 target=target,
+                                 dataroot=args.data_path,
+                                 mode='valid',
+                                 imgroot=None,
+                                 multiplier=args.valid_multiplier
+                ),
                 shuffle=False,
                 num_workers=0, batch_size=args.batch_size)
             model = train_triplet_fun(args=args, target=target, device=device, data=(train_loader, valid_loader),
                                       model=model)
-    elif args.main_mode == 'og':
-        num_target = 1
-        target = [0]
-        transform = transforms.Compose([
-            transforms.Resize(64),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-        ])
-        train_loader = torch.utils.data.DataLoader(
-            AMIADatasetCelebA(target, transform, args.data_path, True, imgroot=None, multiplier=1000), shuffle=False,
-            num_workers=0, batch_size=200000)
-        test_loader = torch.utils.data.DataLoader(
-            AMIADatasetCelebA(target, transform, args.data_path, True, imgroot=None, multiplier=100), shuffle=False,
-            num_workers=0, batch_size=200000)
-        x_train, y_train, imgs_train = next(iter(train_loader))
-        print(x_train.size())
-        x_train[1:] = x_train[1:] + torch.distributions.laplace.Laplace(loc=0.0,
-                                                                        scale=args.sens / args.epsilon).rsample(
-            x_train[1:].size())
-        x_train = x_train.to(device)
-        y_train = y_train.to(device)
-        x_test, y_test, _ = next(iter(test_loader))
-        x_test[1:] = x_test[1:] + torch.distributions.laplace.Laplace(loc=0.0, scale=args.sens / args.epsilon).rsample(
-            x_test[1:].size())
-        x_test = x_test.to(device)
-        y_test = y_test.to(device)
-        print(torch.bincount(y_train), torch.bincount(y_test))
-        model = Classifier(x_train.shape[1], 2)
-        model = model.to(device)
-        if device == 'cuda':
-            model = torch.nn.DataParallel(model)
-        criterion = nn.CrossEntropyLoss()
-        min_loss = 100000000000
-        max_correct = 0
-        max_tpr = 0.0
-        max_tnr = 0.0
-        epoch = 0
-        lr = 1e-6
-        optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-        # optimizer = optim.Adam(model.parameters(), lr=lr)
-        from tqdm import tqdm
-
-        for i in range(2000):
-            num_correct = 0
-            num_samples = 0
-            loss_value = 0
-            epoch += 1
-
-            # for imgs, labels in iter(train_loader):
-            model.train()
-
-            out, probs, fc2 = model(x_train)
-            loss = criterion(out, y_train)
-
-            loss_value += loss
-
-            predictions = fc2[:, 0] < 0
-            tpr_train, tnr_train, _ = tpr_tnr(predictions, y_train)
-
-            loss.backward()
-            optimizer.step()  # make the updates for each parameter
-            optimizer.zero_grad()  # a clean up step for PyTorch
-
-            # Test acc
-            out, probs, fc2 = model(x_test)
-            predictions = fc2[:, 0] < 0
-            tpr, tnr, _ = tpr_tnr(predictions, y_test)
-            acc = (tpr + tnr) / 2
-
-            if (tpr + tnr) / 2 > max_tpr:
-                state = {
-                    'net': model.state_dict(),
-                    'test': (tpr, tnr),
-                    'train': (tpr_train, tnr_train),
-                    'acc': acc,
-                    'lr': lr,
-                    'epoch': epoch
-                }
-
-                max_tpr = (tpr + tnr) / 2
-                torch.save(state, args.save_path + args.save_result_name)
-
-            if i % 10 == 0:
-                # print(f'Loss: {loss_value.item()} | Acc: {num_correct}/{num_samples} | Epoch: {i}')
-                print(
-                    f'Loss: {loss_value.item()} | Train_TPR = {tpr_train}, Train_TNR = {tnr_train:.5f} | TPR = {tpr}, TNR = {tnr}, ACC = {acc} | Epoch: {epoch}')
-
-
 
     else:
         print("Model name:", args.save_path + args.save_model_name)

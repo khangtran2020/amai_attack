@@ -2,3 +2,6 @@
 results
 */__pycache__/
 __pycache__/
+*.ipynb
+Error Analysis.ipynb
+.ipynb_checkpoints/

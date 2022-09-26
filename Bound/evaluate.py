@@ -222,20 +222,19 @@ def cert_2side(args, model, target_data, target, device='cpu'):
     model.to(device)
     list_of_eps_can_cert = []
     test_loader = torch.utils.data.DataLoader(
-        CelebATripletFull(args=args, target=target, dataroot=args.data_path, mode='test', task='cert', imgroot=None,
-                          include_tar=True),
+        CelebATripletFull(args=args, target=target, dataroot=args.data_path, mode='train', task='cert', imgroot=None,
+                          multiplier=args.train_multiplier),
         shuffle=False,
-        num_workers=0, batch_size=args.num_test_point)
+        num_workers=0, batch_size=args.batch_size)
     x_test, y_test, file_name = next(iter(test_loader))
     del (y_test)
     del (file_name)
     gc.collect()
-    target_data = target_data.repeat((args.num_draws, 1))
-    test_data = torch.cat((target_data, x_test), dim=0)
-    test_data = test_data.to(device)
+
     for i, eps in enumerate(np.linspace(args.min_epsilon, args.max_epsilon, args.eps_step)):
         noise_scale = args.sens / eps
-        temp_x = test_data + torch.distributions.laplace.Laplace(loc=0, scale=noise_scale).rsample(test_data.size()).to(device)
+        temp_x = test_data + torch.distributions.laplace.Laplace(loc=0, scale=noise_scale).rsample(test_data.size()).to(
+            device)
         fc2, fc3, prob = model(temp_x)
         pred = fc3[:, 1].cpu().detach().numpy()
         target_larger_than_zero = pred[:args.num_draws] > 0
@@ -246,13 +245,16 @@ def cert_2side(args, model, target_data, target, device='cpu'):
         count_of_nontarget_smaller_than_zero = args.num_draws - count_of_nontarget_larger_than_zero
         print(
             'For eps {:.2f}, Target - # larger than 0: {}, # smaller or equal to 0: {} | Non-target: - # larger than 0: {}, # smaller or equal to 0: {}'.format(
-                eps, count_of_target_larger_than_zero, count_of_target_smaller_than_zero,count_of_nontarget_larger_than_zero,count_of_nontarget_smaller_than_zero))
-        upper_bound_target = hoeffding_upper_bound(count_of_target_smaller_than_zero, nobs=args.num_draws, alpha=args.alpha)
-        lower_bound_target = hoeffding_lower_bound(count_of_target_larger_than_zero, nobs=args.num_draws, alpha=args.alpha)
+                eps, count_of_target_larger_than_zero, count_of_target_smaller_than_zero,
+                count_of_nontarget_larger_than_zero, count_of_nontarget_smaller_than_zero))
+        upper_bound_target = hoeffding_upper_bound(count_of_target_smaller_than_zero, nobs=args.num_draws,
+                                                   alpha=args.alpha)
+        lower_bound_target = hoeffding_lower_bound(count_of_target_larger_than_zero, nobs=args.num_draws,
+                                                   alpha=args.alpha)
         upper_bound_non_target = hoeffding_upper_bound(count_of_nontarget_larger_than_zero, nobs=args.num_draws,
-                                                   alpha=args.alpha)
+                                                       alpha=args.alpha)
         lower_bound_non_target = hoeffding_lower_bound(count_of_nontarget_smaller_than_zero, nobs=args.num_draws,
-                                                   alpha=args.alpha)
+                                                       alpha=args.alpha)
         if (lower_bound_target > upper_bound_target) and (lower_bound_non_target > upper_bound_non_target):
             list_of_eps_can_cert.append(eps)
     return list_of_eps_can_cert
@@ -421,12 +423,12 @@ def perform_attack_test_parallel(arg, eps):
                 noise_target = torch.distributions.laplace.Laplace(loc=0.0, scale=noise_scale_target).rsample(
                     x_test[:args.num_target].size())
                 noise_non_target = torch.distributions.laplace.Laplace(loc=0.0, scale=noise_scale_non_target).rsample(
-                x_test[args.num_target:].size())
+                    x_test[args.num_target:].size())
                 x_test[:args.num_target] = x_test[:args.num_target] + noise_target
                 x_test[args.num_target:] = x_test[args.num_target:] + noise_non_target
             else:
                 x_test = x_test + torch.distributions.laplace.Laplace(loc=0.0, scale=noise_scale_non_target).rsample(
-                x_test.size())
+                    x_test.size())
             criteria = nn.CrossEntropyLoss()
             # x_test = x_test.to(device)
             # y_test = y_test.to(device)
@@ -449,6 +451,7 @@ def perform_attack_test_parallel(arg, eps):
     }
     return 'For eps = {:.2f}, acc: {}, precision: {}, recall {}'.format(eps, acc, precision, recall)
 
+
 def perform_attack_test_parallel_same(arg, eps):
     args, results, target, target_data, target_label, model, device, logger = arg
     true_label = []
@@ -469,7 +472,7 @@ def perform_attack_test_parallel_same(arg, eps):
                 x_test = torch.cat((target_data, x_test), 0)
                 y_test = torch.cat((target_label, y_test), 0)
             x_test = x_test + torch.distributions.laplace.Laplace(loc=0.0, scale=noise_scale_target).rsample(
-            x_test.size())
+                x_test.size())
             criteria = nn.CrossEntropyLoss()
             fc2, fc3, prob = model(x_test)
             loss = criteria(prob, y_test).item()
