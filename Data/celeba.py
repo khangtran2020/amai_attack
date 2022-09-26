@@ -66,38 +66,31 @@ class CelebA(Dataset):
         img_tensor = torch.load(self.dataroot + filename)
         return img_tensor, class_id, filename
 
+
 class AMIADatasetCelebA(Dataset):
-    def __init__(self, args, target, transform, dataroot, mode='train', imgroot=None, multiplier=100):
+    def __init__(self, target, transform, dataroot, train=True, imgroot=None, multiplier=100):
         self.target = target
         self.target_multiplier = multiplier
         self.transform = transform
-        self.num_file = len(os.listdir(dataroot))
-        self.train_data = np.arange(args.train_index)
-        self.valid_data = np.arange(args.train_index, args.valid_index)
-        self.test_data = np.arange(args.valid_index, self.num_file)
-
-        if mode == 'train':
+        if train:
+            # self.valid_data = np.arange(162770, 182637)
+            self.length = len(target) * multiplier  # + len(self.valid_data)
+        else:
             self.train_data = np.arange(162770)
             mask = np.ones(162770, dtype=bool)
+            mask[target] = False
             self.train_data = self.train_data[mask, ...]
             self.length = len(self.train_data) + len(target) * multiplier
-        elif mode == 'valid':
-            self.valid_data = np.arange(162770, 182637)
-            self.length = len(target) * multiplier + len(self.valid_data)
-        else:
-            # print(type(self))
-            self.test_data = np.arange(self.num_file - args.num_draws, self.num_file)
-            self.length = len(target) * multiplier + len(self.test_data)
         self.dataroot = dataroot
         self.imgroot = imgroot
         self.data_name = sorted(os.listdir(dataroot))
-        self.mode = mode
+        self.train = train
 
     def __len__(self):
         return self.length
 
     def __getitem__(self, idx):
-        if self.mode == 'train':
+        if self.train == False:
             if idx / self.target_multiplier < len(self.target):
                 filename = self.data_name[self.target[int(idx / self.target_multiplier)]]
                 # img_loc = os.path.join(self.dataroot, self.data_name[self.target[idx]])
@@ -107,7 +100,8 @@ class AMIADatasetCelebA(Dataset):
                 filename = self.data_name[self.train_data[idx]]
                 # img_loc = os.path.join(self.dataroot, self.data_name[self.valid_data[idx]])
                 class_id = torch.tensor(len(self.target))
-        elif self.mode == 'valid':
+
+        else:
             if idx / self.target_multiplier < len(self.target):
                 filename = self.data_name[self.target[int(idx / self.target_multiplier)]]
                 # img_loc = os.path.join(self.dataroot, self.data_name[self.target[idx]])
@@ -130,7 +124,7 @@ class AMIADatasetCelebA(Dataset):
 
         # img_tensor = img_tensor + s1.astype(np.float32)
 
-        return img_tensor, class_id, filename
+        return img_tensor, class_id, img
 
 class CelebATriplet(Dataset):
     def __init__(self, args, target, transform, dataroot, mode='train', imgroot=None, include_tar=True,

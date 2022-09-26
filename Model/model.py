@@ -17,20 +17,20 @@ logging.basicConfig(format='%(asctime)s | %(levelname)s | %(name)s | %(message)s
 logger = logging.getLogger('exp')
 logger.setLevel(logging.INFO)
 
-
 class Classifier(nn.Module):
-    def __init__(self, args, n_inputs, n_outputs):
+    def __init__(self, n_inputs, n_outputs):
         super(Classifier, self).__init__()
-        self.kernel_size = args.embed_dim
-        self.fc1 = nn.Linear(n_inputs, self.kernel_size)
-        self.fc2 = nn.Linear(self.kernel_size, n_outputs)
+        self.fc1 = nn.Linear(n_inputs, 200)
+        self.fc2 = nn.Linear(200, n_outputs)
 
     def forward(self, x):
-        fc1 = self.fc1(x)
-        fc1 = F.relu(fc1)
-        fc2 = self.fc2(fc1)
-        prob = torch.softmax(fc2, dim=1)
-        return fc1, fc2, prob
+        x = torch.flatten(x, 1)
+        x = self.fc1(x)
+        x = F.relu(x)
+        fc2 = self.fc2(x)
+        x = torch.sigmoid(fc2)
+        probs = F.softmax(x, dim=1)
+        return x, probs, fc2
 
 
 class ClassifierTriplet(nn.Module):

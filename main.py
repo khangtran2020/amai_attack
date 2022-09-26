@@ -75,6 +75,95 @@ def run(args, target, device, logger):
                 num_workers=0, batch_size=args.batch_size)
             model = train_triplet_fun(args=args, target=target, device=device, data=(train_loader, valid_loader),
                                       model=model)
+    elif args.main_mode == 'og':
+        num_target = 1
+        target = [0]
+        transform = transforms.Compose([
+            transforms.Resize(64),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        ])
+        train_loader = torch.utils.data.DataLoader(
+            AMIADatasetCelebA(target, transform, args.data_path, True, imgroot=None, multiplier=1000), shuffle=False,
+            num_workers=0, batch_size=200000)
+        test_loader = torch.utils.data.DataLoader(
+            AMIADatasetCelebA(target, transform, args.data_path, True, imgroot=None, multiplier=100), shuffle=False,
+            num_workers=0, batch_size=200000)
+        x_train, y_train, imgs_train = next(iter(train_loader))
+        x_train[1:] = x_train[1:] + torch.distributions.laplace.Laplace(loc=0.0,
+                                                                        scale=args.sens / args.epsilon).rsample(
+            x_train[1:].size())
+        x_train = x_train.to(device)
+        y_train = y_train.to(device)
+        x_test, y_test, _ = next(iter(test_loader))
+        x_test[1:] = x_test[1:] + torch.distributions.laplace.Laplace(loc=0.0, scale=args.sens / args.epsilon).rsample(
+            x_test[1:].size())
+        x_test = x_test.to(device)
+        y_test = y_test.to(device)
+        weight = sklearn.utils.class_weight.compute_class_weight('balanced', classes=[0, 1],
+                                                                 y=y_test.cpu().detach().numpy())
+        model = Classifier(x_train.shape[1], 2)
+        model = model.to(device)
+        if device == 'cuda':
+            model = torch.nn.DataParallel(model)
+        criterion = nn.CrossEntropyLoss()
+        min_loss = 100000000000
+        max_correct = 0
+        max_tpr = 0.0
+        max_tnr = 0.0
+        epoch = 0
+        lr = 1e-6
+        optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+        # optimizer = optim.Adam(model.parameters(), lr=lr)
+        from tqdm import tqdm
+
+        for i in range(2000):
+            num_correct = 0
+            num_samples = 0
+            loss_value = 0
+            epoch += 1
+
+            # for imgs, labels in iter(train_loader):
+            model.train()
+
+            out, probs, fc2 = model(x_train)
+            loss = criterion(out, y_train)
+
+            loss_value += loss
+
+            predictions = fc2[:, 0] < 0
+            tpr_train, tnr_train, _ = tpr_tnr(predictions, y_train)
+
+            loss.backward()
+            optimizer.step()  # make the updates for each parameter
+            optimizer.zero_grad()  # a clean up step for PyTorch
+
+            # Test acc
+            out, probs, fc2 = model(x_test)
+            predictions = fc2[:, 0] < 0
+            tpr, tnr, _ = tpr_tnr(predictions, y_test)
+            acc = (tpr + tnr) / 2
+
+            if (tpr + tnr) / 2 > max_tpr:
+                state = {
+                    'net': model.state_dict(),
+                    'test': (tpr, tnr),
+                    'train': (tpr_train, tnr_train),
+                    'acc': acc,
+                    'lr': lr,
+                    'epoch': epoch
+                }
+
+                max_tpr = (tpr + tnr) / 2
+                torch.save(state, args.save_path + args.save_result_name)
+
+            if i % 10 == 0:
+                # print(f'Loss: {loss_value.item()} | Acc: {num_correct}/{num_samples} | Epoch: {i}')
+                print(
+                    f'Loss: {loss_value.item()} | Train_TPR = {tpr_train}, Train_TNR = {tnr_train:.5f} | TPR = {tpr}, TNR = {tnr}, ACC = {acc} | Epoch: {epoch}')
+
+
+
     else:
         print("Model name:", args.save_path + args.save_model_name)
         model = torch.load(args.save_path + args.save_model_name)
@@ -111,7 +200,8 @@ def run(args, target, device, logger):
             results['result_of_eps']['eps {:.2f}'.format(eps)] = res[i]
     else:
         with Pool(10) as p:
-            res = list(p.apply_async(perform_attack_test_parallel_same, args=(temp_args, eps)) for eps in list_of_cert_eps)
+            res = list(
+                p.apply_async(perform_attack_test_parallel_same, args=(temp_args, eps)) for eps in list_of_cert_eps)
             res = [r.get() for r in res]
         for i, eps in enumerate(list_of_cert_eps):
             results['result_of_eps']['eps {:.2f}'.format(eps)] = res[i]
@@ -151,4 +241,7 @@ if __name__ == '__main__':
         else:
             args.save_model_name = 'CELEBA_multiple_{}_Lap_eps_{}.pt'.format(args.num_target, args.epsilon)
             args.save_result_name = 'CELEBA_multiple_{}_Lap_eps_{}.json'.format(args.num_target, args.epsilon)
+    if args.main_mode == 'og':
+        args.save_model_name = 'temp_model.pt'
+        args.save_result_name = 'temp_results.json'
     run(args=args, target=target, device=device, logger=logger)
