@@ -100,6 +100,7 @@ def run(args, target, device, logger):
             x_test[1:].size())
         x_test = x_test.to(device)
         y_test = y_test.to(device)
+        print(torch.bincount(y_train), torch.bincount(y_test))
         model = Classifier(x_train.shape[1], 2)
         model = model.to(device)
         if device == 'cuda':
