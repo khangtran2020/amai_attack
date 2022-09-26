@@ -100,8 +100,6 @@ def run(args, target, device, logger):
             x_test[1:].size())
         x_test = x_test.to(device)
         y_test = y_test.to(device)
-        weight = sklearn.utils.class_weight.compute_class_weight('balanced', classes=[0, 1],
-                                                                 y=y_test.cpu().detach().numpy())
         model = Classifier(x_train.shape[1], 2)
         model = model.to(device)
         if device == 'cuda':
