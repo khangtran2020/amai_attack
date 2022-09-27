@@ -473,7 +473,7 @@ def perform_attack_test_parallel_same(arg, eps):
                 x_test = torch.cat((target_data, x_test), 0)
                 y_test = torch.cat((target_label, y_test), 0)
             x_test = x_test + torch.distributions.laplace.Laplace(loc=0.0, scale=noise_scale_target).rsample(
-                (x_test.size(dim=0),1))
+                (x_test.size(dim=0),))
             criteria = nn.CrossEntropyLoss()
             fc2, fc3, prob = model(x_test)
             loss = criteria(prob, y_test).item()
