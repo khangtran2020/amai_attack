@@ -226,8 +226,10 @@ def cert_2side(args, model, target_data, target, device='cpu'):
                           multiplier=args.train_multiplier),
         shuffle=False,
         num_workers=0, batch_size=args.batch_size)
-    x_test, y_test, file_name = next(iter(test_loader))
+    x_test, pos, neg, y_test, file_name = next(iter(test_loader))
     del (y_test)
+    del(pos)
+    del(neg)
     del (file_name)
     gc.collect()
     num_nontarget = x_test.size(dim=0) - args.train_multiplier
