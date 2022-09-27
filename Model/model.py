@@ -229,8 +229,8 @@ def train_triplet_full(args, target, device, data, model):
         y_train = y_train.to(device)
     with timeit(logger, 'valid-data-init'):
         x_valid, y_valid, imgs_valid = next(iter(valid_dataloader))
-        x_valid[1:] = x_valid[1:] + torch.distributions.laplace.Laplace(loc=0.0, scale=args.noise_scale).rsample(
-            x_valid[1:].size())
+        x_valid[1:] = x_valid[1:] + torch.squeeze(torch.distributions.laplace.Laplace(loc=0.0, scale=args.noise_scale).rsample(
+            (x_valid[1:].size(dim=1),1)))
         x_valid = x_valid.to(device)
         y_valid = 1 - y_valid
         y_valid = y_valid.to(device)
