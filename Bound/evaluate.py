@@ -251,13 +251,13 @@ def cert_2side(args, model, target_data, target, device='cpu'):
                 eps, count_of_target_larger_than_zero, count_of_target_smaller_than_zero,
                 count_of_nontarget_larger_than_zero, count_of_nontarget_smaller_than_zero))
         upper_bound_target = hoeffding_upper_bound(count_of_target_smaller_than_zero, nobs=args.num_draws,
-                                                   alpha=args.alpha)
+                                                   alpha=args.alpha, bonferroni_hyp_n=2)
         lower_bound_target = hoeffding_lower_bound(count_of_target_larger_than_zero, nobs=args.num_draws,
-                                                   alpha=args.alpha)
+                                                   alpha=args.alpha, bonferroni_hyp_n=2)
         upper_bound_non_target = hoeffding_upper_bound(count_of_nontarget_larger_than_zero, nobs=args.num_draws,
-                                                       alpha=args.alpha)
+                                                       alpha=args.alpha, bonferroni_hyp_n=2)
         lower_bound_non_target = hoeffding_lower_bound(count_of_nontarget_smaller_than_zero, nobs=args.num_draws,
-                                                       alpha=args.alpha)
+                                                       alpha=args.alpha, bonferroni_hyp_n=2)
         if (lower_bound_target > upper_bound_target) and (lower_bound_non_target > upper_bound_non_target):
             list_of_eps_can_cert.append(eps)
     return list_of_eps_can_cert
