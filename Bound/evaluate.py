@@ -231,9 +231,9 @@ def cert_2side(args, model, target_data, target, device='cpu'):
     del (file_name)
     gc.collect()
     num_nontarget = x_test.size(dim=0) - args.train_multiplier
-    print(x_test.size(dim=0))
     for i, eps in enumerate(np.linspace(args.min_epsilon, args.max_epsilon, args.eps_step)):
         noise_scale = args.sens / eps
+        print(x_test.size(), noise_scale.size())
         temp_x = x_test + torch.distributions.laplace.Laplace(loc=0, scale=noise_scale).rsample((x_test.size(dim=0),1))
         temp_x = temp_x.to(device)
         fc2, fc3, prob = model(temp_x)
