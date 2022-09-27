@@ -159,8 +159,8 @@ def run(args, target, device, logger):
 
 if __name__ == '__main__':
     args = parse_args()
-    max_ = 16 + 8 + 4 + 2 + 1 + 0.5 + 0.25 + 0.125 + 0.0625
-    args.sens = 2 * max_
+    max_tensor = torch.load(args.max_path)
+    args.sens = max_tensor
     args.num_label = args.num_target + 1
     args.noise_scale = args.sens / args.epsilon
     assert args.gpu <= torch.cuda.device_count(), f"--gpu flag should be in range [0,{torch.cuda.device_count() - 1}]"

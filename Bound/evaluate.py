@@ -236,7 +236,7 @@ def cert_2side(args, model, target_data, target, device='cpu'):
 
     for i, eps in enumerate(np.linspace(args.min_epsilon, args.max_epsilon, args.eps_step)):
         noise_scale = args.sens / eps
-        temp_x = x_test + torch.distributions.laplace.Laplace(loc=0, scale=noise_scale).rsample(x_test.size())
+        temp_x = x_test + torch.distributions.laplace.Laplace(loc=0, scale=noise_scale).rsample((x_test.size(dim=0),1))
         temp_x = temp_x.to(device)
         fc2, fc3, prob = model(temp_x)
         pred = fc3[:, 1].cpu().detach().numpy()
@@ -424,9 +424,9 @@ def perform_attack_test_parallel(arg, eps):
                 x_test = torch.cat((target_data, x_test), 0)
                 y_test = torch.cat((target_label, y_test), 0)
                 noise_target = torch.distributions.laplace.Laplace(loc=0.0, scale=noise_scale_target).rsample(
-                    x_test[:args.num_target].size())
+                    (x_test[:args.num_target].size(dim=0),1))
                 noise_non_target = torch.distributions.laplace.Laplace(loc=0.0, scale=noise_scale_non_target).rsample(
-                    x_test[args.num_target:].size())
+                    (x_test[args.num_target:].size(dim=0),1))
                 x_test[:args.num_target] = x_test[:args.num_target] + noise_target
                 x_test[args.num_target:] = x_test[args.num_target:] + noise_non_target
             else:
@@ -475,7 +475,7 @@ def perform_attack_test_parallel_same(arg, eps):
                 x_test = torch.cat((target_data, x_test), 0)
                 y_test = torch.cat((target_label, y_test), 0)
             x_test = x_test + torch.distributions.laplace.Laplace(loc=0.0, scale=noise_scale_target).rsample(
-                x_test.size())
+                (x_test.size(dim=0),1))
             criteria = nn.CrossEntropyLoss()
             fc2, fc3, prob = model(x_test)
             loss = criteria(prob, y_test).item()

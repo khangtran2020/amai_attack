@@ -126,6 +126,7 @@ class AMIADatasetCelebA(Dataset):
 
         return img_tensor, class_id, img
 
+
 class CelebATriplet(Dataset):
     def __init__(self, args, target, transform, dataroot, mode='train', imgroot=None, include_tar=True,
                  shuffle=True, multiplier=100):
@@ -217,6 +218,7 @@ class CelebATriplet(Dataset):
         img_tensor = torch.load(self.dataroot + filename)
         return img_tensor, class_id, filename
 
+
 class CelebATripletFull(Dataset):
     def __init__(self, args, target, dataroot, mode='train', task='eval', imgroot=None, include_tar=True,
                  shuffle=True, multiplier=100):
@@ -237,7 +239,7 @@ class CelebATripletFull(Dataset):
         self.mode = mode
         self.noise_scale = args.noise_scale
         self.noise_tensor = torch.distributions.laplace.Laplace(loc=0, scale=self.noise_scale).rsample(
-            (self.num_file, args.num_feature))
+            (self.num_file,))
 
         if mode == 'train':
             self.train_data = np.arange(int(0.6 * self.num_file))
@@ -270,14 +272,16 @@ class CelebATripletFull(Dataset):
                 class_id = torch.tensor(int(idx / self.target_multiplier))
                 anchor = torch.load(self.dataroot + anchor_name)
                 negative = torch.load(self.dataroot + negative_name) + noise_2
-                positive = anchor + torch.distributions.laplace.Laplace(loc=0, scale=self.noise_scale).rsample(
-                    anchor.size())
+                positive = anchor + torch.squeeze(
+                    torch.distributions.laplace.Laplace(loc=0, scale=self.noise_scale).rsample(
+                        (1,)))
                 sample = np.random.binomial(1, self.args.sample_rate, 1)[0]
                 if sample:
                     return anchor, positive, negative, class_id, anchor_name
                 else:
-                    anchor = anchor + torch.distributions.laplace.Laplace(loc=0, scale=self.noise_scale).rsample(
-                    anchor.size())
+                    anchor = anchor + torch.squeeze(
+                        torch.distributions.laplace.Laplace(loc=0, scale=self.noise_scale).rsample(
+                            (1,)))
                     return anchor, positive, negative, class_id, anchor_name
             else:
                 idx -= len(self.target) * self.target_multiplier
@@ -293,8 +297,9 @@ class CelebATripletFull(Dataset):
                 if sample:
                     return anchor, positive, negative, class_id, anchor_name
                 else:
-                    negative = negative + torch.distributions.laplace.Laplace(loc=0, scale=self.noise_scale).rsample(
-                    negative.size())
+                    negative = negative + torch.squeeze(
+                        torch.distributions.laplace.Laplace(loc=0, scale=self.noise_scale).rsample(
+                            (1,)))
                     return anchor, positive, negative, class_id, anchor_name
         elif self.mode == 'valid':
             if idx / self.target_multiplier < len(self.target):
@@ -309,6 +314,7 @@ class CelebATripletFull(Dataset):
             class_id = torch.tensor(len(self.target))
         img_tensor = torch.load(self.dataroot + filename)
         return img_tensor, class_id, filename
+
 
 class CelebATripletFun(Dataset):
     def __init__(self, args, target, dataroot, mode='train', imgroot=None, include_tar=True,
@@ -328,11 +334,13 @@ class CelebATripletFun(Dataset):
         self.imgroot = imgroot
         self.data_name = sorted(os.listdir(dataroot))
         self.mode = mode
-        self.noise_scale_target = args.sens/args.epsilon
-        self.noise_scale_non_target = args.sens / (args.epsilon*10)
-        print('Noise scale for target: {} | Noise scale for non-target: {}'.format(self.noise_scale_target, self.noise_scale_non_target))
-        self.noise_tensor_non_target = torch.distributions.laplace.Laplace(loc=0, scale=self.noise_scale_non_target).rsample(
-            (self.num_file, args.num_feature))
+        self.noise_scale_target = args.sens / args.epsilon
+        self.noise_scale_non_target = args.sens / (args.epsilon * 10)
+        print('Noise scale for target: {} | Noise scale for non-target: {}'.format(self.noise_scale_target,
+                                                                                   self.noise_scale_non_target))
+        self.noise_tensor_non_target = torch.distributions.laplace.Laplace(loc=0,
+                                                                           scale=self.noise_scale_non_target).rsample(
+            (self.num_file, ))
 
         if mode == 'train':
             self.train_data = np.arange(int(0.6 * self.num_file))
@@ -359,14 +367,12 @@ class CelebATripletFun(Dataset):
                 class_id = torch.tensor(int(idx / self.target_multiplier))
                 anchor = torch.load(self.dataroot + anchor_name)
                 negative = torch.load(self.dataroot + negative_name) + noise_2
-                positive = anchor + torch.distributions.laplace.Laplace(loc=0, scale=self.noise_scale_target).rsample(
-                    anchor.size())
+                positive = anchor + torch.squeeze(torch.distributions.laplace.Laplace(loc=0, scale=self.noise_scale_target).rsample((1,)))
                 sample = np.random.binomial(1, self.args.sample_rate, 1)[0]
                 if sample:
                     return anchor, positive, negative, class_id, anchor_name
                 else:
-                    anchor = anchor + torch.distributions.laplace.Laplace(loc=0, scale=self.noise_scale_target).rsample(
-                    anchor.size())
+                    anchor = anchor + torch.squeeze(torch.distributions.laplace.Laplace(loc=0, scale=self.noise_scale_target).rsample((1,)))
                     return anchor, positive, negative, class_id, anchor_name
             else:
                 idx -= len(self.target) * self.target_multiplier
@@ -382,8 +388,7 @@ class CelebATripletFun(Dataset):
                 if sample:
                     return anchor, positive, negative, class_id, anchor_name
                 else:
-                    negative = negative + torch.distributions.laplace.Laplace(loc=0, scale=self.noise_scale_target).rsample(
-                    negative.size())
+                    negative = negative + torch.squeeze(torch.distributions.laplace.Laplace(loc=0, scale=self.noise_scale_target).rsample((1,)))
                     return anchor, positive, negative, class_id, anchor_name
         elif self.mode == 'valid':
             if idx / self.target_multiplier < len(self.target):
@@ -398,6 +403,7 @@ class CelebATripletFun(Dataset):
             class_id = torch.tensor(len(self.target))
         img_tensor = torch.load(self.dataroot + filename)
         return img_tensor, class_id, filename
+
 
 def init_target_data(args, target):
     data_name = sorted(os.listdir(args.data_path))
