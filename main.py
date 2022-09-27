@@ -159,7 +159,8 @@ def run(args, target, device, logger):
 
 if __name__ == '__main__':
     args = parse_args()
-    max_tensor = torch.load(args.max_path)
+    # max_tensor = torch.load(args.max_path)
+    max_tensor = torch.from_numpy(np.ones(args.num_feature)*11.2836)
     args.sens = max_tensor
     args.num_label = args.num_target + 1
     args.noise_scale = args.sens / args.epsilon
