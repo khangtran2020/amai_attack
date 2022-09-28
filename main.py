@@ -138,7 +138,7 @@ def run(args, target, device, logger):
         items.append((temp_args, eps))
     if args.val_mode == 'test':
         with Pool(10) as p:
-            res = list(p.apply_async(perform_attack_test_parallel, args=(temp_args, eps)) for eps in list_of_cert_eps)
+            res = list(p.apply_async(perform_attack_test_parallel_same, args=(temp_args, eps)) for eps in list_of_cert_eps)
             res = [r.get() for r in res]
         for i, eps in enumerate(list_of_cert_eps):
             results['result_of_eps']['eps {:.2f}'.format(eps)] = res[i]
@@ -160,8 +160,8 @@ def run(args, target, device, logger):
 if __name__ == '__main__':
     args = parse_args()
     # max_tensor = torch.load(args.max_path)
-    max_tensor = torch.from_numpy((np.ones(args.num_feature)*11.2836).astype(np.float32))
-    args.sens = max_tensor
+    # max_tensor = torch.from_numpy((np.ones(args.num_feature)*11.2836).astype(np.float32))
+    args.sens = 11.2836
     args.num_label = args.num_target + 1
     args.noise_scale = args.sens / args.epsilon
     assert args.gpu <= torch.cuda.device_count(), f"--gpu flag should be in range [0,{torch.cuda.device_count() - 1}]"
