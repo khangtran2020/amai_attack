@@ -222,7 +222,7 @@ class CelebATriplet(Dataset):
 class CelebATripletFull(Dataset):
     def __init__(self, args, target, dataroot, mode='train', task='eval', imgroot=None, include_tar=True,
                  shuffle=True, multiplier=100):
-        print("Init CeleATripletFull")
+        # print("Init CeleATripletFull")
         self.args = args
         self.target = target
         self.target_multiplier = multiplier
