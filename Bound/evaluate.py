@@ -223,7 +223,7 @@ def cert_2side(args, model, target_data, target, device='cpu'):
     list_of_eps_can_cert = []
     test_loader = torch.utils.data.DataLoader(
         CelebATripletFull(args=args, target=target, dataroot=args.data_path, mode='valid', task='cert', imgroot=None,
-                          multiplier=args.train_multiplier),
+                          multiplier=args.valid_multiplier),
         shuffle=False,
         num_workers=0, batch_size=args.batch_size)
     x_test, y_test, file_name = next(iter(test_loader))
@@ -238,10 +238,10 @@ def cert_2side(args, model, target_data, target, device='cpu'):
         temp_x = temp_x.to(device)
         fc2, fc3, prob = model(temp_x)
         pred = fc3[:, 1].cpu().detach().numpy()
-        target_larger_than_zero = pred[:args.train_multiplier] > 0
+        target_larger_than_zero = pred[:args.valid_multiplier] > 0
         count_of_target_larger_than_zero = sum(target_larger_than_zero.astype(int))
         count_of_target_smaller_than_zero = args.valid_multiplier - count_of_target_larger_than_zero
-        non_target_larger_than_zero = pred[args.train_multiplier:] > 0
+        non_target_larger_than_zero = pred[args.valid_multiplier:] > 0
         count_of_nontarget_larger_than_zero = sum(non_target_larger_than_zero.astype(int))
         count_of_nontarget_smaller_than_zero = num_nontarget - count_of_nontarget_larger_than_zero
         print(
