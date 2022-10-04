@@ -52,6 +52,7 @@ class ClassifierTriplet(nn.Module):
 
 
 # (args=args, device=device, data=data_loader, model=model)
+# (args=args, device=device, data=data_loader, model=model)
 
 def train(args, target, device, data, model):
     train_dataloader, valid_dataloader = data

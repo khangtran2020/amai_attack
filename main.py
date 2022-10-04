@@ -138,7 +138,7 @@ def run(args, target, device, logger):
         items.append((temp_args, eps))
     if args.val_mode == 'test':
         with Pool(10) as p:
-            res = list(p.apply_async(perform_attack_test_parallel_same, args=(temp_args, eps)) for eps in list_of_cert_eps)
+            res = list(p.apply_async(perform_attack_test_parallel, args=(temp_args, eps)) for eps in list_of_cert_eps)
             res = [r.get() for r in res]
         for i, eps in enumerate(list_of_cert_eps):
             results['result_of_eps']['eps {:.2f}'.format(eps)] = res[i]
