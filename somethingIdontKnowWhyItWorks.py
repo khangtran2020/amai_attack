@@ -341,6 +341,7 @@ if device == 'cuda':
 
 custom_weight = np.array([1600.0, 200.0])
 criterion = nn.CrossEntropyLoss(weight=torch.tensor(custom_weight, dtype=torch.float).to(device))
+triplet_loss = nn.TripletMarginLoss(margin=1.0, p=2)
 
 min_loss = 100000000000
 max_correct = 0
@@ -364,7 +365,7 @@ for i in range(4000):
     out_anchor, probs_anchor, fc2_anchor, fc1_anchor = model(anchor)
     _, _, _, fc1_positive = model(positive)
     _, _, _, fc1_negative = model(negative)
-    loss = criterion(out_anchor, y_train) + nn.TripletMarginLoss(fc1_anchor, fc1_positive, fc1_negative)
+    loss = criterion(out_anchor, y_train) + triplet_loss(fc1_anchor, fc1_positive, fc1_negative)
     loss_value += loss
     predictions = fc2[:, 0] < 0
     tpr_train, tnr_train, _ = tpr_tnr(predictions, y_train)
@@ -374,7 +375,7 @@ for i in range(4000):
     optimizer.zero_grad()  # a clean up step for PyTorch
 
     # Test acc
-    out, probs, fc2 = model(x_test_threat)
+    out, probs, fc2, _ = model(x_test_threat)
     predictions = fc2[:, 0] < 0
     tpr, tnr, _ = tpr_tnr(predictions, y_test_threat)
     acc = (tpr + tnr) / 2
@@ -408,7 +409,7 @@ D = 20
 tpr = 0
 for i in range(5000):
     x_test_threat = torch.cat((x_test[i:i + 1], x_test[np.random.randint(5000, 64769, D - 1)]))
-    out, probs, fc2 = model(x_test_threat)
+    out, probs, fc2, _ = model(x_test_threat)
     if torch.sum(fc2[:, 0] > 0) > 0:
         tpr += 1
 
@@ -418,7 +419,7 @@ print(f'tpr = {tpr}')
 tnr = 0
 for i in range(5000):
     x_test_threat = x_test[np.random.randint(5000, 64769, D)]
-    out, probs, fc2 = model(x_test_threat)
+    out, probs, fc2, _ = model(x_test_threat)
     if torch.sum(fc2[:, 0] > 0) == 0:
         tnr += 1
 
