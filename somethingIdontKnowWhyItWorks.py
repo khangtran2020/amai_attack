@@ -366,7 +366,7 @@ for i in range(4000):
     _, _, _, fc1_negative = model(negative)
     loss = criterion(out_anchor, y_train) + triplet_loss(fc1_anchor, fc1_positive, fc1_negative)
     loss_value += loss
-    predictions = fc2[:, 0] < 0
+    predictions = fc2_anchor[:, 0] < 0
     tpr_train, tnr_train, _ = tpr_tnr(predictions, y_train)
 
     loss.backward()
