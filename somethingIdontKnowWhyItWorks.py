@@ -8,7 +8,6 @@ from tqdm import tqdm
 from torchvision import datasets, transforms
 from torch.utils.data import Dataset, DataLoader
 from PIL import Image
-from img2vec_pytorch import Img2Vec
 import multiprocessing
 import numpy as np
 import os
