@@ -16,7 +16,7 @@ import sklearn.utils.class_weight
 
 # for reproducibility
 torch.manual_seed(1)
-VEC_PATH = '../../Datasets/CelebA/embeddings/'
+VEC_PATH = './embeddings/'
 IMG_PATH = None
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 if device == 'cuda':
